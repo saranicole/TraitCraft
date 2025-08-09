@@ -81,7 +81,7 @@ end
 
 local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex)
     local specificIcon = nil
-    local sideFloat = 170
+    local sideFloat = 180
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
       local altNeeds = currentlyLoggedInChar[id][craftingType]
       if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
