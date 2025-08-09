@@ -122,7 +122,7 @@ function TC.BuildMenu()
 
   local panel = LAM:AddAddon(TC.Name, {
     allowDefaults = false,  -- Show "Reset to Defaults" button
-    allowRefresh = false    -- Enable automatic control updates
+    allowRefresh = true    -- Enable automatic control updates
   })
 
   panel:AddSetting {
