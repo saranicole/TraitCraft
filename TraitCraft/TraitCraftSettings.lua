@@ -85,7 +85,7 @@ end
 function TC.CurrentActivelyResearching()
   local summary = " "
   for k, v in pairs(TC.AV.activelyResearchingCharacters) do
-    summary = summary.."  |t16:16:"..v.icon.."|t  "..v.name.."|r\r\n  "
+    summary = summary.."  |t40:40:"..v.icon.."|t  "..v.name.."|r\r\n  "
   end
   return summary
 end
