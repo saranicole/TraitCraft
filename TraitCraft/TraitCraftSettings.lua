@@ -119,7 +119,6 @@ if not JEWELRY_CHARACTER_NAME or JEWELRY_CHARACTER_ID then
 end
 
 function TC.BuildMenu()
-  EVENT_MANAGER:UnregisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
 
@@ -286,7 +285,4 @@ function TC.BuildMenu()
       return TC.CurrentActivelyResearching()
     end
   }
-
 end
-
-EVENT_MANAGER:RegisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, TC.BuildMenu)
