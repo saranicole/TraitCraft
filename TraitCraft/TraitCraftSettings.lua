@@ -139,64 +139,58 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.MAIN_CRAFTER,
     items = characterList,
-    getFunction = function() return MAIN_CRAFTER_NAME end,
+    getFunction = function() return MAIN_CRAFTER_NAME or TC.AV.mainCrafter.name end,
     setFunction = function(var, itemName, itemData)
       MAIN_CRAFTER_NAME = itemName
       MAIN_CRAFTER_ID = itemData.data
 
-    end,
-    default = TC.AV.mainCrafter.name
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.BLACKSMITHING_CHARACTER,
     items = characterList,
-    getFunction = function() return BLACKSMITHING_CHARACTER_NAME end,
+    getFunction = function() return BLACKSMITHING_CHARACTER_NAME or TC.AV.blacksmithCharacter.name end,
     setFunction = function(var, itemName, itemData)
       BLACKSMITHING_CHARACTER_NAME = itemName
       BLACKSMITHING_CHARACTER_ID = itemData.data
-    end,
-    default = TC.AV.blacksmithCharacter.name
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.CLOTHING_CHARACTER,
     items = characterList,
-    getFunction = function() return CLOTHING_CHARACTER_NAME end,
+    getFunction = function() return CLOTHING_CHARACTER_NAME or TC.AV.clothierCharacter.name end,
     setFunction = function(var, itemName, itemData)
       CLOTHING_CHARACTER_NAME = itemName
       CLOTHING_CHARACTER_ID = itemData.data
 
-    end,
-    default = TC.AV.clothierCharacter.name
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.WOODWORKING_CHARACTER,
     items = characterList,
-    getFunction = function() return WOODWORKING_CHARACTER_NAME end,
+    getFunction = function() return WOODWORKING_CHARACTER_NAME or TC.AV.woodworkingCharacter.name end,
     setFunction = function(var, itemName, itemData)
       WOODWORKING_CHARACTER_NAME = itemName
       WOODWORKING_CHARACTER_ID = itemData.data
 
-    end,
-    default = TC.AV.woodworkingCharacter.name
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.JEWELRY_CHARACTER,
     items = characterList,
-    getFunction = function() return JEWELRY_CHARACTER_NAME end,
+    getFunction = function() return JEWELRY_CHARACTER_NAME or TC.AV.jewelryCharacter.name end,
     setFunction = function(var, itemName, itemData)
       JEWELRY_CHARACTER_NAME = itemName
       JEWELRY_CHARACTER_ID = itemData.data
-
-    end,
-    default = TC.AV.jewelryCharacter.name
+    end
   }
 
   panel:AddSetting {
