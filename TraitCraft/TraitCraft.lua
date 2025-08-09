@@ -84,8 +84,8 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     local specificIcon = nil
     local sideFloat = 180
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
-      if TC.AV.sharedCrafterVars[id] then
-        local altNeeds = TC.AV.sharedCrafterVars[id][craftingType]
+      if TC.AV.sharedCrafterVars[TC.currentlyLoggedInCharId] and TC.AV.sharedCrafterVars[TC.currentlyLoggedInCharId][id] then
+        local altNeeds = TC.AV.sharedCrafterVars[TC.currentlyLoggedInCharId][id][craftingType]
         if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
             if not control.altNeedIcon then
                 control.altNeedIcon = {}
@@ -159,49 +159,58 @@ end
 
 function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
 	for id, value in pairs(TC.AV.activelyResearchingCharacters) do
-    if not TC.AV.sharedCrafterVars[id] then
-      TC.AV.sharedCrafterVars[id] = {}
-    end
     if value.unknownTraits then
       for index, traitKey in pairs(value.unknownTraits) do
         local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(traitKey)
         if TC.AV.blacksmithCharacter.data == currentlyLoggedInCharId and craftingSkillType == BLACKSMITH then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.sharedCrafterVars[id][BLACKSMITH] then
-              TC.AV.sharedCrafterVars[id][BLACKSMITH] = {}
+            if not TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id] then
+              TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id] = {}
             end
-            if not TC.AV.sharedCrafterVars[id][BLACKSMITH][researchLineIndex] then
-              TC.AV.sharedCrafterVars[id][BLACKSMITH][researchLineIndex] = { [traitIndex] = true }
+            if not TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id][BLACKSMITH] then
+              TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id][BLACKSMITH] = {}
+            end
+            if not TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id][BLACKSMITH][researchLineIndex] then
+              TC.AV.sharedCrafterVars[TC.AV.blacksmithCharacter.data][id][BLACKSMITH][researchLineIndex] = { [traitIndex] = true }
             end
           end
         end
         if TC.AV.clothierCharacter.data == currentlyLoggedInCharId and craftingSkillType == CLOTHIER then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.sharedCrafterVars[id][CLOTHIER] then
-              TC.AV.sharedCrafterVars[id][CLOTHIER] = {}
+            if not TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id] then
+              TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id] = {}
             end
-            if not TC.AV.sharedCrafterVars[id][CLOTHIER][researchLineIndex] then
-              TC.AV.sharedCrafterVars[id][CLOTHIER][researchLineIndex] = { [traitIndex] = true }
+            if not TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id][CLOTHIER] then
+              TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id][CLOTHIER] = {}
+            end
+            if not TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id][CLOTHIER][researchLineIndex] then
+              TC.AV.sharedCrafterVars[TC.AV.clothierCharacter.data][id][CLOTHIER][researchLineIndex] = { [traitIndex] = true }
             end
           end
         end
         if TC.AV.woodworkingCharacter.data == currentlyLoggedInCharId and craftingSkillType == WOODWORK then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.sharedCrafterVars[id][WOODWORK] then
-              TC.AV.sharedCrafterVars[id][WOODWORK] = {}
+            if not TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id] then
+              TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id] = {}
             end
-            if not TC.AV.sharedCrafterVars[id][WOODWORK][researchLineIndex] then
-              TC.AV.sharedCrafterVars[id][WOODWORK][researchLineIndex] = { [traitIndex] = true }
+            if not TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id][WOODWORK] then
+              TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id][WOODWORK] = {}
+            end
+            if not TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id][WOODWORK][researchLineIndex] then
+              TC.AV.sharedCrafterVars[TC.AV.woodworkingCharacter.data][id][WOODWORK][researchLineIndex] = { [traitIndex] = true }
             end
           end
         end
         if TC.AV.jewelryCharacter.data == currentlyLoggedInCharId and craftingSkillType == JEWELRY_CRAFTING then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.sharedCrafterVars[id][JEWELRY_CRAFTING] then
-              TC.AV.sharedCrafterVars[id][JEWELRY_CRAFTING] = {}
+            if not TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id] then
+              TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id] = {}
             end
-            if not TC.AV.sharedCrafterVars[id][JEWELRY_CRAFTING][researchLineIndex] then
-              TC.AV.sharedCrafterVars[id][JEWELRY_CRAFTING][researchLineIndex] = { [traitIndex] = true }
+            if not TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id][JEWELRY_CRAFTING] then
+              TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id][JEWELRY_CRAFTING] = {}
+            end
+            if not TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id][JEWELRY_CRAFTING][researchLineIndex] then
+              TC.AV.sharedCrafterVars[TC.AV.jewelryCharacter.data][id][JEWELRY_CRAFTING][researchLineIndex] = { [traitIndex] = true }
             end
           end
         end
