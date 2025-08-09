@@ -114,11 +114,14 @@ local function addSmithingHook()
 end
 
 local function OnCraftingInteract(eventCode, craftingType)
-    ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
-      researchLineId = data.researchLineIndex
-      addSmithingHook()
-
-    end)
+  if next(TC.AV.allCrafterIds) then
+    if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) and getValueFromTable(TC.AV.activelyResearchingCharacters).unknownTraits then
+      ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
+        researchLineId = data.researchLineIndex
+        addSmithingHook()
+      end)
+    end
+  end
 end
 
 function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
