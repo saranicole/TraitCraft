@@ -143,6 +143,12 @@ function TC.BuildMenu()
     setFunction = function(var, itemName, itemData)
       MAIN_CRAFTER_NAME = itemName
       MAIN_CRAFTER_ID = itemData.data
+      if not next(TC.AV.mainCrafter) then
+        TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+      end
+      if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
+        table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
+      end
     end,
     default = TC.AV.mainCrafter.name
   }
