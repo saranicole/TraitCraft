@@ -74,8 +74,8 @@ function TC.GetCurrentCharInfo(characters)
     return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
   end
   for _, value in ipairs(characters) do
-    if value.id == TC.currentlyLoggedInCharId then
-      TC.currentlyLoggedInChar = value
+    if value.data == TC.currentlyLoggedInCharId then
+      TC.currentlyLoggedInChar = { name = value.name, id = value.data })
       return value.name, value.id
     end
   end
