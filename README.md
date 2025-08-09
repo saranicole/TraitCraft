@@ -25,6 +25,14 @@ Currently shows the unresearched traits on the research tab.
 9. Open the Research view
 10. See the icon(s) of the actively researching character(s) next to their needed traits - you will need to manually craft for now
 
+### How it works
+
+In order to operate within the limits of console addons, there is a setting that reduces the number of traits that this will scan - the "limit" setting.  This is intended for use with many characters that are brand new or have many traits they need to limit the memory requirements.  If this setting is turned off, the addon will scan one trait per research line (equipment or weapon type).  
+
+This addon does not currently scan and store all needed traits for every crafting type and research line in order to conserve memory.  I will investigate ways to do this, but for now, seeing only one trait per research line is expected behavior.
+
+This behavior may change as time goes on and I can observe how players are using this addon.
+
 ### Thanks, Credit, and Inspiration
 
 I give credit to Baertram and the other developers ingeniousclown, katkat42, and Randactyl who developed [LibResearch](https://www.esoui.com/downloads/info517-LibResearch.html) and [Research Assistant](https://www.esoui.com/downloads/info111-ResearchAssistantFindyourresearchableitems.html), some code of which I used and modified.  When I get to the autocraft feature I will no doubt look at [Dolgubon's Lazy Writ Crafter](https://www.esoui.com/downloads/info1346-DolgubonsLazyWritCrafter.html) by Dolgubon as well.
