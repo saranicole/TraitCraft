@@ -94,7 +94,7 @@ function TC.SetCrafterDefaults(characters)
   if not MAIN_CRAFTER_NAME or MAIN_CRAFTER_ID then
     MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-    TC.AV.allCrafterIds[1] = MAIN_CRAFTER_ID
+    table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
   end
   if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
     BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
