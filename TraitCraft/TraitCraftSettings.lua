@@ -91,30 +91,26 @@ function TC.CurrentActivelyResearching()
 end
 
 function TC.SetCrafterDefaults(characters)
-  if not MAIN_CRAFTER_NAME or MAIN_CRAFTER_ID then
+  if not next(TC.AV.mainCrafter) and not MAIN_CRAFTER_NAME and not MAIN_CRAFTER_ID then
     MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
     table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
   end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
+  if not next(TC.AV.blacksmithCharacter) and not BLACKSMITHING_CHARACTER_NAME and not BLACKSMITHING_CHARACTER_ID then
     BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not CLOTHING_CHARACTER_NAME or CLOTHING_CHARACTER_ID then
+  if not next(TC.AV.clothierCharacter) and not CLOTHING_CHARACTER_NAME and not CLOTHING_CHARACTER_ID then
     CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not WOODWORKING_CHARACTER_NAME or WOODWORKING_CHARACTER_ID then
+  if not next(TC.AV.woodworkingCharacter) and not WOODWORKING_CHARACTER_NAME and not WOODWORKING_CHARACTER_ID then
     WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-if not JEWELRY_CHARACTER_NAME or JEWELRY_CHARACTER_ID then
+  if not next(TC.AV.jewelryCharacter) and not JEWELRY_CHARACTER_NAME and not JEWELRY_CHARACTER_ID then
     JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
-    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
 end
 
