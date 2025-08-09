@@ -1,292 +1,257 @@
+--Name Space
+TraitCraft = {}
 local TC = TraitCraft
 
-local LAM = LibHarvensAddonSettings
+--Basic Info
+TC.Name = "TraitCraft"
 
-if not LibHarvensAddonSettings then
-    d("LibHarvensAddonSettings is required!")
-    return
-end
-
-local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID
-local BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID, CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID, WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID, JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID
-
---Icon
-TC.IconList = {
-  "/esoui/art/crafting/alchemy_tabicon_reagent_up.dds",
-  "/esoui/art/crafting/alchemy_tabicon_solvent_up.dds",
-  "/esoui/art/crafting/blueprints_tabicon_up.dds",
-  "/esoui/art/crafting/designs_tabicon_up.dds",
-  "/esoui/art/crafting/enchantment_tabicon_aspect_up.dds",
-  "/esoui/art/crafting/enchantment_tabicon_deconstruction_up.dds",
-  "/esoui/art/crafting/enchantment_tabicon_essence_up.dds",
-  "/esoui/art/crafting/enchantment_tabicon_potency_up.dds",
-  "/esoui/art/crafting/gamepad/gp_crafting_menuicon_designs.dds",
-  "/esoui/art/crafting/gamepad/gp_crafting_menuicon_fillet.dds",
-  "/esoui/art/crafting/gamepad/gp_crafting_menuicon_improve.dds",
-  "/esoui/art/crafting/gamepad/gp_crafting_menuicon_refine.dds",
-  "/esoui/art/crafting/gamepad/gp_jewelry_tabicon_icon.dds",
-  "/esoui/art/crafting/gamepad/gp_reconstruct_tabicon.dds",
-  "/esoui/art/crafting/jewelryset_tabicon_icon_up.dds",
-  "/esoui/art/crafting/patterns_tabicon_up.dds",
-  "/esoui/art/crafting/provisioner_indexicon_fish_up.dds",
-  "/esoui/art/crafting/provisioner_indexicon_furnishings_up.dds",
-  "/esoui/art/crafting/retrait_tabicon_up.dds",
-  "/esoui/art/crafting/smithing_tabicon_armorset_up.dds",
-  "/esoui/art/crafting/smithing_tabicon_weaponset_up.dds",
-  "/esoui/art/writadvisor/advisor_tabicon_equip_up.dds",
-  "/esoui/art/writadvisor/advisor_tabicon_quests_up.dds",
-  "/esoui/art/companion/keyboard/category_u30_companions_up.dds",
-  "/esoui/art/collections/collections_categoryicon_unlocked_up.dds",
-  "/esoui/art/collections/collections_tabicon_housing_up.dds",
-  "/esoui/art/companion/keyboard/companion_character_up.dds",
-  "/esoui/art/companion/keyboard/companion_skills_up.dds",
-  "/esoui/art/companion/keyboard/companion_overview_up.dds",
-  "/esoui/art/guildfinder/keyboard/guildbrowser_guildlist_additionalfilters_up.dds",
-  "/esoui/art/help/help_tabicon_cs_up.dds",
-  "/esoui/art/help/help_tabicon_tutorial_up.dds",
-  "/esoui/art/lfg/lfg_any_up_64.dds",
-  "/esoui/art/lfg/lfg_tank_up_64.dds",
-  "/esoui/art/lfg/lfg_dps_up_64.dds",
-  "/esoui/art/lfg/lfg_healer_up_64.dds",
-  "/esoui/art/lfg/lfg_indexicon_alliancewar_up.dds",
-  "/esoui/art/lfg/lfg_indexicon_trial_up.dds",
-  "/esoui/art/lfg/lfg_indexicon_zonestories_up.dds",
-  "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds",
-  "/esoui/art/mail/mail_tabicon_inbox_up.dds",
-  "/esoui/art/market/keyboard/tabicon_crownstore_up.dds",
-  "/esoui/art/market/keyboard/tabicon_daily_up.dds",
-  "/esoui/art/tradinghouse/tradinghouse_materials_jewelrymaking_rawplating_up.dds",
-  "/esoui/art/tradinghouse/tradinghouse_sell_tabicon_up.dds",
-  "/esoui/art/vendor/vendor_tabicon_fence_up.dds",
+TC.Default = {
+    allCrafterIds = {},
+    mainCrafter = {},
+    blacksmithCharacter = {},
+    clothierCharacter = {},
+    woodworkingCharacter = {},
+    jewelryCharacter = {},
+    activelyResearchingCharacters = {},
+    limitTraitsSaved = true,
 }
 
-function TC.GetCharacterList()
-  local characterList = {}
-  for i = 1, GetNumCharacters() do
-      local name, _, _, _, _, _, id = GetCharacterInfo(i)
-      table.insert(characterList, { name = ZO_CachedStrFormat(SI_UNIT_NAME, name), data = id })
-  end
-  return characterList
+TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
+TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
+local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
+local currentlyLoggedInChar = {}
+local researchLineId = nil
+
+local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
+local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
+local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
+local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+local SMITHING = ZO_SmithingResearch
+
+if IsInGamepadPreferredMode() then
+  SMITHING = ZO_GamepadSmithingResearch
 end
 
-function TC.GetCurrentCharInfo(characters)
-  if next(TC.currentlyLoggedInChar) then
-    return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
-  end
-  for _, value in ipairs(characters) do
-    if value.id == TC.currentlyLoggedInCharId then
-      TC.currentlyLoggedInChar = {name = value.name, id = value.id}
-      return value.name, value.id
+--When Loaded
+local function OnAddOnLoaded(eventCode, addonName)
+  if addonName ~= TC.Name then return end
+	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
+
+  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+end
+
+function TC.isValueInTable(table, element)
+  for _, v in pairs(table) do
+    if element == v then
+      return true
     end
   end
-return nil, nil
+return false
 end
 
-function TC.CurrentActivelyResearching()
-  local summary = " "
-  for k, v in pairs(TC.AV.activelyResearchingCharacters) do
-    summary = summary.."  |t16:16:"..v.icon.."|t  "..v.name.."|r\r\n  "
+function TC.getValueInTable(table, element)
+  for _, v in pairs(table) do
+    if element == v then
+      return element
+    end
   end
-  return summary
+  return nil
 end
 
-function TC.SetCrafterDefaults(characters)
-  if not MAIN_CRAFTER_NAME or MAIN_CRAFTER_ID then
-    MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-    TC.AV.allCrafterIds[1] = MAIN_CRAFTER_ID
+local function getValueFromTable(t)
+    return select(2, next(t))
+end
+
+local function TC_Event_Player_Activated(event, isA)
+	--Only fire once after login!
+	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
+	TC.currentlyLoggedInChar = {}
+	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
+    TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].unknownTraits = {}
+    TraitCraft:ScanUnknownTraits()
   end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
-    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-  if not CLOTHING_CHARACTER_NAME or CLOTHING_CHARACTER_ID then
-    CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-  if not WOODWORKING_CHARACTER_NAME or WOODWORKING_CHARACTER_ID then
-    WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-if not JEWELRY_CHARACTER_NAME or JEWELRY_CHARACTER_ID then
-    JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
-    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  if next(TC.AV.allCrafterIds) then
+    if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) and getValueFromTable(TC.AV.activelyResearchingCharacters).unknownTraits then
+      TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
+    end
   end
 end
 
-function TC.BuildMenu()
-  EVENT_MANAGER:UnregisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
-  local characterList = TC.GetCharacterList()
-  TC.SetCrafterDefaults(characterList)
-
-  local IconName, Icon, LimitTraits
-
-  local panel = LAM:AddAddon(TC.Name, {
-    allowDefaults = false,  -- Show "Reset to Defaults" button
-    allowRefresh = false    -- Enable automatic control updates
-  })
-
-  panel:AddSetting {
-    type = LAM.ST_CHECKBOX,
-    label = TC.Lang.LIMIT_TRAITS_SAVED,
-    getFunction = function() return TC.AV.limitTraitsSaved or true end,
-    setFunction = function(var)
-      TC.AV.limitTraitsSaved = var
-    end,
-    default = true,
-  }
-
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.MAIN_CRAFTER,
-    items = characterList,
-    getFunction = function() return MAIN_CRAFTER_NAME end,
-    setFunction = function(var, itemName, itemData)
-      MAIN_CRAFTER_NAME = itemName
-      MAIN_CRAFTER_ID = itemData.data
-    end,
-    default = TC.AV.mainCrafter.name
-  }
-
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.BLACKSMITHING_CHARACTER,
-    items = characterList,
-    getFunction = function() return BLACKSMITHING_CHARACTER_NAME end,
-    setFunction = function(var, itemName, itemData)
-      BLACKSMITHING_CHARACTER_NAME = itemName
-      BLACKSMITHING_CHARACTER_ID = itemData.data
-      TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
+local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex)
+    local specificIcon = nil
+    local sideFloat = 120
+    for id, value in pairs(TC.AV.activelyResearchingCharacters) do
+      local altNeeds = currentlyLoggedInChar[id][craftingType]
+      if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
+          if not control.altNeedIcon then
+              control.altNeedIcon = {}
+          end
+          if not control.altNeedIcon[id] then
+              local icon = WINDOW_MANAGER:CreateControl("iconId"..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+              icon:SetDimensions(30, 30)
+              icon:SetAnchor(RIGHT, control, RIGHT, sideFloat, 0)
+              icon:SetTexture(value.icon)
+              control.altNeedIcon[id] = icon
+          end
+          if control.altNeedIcon[id] then
+            control.altNeedIcon[id]:SetHidden(false)
+            sideFloat = sideFloat + 30
+          end
+      elseif control.altNeedIcon and control.altNeedIcon[id] then
+        control.altNeedIcon[id]:SetHidden(true)
       end
-    end,
-    default = TC.AV.blacksmithCharacter.name
-  }
+    end
+end
 
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.CLOTHING_CHARACTER,
-    items = characterList,
-    getFunction = function() return CLOTHING_CHARACTER_NAME end,
-    setFunction = function(var, itemName, itemData)
-      CLOTHING_CHARACTER_NAME = itemName
-      CLOTHING_CHARACTER_ID = itemData.data
-      TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.clothierCharacter.name
-  }
+local function addSmithingHook()
+  ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
+      local icon = nil
+      icon = control:GetNamedChild("Icon")
+      AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex)
+  end)
+end
 
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.WOODWORKING_CHARACTER,
-    items = characterList,
-    getFunction = function() return WOODWORKING_CHARACTER_NAME end,
-    setFunction = function(var, itemName, itemData)
-      WOODWORKING_CHARACTER_NAME = itemName
-      WOODWORKING_CHARACTER_ID = itemData.data
-      TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.woodworkingCharacter.name
-  }
+local function OnCraftingInteract(eventCode, craftingType)
+    ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
+      researchLineId = data.researchLineIndex
+      addSmithingHook()
 
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.JEWELRY_CHARACTER,
-    items = characterList,
-    getFunction = function() return JEWELRY_CHARACTER_NAME end,
-    setFunction = function(var, itemName, itemData)
-      JEWELRY_CHARACTER_NAME = itemName
-      JEWELRY_CHARACTER_ID = itemData.data
-      TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.jewelryCharacter.name
-  }
+    end)
+end
 
-  panel:AddSetting {
-    type = LAM.ST_DROPDOWN,
-    label = TC.Lang.SELECT_ACTIVELY_RESEARCHING,
-    items = characterList,
-    getFunction = function() return ACTIVELY_RESEARCHING_NAME end,
-    setFunction = function(var, itemName, itemData)
-      ACTIVELY_RESEARCHING_NAME = itemName
-      ACTIVELY_RESEARCHING_ID = itemData.data
-    end,
-  }
+function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
+	if craftingSkillType == nil or researchLineIndex == nil or traitIndex == nil then return end
+	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
+end
 
- --Icon Select
-  panel:AddSetting {
-    type = LAM.ST_ICONPICKER,
-    label = TC.Lang.CHARACTER_ICON,
-    items = TC.IconList,
-    getFunction = function() return Icon  end,
-    setFunction = function(var, iconIndex, iconPath)
-      IconName = iconPath
-      Icon = iconIndex
-    end,
-  }
+function TraitCraft:GetTraitFromKey(key)
+  traitIndex = key % 10000 % 100
+  researchLineIndex = (key % 10000 - traitIndex) / 100
+  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
+--   local craftingName = GetCraftingSkillName(craftingSkillType)
+--   local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
+--   local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
+--   local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+	return craftingSkillType, researchLineIndex, traitIndex
+end
 
---Apply
-  panel:AddSetting {
-    type = LAM.ST_BUTTON,
-    label = TC.Lang.ACTIVE_APPLY,
-    buttonText = TC.Lang.ACTIVE_APPLY,
-    clickHandler  = function()
-      if ACTIVELY_RESEARCHING_ID then
-        if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
-          TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] = {}
+function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return true end
+	return false
+end
+
+function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return true end
+	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
+	if willKnow ~= nil then return true end
+	return false
+end
+
+function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
+	for id, value in pairs(TC.AV.activelyResearchingCharacters) do
+    if value.unknownTraits then
+      for index, traitKey in pairs(value.unknownTraits) do
+        local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(traitKey)
+        if TC.AV.blacksmithCharacter.data == currentlyLoggedInCharId and craftingSkillType == BLACKSMITH then
+          if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
+            if not currentlyLoggedInChar[id] then
+              currentlyLoggedInChar[id] = {}
+            end
+
+            if not currentlyLoggedInChar[id][BLACKSMITH] then
+              currentlyLoggedInChar[id][BLACKSMITH] = {}
+            end
+            if not currentlyLoggedInChar[id][BLACKSMITH][researchLineIndex] then
+              currentlyLoggedInChar[id][BLACKSMITH][researchLineIndex] = { [traitIndex] = true }
+            end
+          end
         end
-        TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].name = ACTIVELY_RESEARCHING_NAME
-        TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].icon = IconName
-        Status = TC.Lang.STATUS_ADDED
-        panel:UpdateControls()
+        if TC.AV.clothierCharacter.data == currentlyLoggedInCharId and craftingSkillType == CLOTHIER then
+          if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
+            if not currentlyLoggedInChar[id] then
+              currentlyLoggedInChar[id] = {}
+            end
+
+            if not currentlyLoggedInChar[id][CLOTHIER] then
+              currentlyLoggedInChar[id][CLOTHIER] = {}
+            end
+            if not currentlyLoggedInChar[id][CLOTHIER][researchLineIndex] then
+              currentlyLoggedInChar[id][CLOTHIER][researchLineIndex] = { [traitIndex] = true }
+            end
+          end
+        end
+        if TC.AV.woodworkingCharacter.data == currentlyLoggedInCharId and craftingSkillType == WOODWORK then
+          if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
+            if not currentlyLoggedInChar[id] then
+              currentlyLoggedInChar[id] = {}
+            end
+            if not currentlyLoggedInChar[id][WOODWORK] then
+              currentlyLoggedInChar[id][WOODWORK] = {}
+            end
+            if not currentlyLoggedInChar[id][WOODWORK][researchLineIndex] then
+              currentlyLoggedInChar[id][WOODWORK][researchLineIndex] = { [traitIndex] = true }
+            end
+          end
+        end
+        if TC.AV.jewelryCharacter.data == currentlyLoggedInCharId and craftingSkillType == JEWELRY_CRAFTING then
+          if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
+            if not currentlyLoggedInChar[id] then
+              currentlyLoggedInChar[id] = {}
+            end
+            if not currentlyLoggedInChar[id][JEWELRY_CRAFTING] then
+              currentlyLoggedInChar[id][JEWELRY_CRAFTING] = {}
+            end
+            if not currentlyLoggedInChar[id][JEWELRY_CRAFTING][researchLineIndex] then
+              currentlyLoggedInChar[id][JEWELRY_CRAFTING][researchLineIndex] = { [traitIndex] = true }
+            end
+          end
+        end
       end
+    else
+      d("Researching character has no unknown traits.")
     end
-  }
-
-  --Status
-  panel:AddSetting {
-    type = LAM.ST_LABEL,
-    label = function()
-      return Status or " "
-    end
-  }
---Clear Researching Characters
-  panel:AddSetting {
-    type = LAM.ST_BUTTON,
-    label = TC.Lang.CLEAR_ACTIVELY_RESEARCHING,
-    buttonText = TC.Lang.SHORT_CLEAR,
-    clickHandler  = function()
-      TC.AV.activelyResearchingCharacters = {}
-      panel:UpdateControls()
-    end
-  }
-  --Configured
-  panel:AddSetting {
-    type = LAM.ST_SECTION,
-    label = TC.Lang.ACTIVELY_RESEARCHING,
-  }
-  --Actively Researching Characters Summary
-  panel:AddSetting {
-    type = LAM.ST_LABEL,
-    label = function()
-      return TC.CurrentActivelyResearching()
-    end
-  }
-
+  end
 end
 
-EVENT_MANAGER:RegisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, TC.BuildMenu)
+function TraitCraft:ScanUnknownTraits()
+  local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
+  local traitLimit = 9
+  if TC.AV.limitTraitsSaved then
+    traitLimit = 1
+  end
+	for researchLineIndex = 1, GetNumSmithingResearchLines(BLACKSMITH) do
+		for traitIndex = 1, traitLimit do
+      if not self:WillCharacterKnowTrait(BLACKSMITH, researchLineIndex, traitIndex) then
+        table.insert(char.unknownTraits, self:GetTraitKey(BLACKSMITH, researchLineIndex, traitIndex))
+      end
+		end
+	end
+	for researchLineIndex = 1, GetNumSmithingResearchLines(CLOTHIER) do
+    for traitIndex = 1, traitLimit do
+      if not self:WillCharacterKnowTrait(CLOTHIER, researchLineIndex, traitIndex) then
+        table.insert(char.unknownTraits, self:GetTraitKey(CLOTHIER, researchLineIndex, traitIndex))
+      end
+    end
+	end
+	for researchLineIndex = 1, GetNumSmithingResearchLines(WOODWORK) do
+    for traitIndex = 1, traitLimit do
+      if not self:WillCharacterKnowTrait(WOODWORK, researchLineIndex, traitIndex) then
+        table.insert(char.unknownTraits, self:GetTraitKey(WOODWORK, researchLineIndex, traitIndex))
+      end
+    end
+	end
+	for researchLineIndex = 1, GetNumSmithingResearchLines(JEWELRY_CRAFTING) do
+    for traitIndex = 1, traitLimit do
+      if not self:WillCharacterKnowTrait(JEWELRY_CRAFTING, researchLineIndex, traitIndex) then
+        table.insert(char.unknownTraits, self:GetTraitKey(JEWELRY_CRAFTING, researchLineIndex, traitIndex))
+      end
+    end
+	end
+end
+
+EVENT_MANAGER:RegisterForEvent(TC.Name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+EVENT_MANAGER:RegisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, TC_Event_Player_Activated)
+EVENT_MANAGER:RegisterForEvent(TC.name, EVENT_CRAFTING_STATION_INTERACT, OnCraftingInteract)
