@@ -83,24 +83,26 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     local specificIcon = nil
     local sideFloat = 180
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
-      local altNeeds = currentlyLoggedInChar[id][craftingType]
-      if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
-          if not control.altNeedIcon then
-              control.altNeedIcon = {}
-          end
-          if not control.altNeedIcon[id] then
-              local icon = WINDOW_MANAGER:CreateControl("iconId"..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
-              icon:SetDimensions(40, 40)
-              icon:SetAnchor(RIGHT, control, RIGHT, sideFloat, 0)
-              icon:SetTexture(value.icon)
-              control.altNeedIcon[id] = icon
-          end
-          if control.altNeedIcon[id] then
-            control.altNeedIcon[id]:SetHidden(false)
-            sideFloat = sideFloat + 40
-          end
-      elseif control.altNeedIcon and control.altNeedIcon[id] then
-        control.altNeedIcon[id]:SetHidden(true)
+      if currentlyLoggedInChar and currentlyLoggedInChar[id] then
+        local altNeeds = currentlyLoggedInChar[id][craftingType]
+        if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
+            if not control.altNeedIcon then
+                control.altNeedIcon = {}
+            end
+            if not control.altNeedIcon[id] then
+                local icon = WINDOW_MANAGER:CreateControl("iconId"..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+                icon:SetDimensions(40, 40)
+                icon:SetAnchor(RIGHT, control, RIGHT, sideFloat, 0)
+                icon:SetTexture(value.icon)
+                control.altNeedIcon[id] = icon
+            end
+            if control.altNeedIcon[id] then
+              control.altNeedIcon[id]:SetHidden(false)
+              sideFloat = sideFloat + 40
+            end
+        elseif control.altNeedIcon and control.altNeedIcon[id] then
+          control.altNeedIcon[id]:SetHidden(true)
+        end
       end
     end
 end
