@@ -42,7 +42,7 @@ local function OnAddOnLoaded(eventCode, addonName)
 end
 
 function TC.isValueInTable(table, element)
-  for _, v in pairs(table) do
+  for _, v in ipairs(table) do
     if element == v then
       return true
     end
