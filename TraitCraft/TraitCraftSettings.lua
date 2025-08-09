@@ -222,30 +222,40 @@ function TC.BuildMenu()
     label = TC.Lang.ACTIVE_APPLY,
     buttonText = TC.Lang.ACTIVE_APPLY,
     clickHandler  = function()
-      TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
-        table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
-        TC.AV.sharedCrafterVars[MAIN_CRAFTER_ID] = {}
+      if MAIN_CRAFTER_NAME and MAIN_CRAFTER_ID then
+        TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+        if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
+          table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
+          TC.AV.sharedCrafterVars[MAIN_CRAFTER_ID or TC.AV.mainCrafter.data] = {}
+        end
       end
-      TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
-        TC.AV.sharedCrafterVars[BLACKSMITHING_CHARACTER_ID] = {}
+      if BLACKSMITHING_CHARACTER_NAME and BLACKSMITHING_CHARACTER_ID then
+        TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
+        if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
+          table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
+          TC.AV.sharedCrafterVars[BLACKSMITHING_CHARACTER_ID] = {}
+        end
       end
-      TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
-        TC.AV.sharedCrafterVars[CLOTHING_CHARACTER_ID] = {}
+      if CLOTHING_CHARACTER_NAME and CLOTHING_CHARACTER_ID then
+        TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
+        if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
+          table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
+          TC.AV.sharedCrafterVars[CLOTHING_CHARACTER_ID] = {}
+        end
       end
-      TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
-        TC.AV.sharedCrafterVars[WOODWORKING_CHARACTER_ID] = {}
+      if WOODWORKING_CHARACTER_NAME and WOODWORKING_CHARACTER_ID then
+        TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
+        if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
+          table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
+          TC.AV.sharedCrafterVars[WOODWORKING_CHARACTER_ID] = {}
+        end
       end
-      TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
-        TC.AV.sharedCrafterVars[JEWELRY_CHARACTER_ID] = {}
+      if JEWELRY_CHARACTER_NAME and JEWELRY_CHARACTER_ID then
+        TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
+        if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
+          table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
+          TC.AV.sharedCrafterVars[JEWELRY_CHARACTER_ID] = {}
+        end
       end
       if ACTIVELY_RESEARCHING_ID then
         if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
