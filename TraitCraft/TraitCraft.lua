@@ -67,6 +67,7 @@ local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
 	TC.currentlyLoggedInChar = {}
+	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
     TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].unknownTraits = {}
     TraitCraft:ScanUnknownTraits()
