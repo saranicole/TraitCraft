@@ -26,6 +26,12 @@ local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
 
+local SMITHING = ZO_SmithingResearch
+
+if IsInGamepadPreferredMode() then
+  SMITHING = ZO_GamepadSmithingResearch
+end
+
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
@@ -88,7 +94,7 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
 end
 
 local function addSmithingHook()
-  ZO_PreHook(ZO_SmithingResearch, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
+  ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
       AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex)
@@ -96,7 +102,7 @@ local function addSmithingHook()
 end
 
 local function OnCraftingInteract(eventCode, craftingType)
-    ZO_PreHook(ZO_SmithingResearch, "ShowTraitsFor", function(self, data)
+    ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
       researchLineId = data.researchLineIndex
       addSmithingHook()
 
