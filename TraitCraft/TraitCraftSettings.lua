@@ -63,8 +63,8 @@ TC.IconList = {
 function TC.GetCharacterList()
   local characterList = {}
   for i = 1, GetNumCharacters() do
-      local name, _, _, _, _, _, id = GetCharacterInfo(i)
-      table.insert(characterList, { name = ZO_CachedStrFormat(SI_UNIT_NAME, name), data = id })
+      local name, _, _, _, _, backupId, id = GetCharacterInfo(i)
+      table.insert(characterList, { name = ZO_CachedStrFormat(SI_UNIT_NAME, name), data = id or backupId })
   end
   return characterList
 end
