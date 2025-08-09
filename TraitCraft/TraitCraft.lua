@@ -140,11 +140,6 @@ function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
         local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(traitKey)
         if TC.AV.blacksmithCharacter.data == currentlyLoggedInCharId and craftingSkillType == BLACKSMITH then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.blacksmithCharacter.intersectingKnownTrait then
-              TC.AV.blacksmithCharacter.intersectingKnownTrait = {}
-            end
-            TC.AV.blacksmithCharacter.intersectingKnownTrait[traitKey] = { skillType = craftingSkillType, researchLine = researchLineIndex, trait = traitIndex }
-
             if not currentlyLoggedInChar[id] then
               currentlyLoggedInChar[id] = {}
             end
@@ -159,10 +154,6 @@ function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
         end
         if TC.AV.clothierCharacter.data == currentlyLoggedInCharId and craftingSkillType == CLOTHIER then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.clothierCharacter.intersectingKnownTrait then
-              TC.AV.clothierCharacter.intersectingKnownTrait = {}
-            end
-            TC.AV.clothierCharacter.intersectingKnownTrait[traitKey] = { skillType = craftingSkillType, researchLine = researchLineIndex, trait = traitIndex }
             if not currentlyLoggedInChar[id] then
               currentlyLoggedInChar[id] = {}
             end
@@ -177,10 +168,6 @@ function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
         end
         if TC.AV.woodworkingCharacter.data == currentlyLoggedInCharId and craftingSkillType == WOODWORK then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.woodworkingCharacter.intersectingKnownTrait then
-              TC.AV.woodworkingCharacter.intersectingKnownTrait = {}
-            end
-            TC.AV.woodworkingCharacter.intersectingKnownTrait[traitKey] = { skillType = craftingSkillType, researchLine = researchLineIndex, trait = traitIndex }
             if not currentlyLoggedInChar[id] then
               currentlyLoggedInChar[id] = {}
             end
@@ -194,10 +181,6 @@ function TraitCraft:ScanIntersectingKnownTraitsOnCrafter()
         end
         if TC.AV.jewelryCharacter.data == currentlyLoggedInCharId and craftingSkillType == JEWELRY_CRAFTING then
           if TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex) then
-            if not TC.AV.jewelryCharacter.intersectingKnownTrait then
-              TC.AV.jewelryCharacter.intersectingKnownTrait = {}
-            end
-            TC.AV.jewelryCharacter.intersectingKnownTrait[traitKey] = { skillType = craftingSkillType, researchLine = researchLineIndex, trait = traitIndex }
             if not currentlyLoggedInChar[id] then
               currentlyLoggedInChar[id] = {}
             end
@@ -220,7 +203,7 @@ function TraitCraft:ScanUnknownTraits()
   local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
   local traitLimit = 9
   if TC.AV.limitTraitsSaved then
-    traitLimit = 3
+    traitLimit = 1
   end
 	for researchLineIndex = 1, GetNumSmithingResearchLines(BLACKSMITH) do
 		for traitIndex = 1, traitLimit do
