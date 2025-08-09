@@ -131,7 +131,6 @@ function TC.BuildMenu()
     getFunction = function() return TC.AV.limitTraitsSaved end,
     setFunction = function(var)
       TC.AV.limitTraitsSaved = var
-      panel:UpdateControls()
     end,
     default = true,
   }
