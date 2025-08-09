@@ -63,7 +63,7 @@ TC.IconList = {
 function TC.GetCharacterList()
   local characterList = {}
   for i = 1, GetNumCharacters() do
-      local name, _, _, _, _, _, id = GetCharacterInfo(i)
+      local name, _, _, _, _, id = GetCharacterInfo(i)
       table.insert(characterList, { name = ZO_CachedStrFormat(SI_UNIT_NAME, name), data = id })
   end
   return characterList
@@ -75,7 +75,7 @@ function TC.GetCurrentCharInfo(characters)
   end
   for _, value in ipairs(characters) do
     if value.id == TC.currentlyLoggedInCharId then
-      TC.currentlyLoggedInChar = {name = value.name, id = value.id}
+      TC.currentlyLoggedInChar = value
       return value.name, value.id
     end
   end
