@@ -42,7 +42,7 @@ local function OnAddOnLoaded(eventCode, addonName)
 end
 
 function TC.isValueInTable(table, element)
-  for _, v in pairs(table) do
+  for _, v in ipairs(table) do
     if element == v then
       return true
     end
@@ -67,6 +67,7 @@ local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
 	TC.currentlyLoggedInChar = {}
+	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
     TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].unknownTraits = {}
     TraitCraft:ScanUnknownTraits()
@@ -80,7 +81,7 @@ end
 
 local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex)
     local specificIcon = nil
-    local sideFloat = 120
+    local sideFloat = 180
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
       local altNeeds = currentlyLoggedInChar[id][craftingType]
       if altNeeds and altNeeds[researchLineIndex] and altNeeds[researchLineIndex][traitIndex] then
@@ -89,14 +90,14 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
           end
           if not control.altNeedIcon[id] then
               local icon = WINDOW_MANAGER:CreateControl("iconId"..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
-              icon:SetDimensions(30, 30)
+              icon:SetDimensions(40, 40)
               icon:SetAnchor(RIGHT, control, RIGHT, sideFloat, 0)
               icon:SetTexture(value.icon)
               control.altNeedIcon[id] = icon
           end
           if control.altNeedIcon[id] then
             control.altNeedIcon[id]:SetHidden(false)
-            sideFloat = sideFloat + 30
+            sideFloat = sideFloat + 40
           end
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:SetHidden(true)
@@ -113,11 +114,14 @@ local function addSmithingHook()
 end
 
 local function OnCraftingInteract(eventCode, craftingType)
-    ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
-      researchLineId = data.researchLineIndex
-      addSmithingHook()
-
-    end)
+  if next(TC.AV.allCrafterIds) then
+    if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) and getValueFromTable(TC.AV.activelyResearchingCharacters).unknownTraits then
+      ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
+        researchLineId = data.researchLineIndex
+        addSmithingHook()
+      end)
+    end
+  end
 end
 
 function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)

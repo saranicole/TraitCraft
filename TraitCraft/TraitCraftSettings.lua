@@ -74,8 +74,8 @@ function TC.GetCurrentCharInfo(characters)
     return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
   end
   for _, value in ipairs(characters) do
-    if value.id == TC.currentlyLoggedInCharId then
-      TC.currentlyLoggedInChar = {name = value.name, id = value.id}
+    if value.data == TC.currentlyLoggedInCharId then
+      TC.currentlyLoggedInChar = { name = value.name, id = value.data }
       return value.name, value.id
     end
   end
@@ -91,35 +91,30 @@ function TC.CurrentActivelyResearching()
 end
 
 function TC.SetCrafterDefaults(characters)
-  if not MAIN_CRAFTER_NAME or MAIN_CRAFTER_ID then
+  if not next(TC.AV.mainCrafter) and not MAIN_CRAFTER_NAME and not MAIN_CRAFTER_ID then
     MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-    TC.AV.allCrafterIds[1] = MAIN_CRAFTER_ID
+    table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
   end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
+  if not next(TC.AV.blacksmithCharacter) and not BLACKSMITHING_CHARACTER_NAME and not BLACKSMITHING_CHARACTER_ID then
     BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not CLOTHING_CHARACTER_NAME or CLOTHING_CHARACTER_ID then
+  if not next(TC.AV.clothierCharacter) and not CLOTHING_CHARACTER_NAME and not CLOTHING_CHARACTER_ID then
     CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not WOODWORKING_CHARACTER_NAME or WOODWORKING_CHARACTER_ID then
+  if not next(TC.AV.woodworkingCharacter) and not WOODWORKING_CHARACTER_NAME and not WOODWORKING_CHARACTER_ID then
     WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-if not JEWELRY_CHARACTER_NAME or JEWELRY_CHARACTER_ID then
+  if not next(TC.AV.jewelryCharacter) and not JEWELRY_CHARACTER_NAME and not JEWELRY_CHARACTER_ID then
     JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
     TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-  end
-  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
-    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
 end
 
 function TC.BuildMenu()
-  EVENT_MANAGER:UnregisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
 
@@ -144,76 +139,58 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.MAIN_CRAFTER,
     items = characterList,
-    getFunction = function() return MAIN_CRAFTER_NAME end,
+    getFunction = function() return MAIN_CRAFTER_NAME or TC.AV.mainCrafter.name end,
     setFunction = function(var, itemName, itemData)
       MAIN_CRAFTER_NAME = itemName
       MAIN_CRAFTER_ID = itemData.data
-    end,
-    default = TC.AV.mainCrafter.name
+
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.BLACKSMITHING_CHARACTER,
     items = characterList,
-    getFunction = function() return BLACKSMITHING_CHARACTER_NAME end,
+    getFunction = function() return BLACKSMITHING_CHARACTER_NAME or TC.AV.blacksmithCharacter.name end,
     setFunction = function(var, itemName, itemData)
       BLACKSMITHING_CHARACTER_NAME = itemName
       BLACKSMITHING_CHARACTER_ID = itemData.data
-      TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.blacksmithCharacter.name
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.CLOTHING_CHARACTER,
     items = characterList,
-    getFunction = function() return CLOTHING_CHARACTER_NAME end,
+    getFunction = function() return CLOTHING_CHARACTER_NAME or TC.AV.clothierCharacter.name end,
     setFunction = function(var, itemName, itemData)
       CLOTHING_CHARACTER_NAME = itemName
       CLOTHING_CHARACTER_ID = itemData.data
-      TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.clothierCharacter.name
+
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.WOODWORKING_CHARACTER,
     items = characterList,
-    getFunction = function() return WOODWORKING_CHARACTER_NAME end,
+    getFunction = function() return WOODWORKING_CHARACTER_NAME or TC.AV.woodworkingCharacter.name end,
     setFunction = function(var, itemName, itemData)
       WOODWORKING_CHARACTER_NAME = itemName
       WOODWORKING_CHARACTER_ID = itemData.data
-      TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.woodworkingCharacter.name
+
+    end
   }
 
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.JEWELRY_CHARACTER,
     items = characterList,
-    getFunction = function() return JEWELRY_CHARACTER_NAME end,
+    getFunction = function() return JEWELRY_CHARACTER_NAME or TC.AV.jewelryCharacter.name end,
     setFunction = function(var, itemName, itemData)
       JEWELRY_CHARACTER_NAME = itemName
       JEWELRY_CHARACTER_ID = itemData.data
-      TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
-      if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
-        table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
-      end
-    end,
-    default = TC.AV.jewelryCharacter.name
+    end
   }
 
   panel:AddSetting {
@@ -245,6 +222,28 @@ function TC.BuildMenu()
     label = TC.Lang.ACTIVE_APPLY,
     buttonText = TC.Lang.ACTIVE_APPLY,
     clickHandler  = function()
+      if not next(TC.AV.mainCrafter) then
+        TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+      end
+      if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
+        table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
+      end
+      TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
+      if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
+        table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
+      end
+      TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
+      if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
+        table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
+      end
+      TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
+      if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
+        table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
+      end
+      TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
+      if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
+        table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
+      end
       if ACTIVELY_RESEARCHING_ID then
         if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
           TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] = {}
@@ -286,7 +285,4 @@ function TC.BuildMenu()
       return TC.CurrentActivelyResearching()
     end
   }
-
 end
-
-EVENT_MANAGER:RegisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, TC.BuildMenu)
