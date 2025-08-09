@@ -7,6 +7,9 @@ if not LibHarvensAddonSettings then
     return
 end
 
+local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID
+local BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID, CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID, WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID, JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID
+
 --Icon
 TC.IconList = {
   "/esoui/art/crafting/alchemy_tabicon_reagent_up.dds",
@@ -63,7 +66,20 @@ function TC.GetCharacterList()
       local name, _, _, _, _, _, id = GetCharacterInfo(i)
       table.insert(characterList, { name = ZO_CachedStrFormat(SI_UNIT_NAME, name), data = id })
   end
-return characterList
+  return characterList
+end
+
+function TC.GetCurrentCharInfo(characters)
+  if next(TC.currentlyLoggedInChar) then
+    return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
+  end
+  for _, value in ipairs(characters) do
+    if value.id == TC.currentlyLoggedInCharId then
+      TC.currentlyLoggedInChar = {name = value.name, id = value.id}
+      return value.name, value.id
+    end
+  end
+return nil, nil
 end
 
 function TC.CurrentActivelyResearching()
@@ -74,12 +90,39 @@ function TC.CurrentActivelyResearching()
   return summary
 end
 
+function TC.SetCrafterDefaults(characters)
+  if not MAIN_CRAFTER_NAME or MAIN_CRAFTER_ID then
+    MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+    TC.AV.allCrafterIds[1] = MAIN_CRAFTER_ID
+  end
+  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
+    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  end
+  if not CLOTHING_CHARACTER_NAME or CLOTHING_CHARACTER_ID then
+    CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  end
+  if not WOODWORKING_CHARACTER_NAME or WOODWORKING_CHARACTER_ID then
+    WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  end
+if not JEWELRY_CHARACTER_NAME or JEWELRY_CHARACTER_ID then
+    JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  end
+  if not BLACKSMITHING_CHARACTER_NAME or BLACKSMITHING_CHARACTER_ID then
+    BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
+    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
+  end
+end
+
 function TC.BuildMenu()
   EVENT_MANAGER:UnregisterForEvent("TCBuildMenu_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
   local characterList = TC.GetCharacterList()
+  TC.SetCrafterDefaults(characterList)
 
-  local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, SET_ALL_TO_MAIN_CRAFTER, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID
-  local BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID, CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID, WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID, JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID
   local IconName, Icon, LimitTraits
 
   local panel = LAM:AddAddon(TC.Name, {
@@ -107,33 +150,6 @@ function TC.BuildMenu()
       MAIN_CRAFTER_ID = itemData.data
     end,
     default = TC.AV.mainCrafter.name
-  }
-
-  panel:AddSetting {
-    type = LAM.ST_CHECKBOX,
-    label = TC.Lang.SET_ALL_TO_MAIN_CRAFTER,
-    getFunction = function() return SET_ALL_TO_MAIN_CRAFTER or false end,
-    setFunction = function(var)
-      SET_ALL_TO_MAIN_CRAFTER = var
-      if var then
-        BLACKSMITHING_CHARACTER_NAME = MAIN_CRAFTER_NAME
-        CLOTHING_CHARACTER_NAME = MAIN_CRAFTER_NAME
-        WOODWORKING_CHARACTER_NAME = MAIN_CRAFTER_NAME
-        JEWELRY_CHARACTER_NAME = MAIN_CRAFTER_NAME
-        BLACKSMITHING_CHARACTER_ID = MAIN_CRAFTER_ID
-        CLOTHING_CHARACTER_ID = MAIN_CRAFTER_ID
-        WOODWORKING_CHARACTER_ID = MAIN_CRAFTER_ID
-        JEWELRY_CHARACTER_ID = MAIN_CRAFTER_ID
-        TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-        TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-        TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-        TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-        TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
-        TC.AV.allCrafterIds[1] = MAIN_CRAFTER_ID
-        panel:UpdateControls()
-      end
-    end,
-    default = false,
   }
 
   panel:AddSetting {
