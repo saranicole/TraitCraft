@@ -75,7 +75,7 @@ function TC.GetCurrentCharInfo(characters)
   end
   for _, value in ipairs(characters) do
     if value.data == TC.currentlyLoggedInCharId then
-      TC.currentlyLoggedInChar = { name = value.name, id = value.data })
+      TC.currentlyLoggedInChar = { name = value.name, id = value.data }
       return value.name, value.id
     end
   end
