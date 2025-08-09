@@ -70,7 +70,7 @@ function TC.GetCharacterList()
 end
 
 function TC.GetCurrentCharInfo(characters)
-  if next(TC.currentlyLoggedInChar) then
+  if TC.currentlyLoggedInChar.name and TC.currentlyLoggedInChar.id then
     return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
   end
   for _, value in ipairs(characters) do
