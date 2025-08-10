@@ -77,7 +77,7 @@ local function getValueFromTable(t)
     return select(2, next(t))
 end
 
-local function HasResearched(trait, mask)
+function TC.HasResearched(trait, mask)
     -- traitFlags is the integer bitmask
     -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
     return (trait % (mask * 2)) >= mask
@@ -112,7 +112,7 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon
-        if not HasResearched(trait, mask) then
+        if not TC.HasResearched(trait, mask) or TC.AV.traitTable[key] == nil then
               if not control.altNeedIcon then
                   control.altNeedIcon = {}
               end
