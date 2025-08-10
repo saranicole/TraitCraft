@@ -77,10 +77,11 @@ local function getValueFromTable(t)
     return select(2, next(t))
 end
 
-function TC.HasResearched(trait, mask)
-    -- trait is the integer bitmask
-    -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
-    return (trait % (mask * 2)) >= mask
+local function charBitMissing(trait, mask)
+  -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
+  -- trait is the integer bitmask
+  -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
+  return (trait % (mask*2)) < mask
 end
 
 local function TC_Event_Player_Activated(event, isA)
@@ -106,7 +107,7 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
-        if not TC.HasResearched(trait, mask) then
+        if charBitMissing(trait, mask) then
               if not control.altNeedIcon then
                   control.altNeedIcon = {}
               end
@@ -158,12 +159,6 @@ function TraitCraft:GetTraitFromKey(key)
 	return craftingSkillType, researchLineIndex, traitIndex
 end
 
-function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
-	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
-	if knows then return true end
-	return false
-end
-
 function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 	if knows then return true end
@@ -172,67 +167,26 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-local function needsToBeAdded(trait, mask)
-  return (trait % (mask*2)) < mask
-end
-
 function TraitCraft:ScanKnownTraits()
   local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
   local traitLimit = 9
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = nil
-	for researchLineIndex = 1, GetNumSmithingResearchLines(BLACKSMITH) do
-		for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(BLACKSMITH, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(BLACKSMITH, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-		end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(CLOTHIER) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(CLOTHIER, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(CLOTHIER, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+  for _, craftingType in ipairs({ BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }) do
+    for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
+      for traitIndex = 1, traitLimit do
+        if self:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+          key = self:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+          if not TC.AV.traitTable[key] then
+            TC.AV.traitTable[key] = 0
+          end
+          if charBitMissing(TC.AV.traitTable[key], charBitId) then
+            TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+          end
         end
       end
     end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(WOODWORK) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(WOODWORK, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(WOODWORK, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-    end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(JEWELRY_CRAFTING) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(JEWELRY_CRAFTING, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(JEWELRY_CRAFTING, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-    end
-	end
+  end
 end
 
 EVENT_MANAGER:RegisterForEvent(TC.Name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
