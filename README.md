@@ -35,13 +35,13 @@ Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u
 In order to operate within the limits of console addons and compress the trait table, the traits have been loaded into saved variables with their "key" set to a combined number which represents the known state of all the actively researching characters.  To accomplish this, each character is assigned a number which is 2 to the power of their order in the character lineup.  When the traits are scanned, this number is tested for in the existing trait value.  If a character now knows the trait but its power of two number is not present (or in bitwise math, its bit is not turned on), the power of two number is added.  Then when the research traits are loaded with the crafting character, the power of two number can be tested for again and the specific number identified.
 
 Example:
-Character 1 → mask = 1   2^0 (since bitwise math operates on a zero index)
-Character 2 → mask = 2   2^1
-Character 3 → mask = 4   2^2
-Character 4 → mask = 8   2^3
-Character 5 → mask = 16  2^4
-Character 6 → mask = 32  2^5
-Character 7 → mask = 64  2^6
+* Character 1 → mask = 1   2^0 (since bitwise math operates on a zero index)
+* Character 2 → mask = 2   2^1
+* Character 3 → mask = 4   2^2
+* Character 4 → mask = 8   2^3
+* Character 5 → mask = 16  2^4
+* Character 6 → mask = 32  2^5
+* Character 7 → mask = 64  2^6
 
 This corresponds to binary numbers when added up - for instance, if characters 3 and 4 know a trait, their combined binary number is 1100, and their decimal number is 12.
 
