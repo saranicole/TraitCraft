@@ -108,11 +108,11 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     local specificIcon = nil
     local sideFloat = 180
     local key = TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
-    local trait = TC.AV.traitTable[key] or 0
+    local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon
-        if not TC.HasResearched(trait, mask) or TC.AV.traitTable[key] == nil then
+        if not TC.HasResearched(trait, mask) then
               if not control.altNeedIcon then
                   control.altNeedIcon = {}
               end
