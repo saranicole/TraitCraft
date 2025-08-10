@@ -85,7 +85,8 @@ end
 function TC.CurrentActivelyResearching()
   local summary = " "
   for k, v in pairs(TC.AV.activelyResearchingCharacters) do
-    summary = summary.."  |t40:40:"..v.icon.."|t  "..v.name.."|r\r\n  "
+    local icon = v.icon or TC.IconList[1]
+    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n  "
   end
   return summary
 end
@@ -224,6 +225,7 @@ function TC.BuildMenu()
         if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
           table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
           TC.AV.sharedCrafterVars[BLACKSMITHING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] = BLACKSMITHING_CHARACTER_ID
         end
       end
       if CLOTHING_CHARACTER_NAME and CLOTHING_CHARACTER_ID then
@@ -231,6 +233,7 @@ function TC.BuildMenu()
         if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
           table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
           TC.AV.sharedCrafterVars[CLOTHING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] = CLOTHING_CHARACTER_ID
         end
       end
       if WOODWORKING_CHARACTER_NAME and WOODWORKING_CHARACTER_ID then
@@ -238,6 +241,7 @@ function TC.BuildMenu()
         if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
           table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
           TC.AV.sharedCrafterVars[WOODWORKING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] = WOODWORKING_CHARACTER_ID
         end
       end
       if JEWELRY_CHARACTER_NAME and JEWELRY_CHARACTER_ID then
@@ -245,6 +249,7 @@ function TC.BuildMenu()
         if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
           table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
           TC.AV.sharedCrafterVars[JEWELRY_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] = JEWELRY_CHARACTER_ID
         end
       end
       if ACTIVELY_RESEARCHING_ID then
