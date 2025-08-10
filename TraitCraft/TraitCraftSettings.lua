@@ -126,16 +126,6 @@ function TC.BuildMenu()
   })
 
   panel:AddSetting {
-    type = LAM.ST_CHECKBOX,
-    label = TC.Lang.LIMIT_TRAITS_SAVED,
-    getFunction = function() return TC.AV.limitTraitsSaved end,
-    setFunction = function(var)
-      TC.AV.limitTraitsSaved = var
-    end,
-    default = true,
-  }
-
-  panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.MAIN_CRAFTER,
     items = characterList,
