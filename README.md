@@ -8,6 +8,11 @@ Tired of writing down which traits you need across which alts so that you can cr
 
 Currently shows the unresearched traits on the research tab.
 
+<img width="318" height="756" alt="TraitCraft_screenshot" src="https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1" />
+
+Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968)
+
+
 ### Roadmap
 
 * Autocraft option
