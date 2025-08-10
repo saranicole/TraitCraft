@@ -7,6 +7,7 @@ TC.Name = "TraitCraft"
 
 TC.Default = {
     allCrafterIds = {},
+    allCrafters = {},
     sharedCrafterVars = {},
     mainCrafter = {},
     blacksmithCharacter = {},
@@ -139,7 +140,7 @@ end
 
 local function OnCraftingInteract(eventCode, craftingType)
   if next(TC.AV.allCrafterIds) then
-    if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
+    if TC.AV.allCrafters[craftingType] == currentlyLoggedInCharId then
       ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
         researchLineId = data.researchLineIndex
         addSmithingHook()
