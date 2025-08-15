@@ -16,11 +16,13 @@ TC.Default = {
     jewelryCharacter = {},
     activelyResearchingCharacters = {},
     traitTable = {},
+    savedCharacterList = {},
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
+TC.traitIndexKey = nil
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineId = nil
@@ -46,6 +48,58 @@ function TC.GetCharacterBitwise()
   return characterList
 end
 
+function TC.CompareCharChanges(savedList, currentList)
+  local deltaList = { reordered = {}, deleted = {} }
+  for charId, mask in pairs(currentList) do
+    if savedList[charId] and savedList[charId] ~= mask and TC.AV.activelyResearchingCharacters[charId] then
+      -- Order swap involving character that was researching - save the old mask for subtraction
+      deltaList.reordered[charId] = savedList[charId]
+    end
+  end
+  for charId, mask in pairs(savedList) do
+    if not currentList[charId] and TC.AV.activelyResearchingCharacters[charId] then
+      -- Character deleted involving character that was researching - save the old mask for subtraction
+      deltaList.deleted[charId] = savedList[charId]
+    end
+  end
+  return deltaList
+end
+
+local function charBitMissing(trait, mask)
+  -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
+  -- trait is the integer bitmask
+  -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
+  return (trait % (mask*2)) < mask
+end
+
+function TC.ResolveTraitDiffs()
+  local start = GetFrameTimeMilliseconds()
+  local key = nil
+  while true do
+    key, allMasks = next(TC.AV.traitTable, TC.traitIndexKey)
+    if not key then
+      EVENT_MANAGER:UnregisterForUpdate("TC_TraitMaskMigration")
+      return
+    end
+    for charId, mask in pairs(TC.deltaList.deleted) do
+      if not charBitMissing(allMasks, mask) then
+        -- fix deleted
+        TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask
+      end
+    end
+    for charId, mask in pairs(TC.deltaList.reordered) do
+      if not charBitMissing(allMasks, mask) then
+        -- fix reordered
+        TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask + TC.bitwiseChars[charId]
+      end
+    end
+    TC.traitIndexKey = key
+    if GetFrameTimeMilliseconds() - start > 5 then
+        return
+    end
+  end
+end
+
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
@@ -54,6 +108,15 @@ local function OnAddOnLoaded(eventCode, addonName)
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
 
   TC.bitwiseChars = TC.GetCharacterBitwise()
+
+  if not next(TC.AV.savedCharacterList) then
+    TC.AV.savedCharacterList = TC.bitwiseChars
+  else
+    TC.deltaList = TC.CompareCharChanges(TC.AV.savedCharacterList, TC.bitwiseChars)
+    if next(TC.deltaList.reordered) or next(TC.deltaList.deleted) then
+      EVENT_MANAGER:RegisterForUpdate("TC_TraitMaskMigration", 0, TC.ResolveTraitDiffs)
+    end
+  end
 end
 
 function TC.isValueInTable(table, element)
@@ -76,13 +139,6 @@ end
 
 local function getValueFromTable(t)
     return select(2, next(t))
-end
-
-local function charBitMissing(trait, mask)
-  -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
-  -- trait is the integer bitmask
-  -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
-  return (trait % (mask*2)) < mask
 end
 
 local function TC_Event_Player_Activated(event, isA)
