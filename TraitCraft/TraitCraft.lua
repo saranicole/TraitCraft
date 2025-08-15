@@ -79,6 +79,7 @@ function TC.ResolveTraitDiffs()
     key, allMasks = next(TC.AV.traitTable, TC.traitIndexKey)
     if not key then
       EVENT_MANAGER:UnregisterForUpdate("TC_TraitMaskMigration")
+      TC.AV.savedCharacterList = TC.bitwiseChars
       return
     end
     for charId, mask in pairs(TC.deltaList.deleted) do
