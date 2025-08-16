@@ -27,6 +27,10 @@ local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
 
+TC.craftingTypeIndex = 1
+TC.researchLineIndex = 1
+TC.traitIndex = 1
+
 local SMITHING = ZO_SmithingResearch
 
 if IsInGamepadPreferredMode() then
@@ -169,22 +173,19 @@ end
 function TraitCraft:ScanKnownTraits()
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
-  local craftingTypeIndex = 1
-  local researchLineIndex = 1
   local traitLimit = 9
-  local traitIndex = 1
   while true do
-    checkTrait(charBitId, craftTypes[craftingTypeIndex], researchLineIndex, traitIndex)
-    traitIndex = traitIndex + 1
-    if traitIndex > traitLimit then
-      traitIndex = 1
-      researchLineIndex = researchLineIndex + 1
-      if researchLineIndex > GetNumSmithingResearchLines(craftTypes[craftingTypeIndex]) then
-          researchLineIndex = 1
-          craftingTypeIndex = craftingTypeIndex + 1
+    checkTrait(charBitId, craftTypes[TC.craftingTypeIndex], TC.researchLineIndex, TC.traitIndex)
+    TC.traitIndex = TC.traitIndex + 1
+    if TC.traitIndex > traitLimit then
+      TC.traitIndex = 1
+      TC.researchLineIndex = TC.researchLineIndex + 1
+      if TC.researchLineIndex > GetNumSmithingResearchLines(craftTypes[TC.craftingTypeIndex]) then
+          TC.researchLineIndex = 1
+          TC.craftingTypeIndex = TC.craftingTypeIndex + 1
       end
     end
-    if craftingTypeIndex > #craftTypes then
+    if TC.craftingTypeIndex > #craftTypes then
       EVENT_MANAGER:UnregisterForUpdate("TC_ScanKnownTraits")
       return
     end
