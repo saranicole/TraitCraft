@@ -171,6 +171,7 @@ local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex
 end
 
 function TraitCraft:ScanKnownTraits()
+  local start = GetFrameTimeMilliseconds()
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
   local traitLimit = 9
