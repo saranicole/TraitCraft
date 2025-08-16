@@ -8,12 +8,7 @@ TC.Name = "TraitCraft"
 TC.Default = {
     allCrafterIds = {},
     allCrafters = {},
-    sharedCrafterVars = {},
     mainCrafter = {},
-    blacksmithCharacter = {},
-    clothierCharacter = {},
-    woodworkingCharacter = {},
-    jewelryCharacter = {},
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
@@ -51,15 +46,18 @@ end
 function TC.CompareCharChanges(savedList, currentList)
   local deltaList = { reordered = {}, deleted = {} }
   for charId, mask in pairs(currentList) do
-    if savedList[charId] and savedList[charId] ~= mask and TC.AV.activelyResearchingCharacters[charId] then
+    if savedList[charId] and savedList[charId] ~= mask then
       -- Order swap involving character that was researching - save the old mask for subtraction
       deltaList.reordered[charId] = savedList[charId]
     end
   end
   for charId, mask in pairs(savedList) do
-    if not currentList[charId] and TC.AV.activelyResearchingCharacters[charId] then
+    if not currentList[charId] then
       -- Character deleted involving character that was researching - save the old mask for subtraction
       deltaList.deleted[charId] = savedList[charId]
+      if next(TC.AV.activelyResearchingCharacters) and TC.AV.activelyResearchingCharacters[charId] then
+        TC.AV.activelyResearchingCharacters[charId] = nil
+      end
     end
   end
   return deltaList
@@ -75,6 +73,7 @@ end
 function TC.ResolveTraitDiffs()
   local start = GetFrameTimeMilliseconds()
   local key = nil
+  local allMasks = nil
   while true do
     key, allMasks = next(TC.AV.traitTable, TC.traitIndexKey)
     if not key then
