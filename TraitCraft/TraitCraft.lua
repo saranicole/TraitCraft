@@ -158,16 +158,36 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
-  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
-    key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-    if not TC.AV.traitTable[key] then
-      TC.AV.traitTable[key] = 0
-    end
-    if charBitMissing(TC.AV.traitTable[key], charBitId) then
-      TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+function TraitCraft:SetTraitKnown(eventId, craftingType, researchLineIndex, traitIndex)
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  if not TC.AV.traitTable[key] then
+    TC.AV.traitTable[key] = 0
+  end
+  if charBitMissing(TC.AV.traitTable[key], charBitId) then
+    TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+  end
+end
+
+function TraitCraft:SetTraitUnknown(eventId, craftingType, researchLineIndex, traitIndex)
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  if TC.AV.traitTable[key] and TC.AV.traitTable[key] > 0 then
+    if not charBitMissing(TC.AV.traitTable[key], charBitId) then
+      TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
     end
   end
+end
+
+local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
+  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+    TraitCraft:SetTraitKnown(nil, craftingType, researchLineIndex, traitIndex)
+  end
+end
+
+local function SetResearchHooks()
+  EVENT_MANAGER:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, TC.SetTraitKnown)
+  EVENT_MANAGER:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
 function TraitCraft:ScanKnownTraits()
@@ -188,6 +208,7 @@ function TraitCraft:ScanKnownTraits()
     end
     if TC.craftingTypeIndex > #craftTypes then
       EVENT_MANAGER:UnregisterForUpdate("TC_ScanKnownTraits")
+      SetResearchHooks()
       return
     end
     if GetFrameTimeMilliseconds() - start > 5 then
