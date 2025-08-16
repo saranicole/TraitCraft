@@ -14,6 +14,5 @@ TC.Lang = {
   ACTIVELY_RESEARCHING    =         "Actively researching characters",
   CLEAR_ACTIVELY_RESEARCHING =      "Clear researching characters",
   SHORT_CLEAR             =         "Clear",
-  LIMIT_TRAITS_SAVED      =         "Limit number of traits saved per character (optimizes console performance)"
 
 }

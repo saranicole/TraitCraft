@@ -7,19 +7,17 @@ TC.Name = "TraitCraft"
 
 TC.Default = {
     allCrafterIds = {},
-    sharedCrafterVars = {},
+    allCrafters = {},
     mainCrafter = {},
-    blacksmithCharacter = {},
-    clothierCharacter = {},
-    woodworkingCharacter = {},
-    jewelryCharacter = {},
     activelyResearchingCharacters = {},
     traitTable = {},
+    savedCharacterList = {},
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
+TC.traitIndexKey = nil
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineId = nil
@@ -28,6 +26,10 @@ local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+TC.craftingTypeIndex = 1
+TC.researchLineIndex = 1
+TC.traitIndex = 1
 
 local SMITHING = ZO_SmithingResearch
 
@@ -45,6 +47,63 @@ function TC.GetCharacterBitwise()
   return characterList
 end
 
+function TC.CompareCharChanges(savedList, currentList)
+  local deltaList = { reordered = {}, deleted = {} }
+  for charId, mask in pairs(currentList) do
+    if savedList[charId] and savedList[charId] ~= mask then
+      -- Order swap involving character that was researching - save the old mask for subtraction
+      deltaList.reordered[charId] = savedList[charId]
+    end
+  end
+  for charId, mask in pairs(savedList) do
+    if not currentList[charId] then
+      -- Character deleted involving character that was researching - save the old mask for subtraction
+      deltaList.deleted[charId] = savedList[charId]
+      if next(TC.AV.activelyResearchingCharacters) and TC.AV.activelyResearchingCharacters[charId] then
+        TC.AV.activelyResearchingCharacters[charId] = nil
+      end
+    end
+  end
+  return deltaList
+end
+
+local function charBitMissing(trait, mask)
+  -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
+  -- trait is the integer bitmask
+  -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
+  return (trait % (mask*2)) < mask
+end
+
+function TC.ResolveTraitDiffs()
+  local start = GetFrameTimeMilliseconds()
+  local key = nil
+  local allMasks = nil
+  while true do
+    key, allMasks = next(TC.AV.traitTable, TC.traitIndexKey)
+    if not key then
+      EVENT_MANAGER:UnregisterForUpdate("TC_TraitMaskMigration")
+      TC.AV.savedCharacterList = TC.bitwiseChars
+      return
+    end
+    for charId, mask in pairs(TC.deltaList.deleted) do
+      if not charBitMissing(allMasks, mask) then
+        -- fix deleted
+        TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask
+      end
+    end
+    for charId, mask in pairs(TC.deltaList.reordered) do
+      if not charBitMissing(allMasks, mask) then
+        -- fix reordered
+        TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask + TC.bitwiseChars[charId]
+      end
+    end
+    TC.traitIndexKey = key
+    if GetFrameTimeMilliseconds() - start > 5 then
+        return
+    end
+  end
+end
+
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
@@ -53,6 +112,15 @@ local function OnAddOnLoaded(eventCode, addonName)
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
 
   TC.bitwiseChars = TC.GetCharacterBitwise()
+
+  if not next(TC.AV.savedCharacterList) then
+    TC.AV.savedCharacterList = TC.bitwiseChars
+  else
+    TC.deltaList = TC.CompareCharChanges(TC.AV.savedCharacterList, TC.bitwiseChars)
+    if next(TC.deltaList.reordered) or next(TC.deltaList.deleted) then
+      EVENT_MANAGER:RegisterForUpdate("TC_TraitMaskMigration", 0, TC.ResolveTraitDiffs)
+    end
+  end
 end
 
 function TC.isValueInTable(table, element)
@@ -77,10 +145,55 @@ local function getValueFromTable(t)
     return select(2, next(t))
 end
 
-function TC.HasResearched(trait, mask)
-    -- trait is the integer bitmask
-    -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
-    return (trait % (mask * 2)) >= mask
+function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
+	if craftingSkillType == nil or researchLineIndex == nil or traitIndex == nil then return end
+	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
+end
+
+function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return true end
+	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
+	if willKnow ~= nil then return true end
+	return false
+end
+
+local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
+  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+    key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    if not TC.AV.traitTable[key] then
+      TC.AV.traitTable[key] = 0
+    end
+    if charBitMissing(TC.AV.traitTable[key], charBitId) then
+      TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+    end
+  end
+end
+
+function TraitCraft:ScanKnownTraits()
+  local start = GetFrameTimeMilliseconds()
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  local traitLimit = 9
+  while true do
+    checkTrait(charBitId, craftTypes[TC.craftingTypeIndex], TC.researchLineIndex, TC.traitIndex)
+    TC.traitIndex = TC.traitIndex + 1
+    if TC.traitIndex > traitLimit then
+      TC.traitIndex = 1
+      TC.researchLineIndex = TC.researchLineIndex + 1
+      if TC.researchLineIndex > GetNumSmithingResearchLines(craftTypes[TC.craftingTypeIndex]) then
+          TC.researchLineIndex = 1
+          TC.craftingTypeIndex = TC.craftingTypeIndex + 1
+      end
+    end
+    if TC.craftingTypeIndex > #craftTypes then
+      EVENT_MANAGER:UnregisterForUpdate("TC_ScanKnownTraits")
+      return
+    end
+    if GetFrameTimeMilliseconds() - start > 5 then
+        return -- resume next frame with current indices
+    end
+  end
 end
 
 local function TC_Event_Player_Activated(event, isA)
@@ -89,13 +202,8 @@ local function TC_Event_Player_Activated(event, isA)
 	TC.currentlyLoggedInChar = {}
 	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
-    TraitCraft:ScanKnownTraits()
+    EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
   end
-end
-
-function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
-	if craftingSkillType == nil or researchLineIndex == nil or traitIndex == nil then return end
-	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
 end
 
 local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex)
@@ -106,7 +214,7 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
-        if not TC.HasResearched(trait, mask) then
+        if charBitMissing(trait, mask) then
               if not control.altNeedIcon then
                   control.altNeedIcon = {}
               end
@@ -138,7 +246,7 @@ end
 
 local function OnCraftingInteract(eventCode, craftingType)
   if next(TC.AV.allCrafterIds) then
-    if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
+    if TC.AV.allCrafters[craftingType] == currentlyLoggedInCharId then
       ZO_PreHook(SMITHING, "ShowTraitsFor", function(self, data)
         researchLineId = data.researchLineIndex
         addSmithingHook()
@@ -156,83 +264,6 @@ function TraitCraft:GetTraitFromKey(key)
 --   local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
 --   local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
 	return craftingSkillType, researchLineIndex, traitIndex
-end
-
-function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
-	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
-	if knows then return true end
-	return false
-end
-
-function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
-	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
-	if knows then return true end
-	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
-	if willKnow ~= nil then return true end
-	return false
-end
-
-local function needsToBeAdded(trait, mask)
-  return (trait % (mask*2)) < mask
-end
-
-function TraitCraft:ScanKnownTraits()
-  local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
-  local traitLimit = 9
-  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
-  local key = nil
-	for researchLineIndex = 1, GetNumSmithingResearchLines(BLACKSMITH) do
-		for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(BLACKSMITH, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(BLACKSMITH, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-		end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(CLOTHIER) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(CLOTHIER, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(CLOTHIER, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-    end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(WOODWORK) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(WOODWORK, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(WOODWORK, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-    end
-	end
-	for researchLineIndex = 1, GetNumSmithingResearchLines(JEWELRY_CRAFTING) do
-    for traitIndex = 1, traitLimit do
-      if self:WillCharacterKnowTrait(JEWELRY_CRAFTING, researchLineIndex, traitIndex) then
-        key = self:GetTraitKey(JEWELRY_CRAFTING, researchLineIndex, traitIndex)
-        if not TC.AV.traitTable[key] then
-          TC.AV.traitTable[key] = 0
-        end
-        if needsToBeAdded(TC.AV.traitTable[key], charBitId) then
-          TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
-        end
-      end
-    end
-	end
 end
 
 EVENT_MANAGER:RegisterForEvent(TC.Name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)

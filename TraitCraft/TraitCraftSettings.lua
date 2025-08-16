@@ -69,6 +69,14 @@ function TC.GetCharacterList()
   return characterList
 end
 
+function TC.GetNameFromId(characterList, charId)
+  for _, value in ipairs(characterList) do
+    if value.data == charId then
+      return value.name
+    end
+  end
+end
+
 function TC.GetCurrentCharInfo(characters)
   if TC.currentlyLoggedInChar.name and TC.currentlyLoggedInChar.id then
     return TC.currentlyLoggedInChar.name, TC.currentlyLoggedInChar.id
@@ -85,7 +93,8 @@ end
 function TC.CurrentActivelyResearching()
   local summary = " "
   for k, v in pairs(TC.AV.activelyResearchingCharacters) do
-    summary = summary.."  |t40:40:"..v.icon.."|t  "..v.name.."|r\r\n  "
+    local icon = v.icon or TC.IconList[1]
+    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n  "
   end
   return summary
 end
@@ -96,21 +105,17 @@ function TC.SetCrafterDefaults(characters)
     TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
     table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
   end
-  if not next(TC.AV.blacksmithCharacter) and not BLACKSMITHING_CHARACTER_NAME and not BLACKSMITHING_CHARACTER_ID then
+  if not TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] and not BLACKSMITHING_CHARACTER_NAME and not BLACKSMITHING_CHARACTER_ID then
     BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.blacksmithCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not next(TC.AV.clothierCharacter) and not CLOTHING_CHARACTER_NAME and not CLOTHING_CHARACTER_ID then
+  if not TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] and not CLOTHING_CHARACTER_NAME and not CLOTHING_CHARACTER_ID then
     CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.clothierCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not next(TC.AV.woodworkingCharacter) and not WOODWORKING_CHARACTER_NAME and not WOODWORKING_CHARACTER_ID then
+  if not TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] and not WOODWORKING_CHARACTER_NAME and not WOODWORKING_CHARACTER_ID then
     WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.woodworkingCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
-  if not next(TC.AV.jewelryCharacter) and not JEWELRY_CHARACTER_NAME and not JEWELRY_CHARACTER_ID then
+  if not TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] and not JEWELRY_CHARACTER_NAME and not JEWELRY_CHARACTER_ID then
     JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID  = TC.GetCurrentCharInfo(characters)
-    TC.AV.jewelryCharacter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
   end
 end
 
@@ -133,7 +138,6 @@ function TC.BuildMenu()
     setFunction = function(var, itemName, itemData)
       MAIN_CRAFTER_NAME = itemName
       MAIN_CRAFTER_ID = itemData.data
-
     end
   }
 
@@ -141,7 +145,7 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.BLACKSMITHING_CHARACTER,
     items = characterList,
-    getFunction = function() return BLACKSMITHING_CHARACTER_NAME or TC.AV.blacksmithCharacter.name end,
+    getFunction = function() return BLACKSMITHING_CHARACTER_NAME or TC.GetNameFromId(characterList, (TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] or TC.AV.mainCrafter.data)) end,
     setFunction = function(var, itemName, itemData)
       BLACKSMITHING_CHARACTER_NAME = itemName
       BLACKSMITHING_CHARACTER_ID = itemData.data
@@ -152,7 +156,7 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.CLOTHING_CHARACTER,
     items = characterList,
-    getFunction = function() return CLOTHING_CHARACTER_NAME or TC.AV.clothierCharacter.name end,
+    getFunction = function() return CLOTHING_CHARACTER_NAME or TC.GetNameFromId(characterList, (TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] or TC.AV.mainCrafter.data)) end,
     setFunction = function(var, itemName, itemData)
       CLOTHING_CHARACTER_NAME = itemName
       CLOTHING_CHARACTER_ID = itemData.data
@@ -164,7 +168,7 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.WOODWORKING_CHARACTER,
     items = characterList,
-    getFunction = function() return WOODWORKING_CHARACTER_NAME or TC.AV.woodworkingCharacter.name end,
+    getFunction = function() return WOODWORKING_CHARACTER_NAME or TC.GetNameFromId(characterList, (TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] or TC.AV.mainCrafter.data))  end,
     setFunction = function(var, itemName, itemData)
       WOODWORKING_CHARACTER_NAME = itemName
       WOODWORKING_CHARACTER_ID = itemData.data
@@ -176,7 +180,7 @@ function TC.BuildMenu()
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.JEWELRY_CHARACTER,
     items = characterList,
-    getFunction = function() return JEWELRY_CHARACTER_NAME or TC.AV.jewelryCharacter.name end,
+    getFunction = function() return JEWELRY_CHARACTER_NAME  or TC.GetNameFromId(characterList, (TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] or TC.AV.mainCrafter.data))  end,
     setFunction = function(var, itemName, itemData)
       JEWELRY_CHARACTER_NAME = itemName
       JEWELRY_CHARACTER_ID = itemData.data
@@ -216,35 +220,30 @@ function TC.BuildMenu()
         TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
         if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
           table.insert(TC.AV.allCrafterIds, MAIN_CRAFTER_ID)
-          TC.AV.sharedCrafterVars[MAIN_CRAFTER_ID or TC.AV.mainCrafter.data] = {}
         end
       end
       if BLACKSMITHING_CHARACTER_NAME and BLACKSMITHING_CHARACTER_ID then
-        TC.AV.blacksmithCharacter = { name = BLACKSMITHING_CHARACTER_NAME, data = BLACKSMITHING_CHARACTER_ID }
-        if not TC.isValueInTable(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID) then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] then
           table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
-          TC.AV.sharedCrafterVars[BLACKSMITHING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] = BLACKSMITHING_CHARACTER_ID
         end
       end
       if CLOTHING_CHARACTER_NAME and CLOTHING_CHARACTER_ID then
-        TC.AV.clothierCharacter = { name = CLOTHING_CHARACTER_NAME, data = CLOTHING_CHARACTER_ID }
-        if not TC.isValueInTable(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID) then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] then
           table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
-          TC.AV.sharedCrafterVars[CLOTHING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] = CLOTHING_CHARACTER_ID
         end
       end
       if WOODWORKING_CHARACTER_NAME and WOODWORKING_CHARACTER_ID then
-        TC.AV.woodworkingCharacter = { name = WOODWORKING_CHARACTER_NAME, data = WOODWORKING_CHARACTER_ID }
-        if not TC.isValueInTable(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID) then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] then
           table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
-          TC.AV.sharedCrafterVars[WOODWORKING_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] = WOODWORKING_CHARACTER_ID
         end
       end
       if JEWELRY_CHARACTER_NAME and JEWELRY_CHARACTER_ID then
-        TC.AV.jewelryCharacter = { name = JEWELRY_CHARACTER_NAME, data = JEWELRY_CHARACTER_ID }
-        if not TC.isValueInTable(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID) then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] then
           table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
-          TC.AV.sharedCrafterVars[JEWELRY_CHARACTER_ID] = {}
+          TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] = JEWELRY_CHARACTER_ID
         end
       end
       if ACTIVELY_RESEARCHING_ID then
@@ -287,5 +286,10 @@ function TC.BuildMenu()
     label = function()
       return TC.CurrentActivelyResearching()
     end
+  }
+  --Breakpoint
+  panel:AddSetting {
+    type = LAM.ST_SECTION,
+    label = " ",
   }
 end
