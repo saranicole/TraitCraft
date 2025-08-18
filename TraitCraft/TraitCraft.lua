@@ -38,6 +38,7 @@ if IsInGamepadPreferredMode() then
 end
 
 
+
 function TC.GetCharacterBitwise()
   local characterList = {}
   for i = 1, GetNumCharacters() do
@@ -67,7 +68,7 @@ function TC.CompareCharChanges(savedList, currentList)
   return deltaList
 end
 
-local function charBitMissing(trait, mask)
+function TC.charBitMissing(trait, mask)
   -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
   -- trait is the integer bitmask
   -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
@@ -86,13 +87,13 @@ function TC.ResolveTraitDiffs()
       return
     end
     for charId, mask in pairs(TC.deltaList.deleted) do
-      if not charBitMissing(allMasks, mask) then
+      if not TC.charBitMissing(allMasks, mask) then
         -- fix deleted
         TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask
       end
     end
     for charId, mask in pairs(TC.deltaList.reordered) do
-      if not charBitMissing(allMasks, mask) then
+      if not TC.charBitMissing(allMasks, mask) then
         -- fix reordered
         TC.AV.traitTable[key] = TC.AV.traitTable[key] - mask + TC.bitwiseChars[charId]
       end
@@ -158,16 +159,38 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
-  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
-    key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-    if not TC.AV.traitTable[key] then
-      TC.AV.traitTable[key] = 0
-    end
-    if charBitMissing(TC.AV.traitTable[key], charBitId) then
-      TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  if key and not TC.AV.traitTable[key] then
+    TC.AV.traitTable[key] = 0
+  end
+  if key and TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
+    TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+  end
+end
+
+function TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  if key and TC.AV.traitTable[key] and TC.AV.traitTable[key] > 0 then
+    if key and not TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
+      TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
     end
   end
+end
+
+local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
+  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+    TraitCraft:SetTraitKnown(nil, craftingType, researchLineIndex, traitIndex)
+  end
+end
+
+local function SetResearchHooks()
+  EVENT_MANAGER:UnregisterForEvent("TC_ResearchComplete", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED)
+  EVENT_MANAGER:UnregisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED)
+  EVENT_MANAGER:RegisterForEvent("TC_ResearchComplete", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, TC.SetTraitKnown)
+  EVENT_MANAGER:RegisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
 function TraitCraft:ScanKnownTraits()
@@ -188,6 +211,7 @@ function TraitCraft:ScanKnownTraits()
     end
     if TC.craftingTypeIndex > #craftTypes then
       EVENT_MANAGER:UnregisterForUpdate("TC_ScanKnownTraits")
+      SetResearchHooks()
       return
     end
     if GetFrameTimeMilliseconds() - start > 5 then
@@ -206,24 +230,31 @@ local function TC_Event_Player_Activated(event, isA)
   end
 end
 
-local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex)
-    local specificIcon = nil
-    local sideFloat = 180
+function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+    local icon
+    if not sideFloat then
+      sideFloat = 180
+    end
+    if not prefix then
+      prefix = "iconId"
+    end
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
-        if charBitMissing(trait, mask) then
+        if TC.charBitMissing(trait, mask) then
               if not control.altNeedIcon then
                   control.altNeedIcon = {}
               end
               if not control.altNeedIcon[id] then
-                  local icon = WINDOW_MANAGER:CreateControl("iconId"..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+                if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
+                  icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
                   icon:SetDimensions(40, 40)
-                  icon:SetAnchor(RIGHT, control, RIGHT, sideFloat, 0)
+                  icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
                   icon:SetTexture(iconPath)
                   control.altNeedIcon[id] = icon
+                end
               end
               if control.altNeedIcon[id] then
                 control.altNeedIcon[id]:SetHidden(false)
@@ -234,13 +265,14 @@ local function AddAltNeedIcon(control, craftingType, researchLineIndex, traitInd
         end
       end
     end
+  return icon
 end
 
 local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex)
+      TC.AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
   end)
 end
 
