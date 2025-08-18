@@ -232,48 +232,46 @@ end
 
 function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     local icon
-    local prevCharId
-    if not sideFloat then
-      sideFloat = 180
-    end
     if not prefix then
       prefix = "iconId"
     end
+    if not sideFloat then
+      sideFloat = 180
+    end
+    local origSideFloat = sideFloat
+    local charCounter = 0
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
         if TC.charBitMissing(trait, mask) then
-              if not control.altNeedIcon then
-                  control.altNeedIcon = {}
-              end
-              if not control.altNeedIcon[id] then
-                if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
-                  icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
-                  icon:SetDimensions(40, 40)
-                  if not IsInGamepadPreferredMode() then
-                    if not prevCharId and not control.altNeedIcon[id] then
-                      icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-                    else
-                      icon:SetAnchor(RIGHT, control.altNeedIcon[prevCharId], LEFT, 10, 0)
-                    end
-                  else
-                    icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-                    sideFloat = sideFloat + 40
-                  end
-                  icon:SetTexture(iconPath)
-                  control.altNeedIcon[id] = icon
-                end
-              end
-              if control.altNeedIcon[id] then
-                control.altNeedIcon[id]:SetHidden(false)
-              end
+          sideFloat = origSideFloat + charCounter * 40
+          if "@saranicole1980" == GetDisplayName() or "@thisbeaurielle" == GetDisplayName() then
+            d("sideFloat")
+            d(sideFloat)
+          end
+          if not control.altNeedIcon then
+              control.altNeedIcon = {}
+          end
+          if not control.altNeedIcon[id] then
+            if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
+              icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+              icon:SetDimensions(40, 40)
+              icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+              icon:SetTexture(iconPath)
+              control.altNeedIcon[id] = icon
+            end
+          end
+          if control.altNeedIcon[id] then
+            control.altNeedIcon[id]:SetHidden(false)
+          end
+          charCounter = charCounter + 1
         elseif control.altNeedIcon and control.altNeedIcon[id] then
+          control.altNeedIcon[id]:ClearAnchors()
           control.altNeedIcon[id]:SetHidden(true)
         end
       end
-      prevCharId = id
     end
   return icon
 end
