@@ -56,7 +56,7 @@ local function OnSmithingCreation(eventCode, craftingType)
               prev = selectedTrait
             end
             if prev ~= selectedTrait then
-              TC.charIterator = 1
+              TC.charIterator[icon:GetName()] = 1
             end
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
