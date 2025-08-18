@@ -46,22 +46,19 @@ local function OnSmithingCreation(eventCode, craftingType)
   if next(TC.AV.allCrafterIds) then
     if TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
       ZO_PostHook(SMITHING, "RefreshTraitList", function(self, data)
-        local prev = nil
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
           local icon = FindLabel(selflist:GetParent():GetParent():GetParent())
           local selectedTraitData = self.traitList.selectedData
           if selectedTraitData then
+            if icon.iconSetupTraitDone == selectedTraitData.traitType then
+              return
+            end
             local selectedTrait = selectedTraitData.traitType
-            if not prev then
-              prev = selectedTrait
-            end
-            if prev ~= selectedTrait then
-              TC.charIterator[icon:GetName()] = 1
-            end
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 10, "craftId", TC.charIterator)
+              icon.iconSetupTraitDone = selectedTraitData.traitType
+              TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
             end
           end
         end)
