@@ -238,35 +238,36 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
     if not sideFloat then
       sideFloat = 180
     end
-    local origSideFloat = sideFloat
-    local charCounter = 0
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, mask in pairs(TC.bitwiseChars) do
       if TC.AV.activelyResearchingCharacters[id] then
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
         if TC.charBitMissing(trait, mask) then
-          sideFloat = origSideFloat + charCounter * 40
-          if "@Saranicole1980" == GetDisplayName() then
-            d("sideFloat")
-            d(sideFloat)
-          end
           if not control.altNeedIcon then
               control.altNeedIcon = {}
           end
           if not control.altNeedIcon[id] then
             if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
+              if "@Saranicole1980" == GetDisplayName() or "@thisbeaurielle" == GetDisplayName() then
+                d("control")
+                d(control:GetName())
+                d("parent")
+                d(control:GetParent():GetName())
+                d("sideFloat")
+                d(sideFloat)
+              end
               icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
               icon:SetDimensions(40, 40)
               icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
               icon:SetTexture(iconPath)
               control.altNeedIcon[id] = icon
+              sideFloat = sideFloat + 40
             end
           end
           if control.altNeedIcon[id] then
             control.altNeedIcon[id]:SetHidden(false)
           end
-          charCounter = charCounter + 1
         elseif control.altNeedIcon and control.altNeedIcon[id] then
           control.altNeedIcon[id]:ClearAnchors()
           control.altNeedIcon[id]:SetHidden(true)
