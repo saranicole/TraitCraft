@@ -255,7 +255,7 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
                   if not prevCharId then
                     icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
                   else
-                    icon:SetAnchor(LEFT, control.altNeedIcon[prevCharId], RIGHT, 40, 0)
+                    icon:SetAnchor(RIGHT, control.altNeedIcon[prevCharId], LEFT, 10, 0)
                   end
                   icon:SetTexture(iconPath)
                   control.altNeedIcon[id] = icon
