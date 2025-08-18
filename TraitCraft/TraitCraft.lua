@@ -247,7 +247,7 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
         local iconPath = TC.AV.activelyResearchingCharacters[id].icon or TC.IconList[1]
         if TC.charBitMissing(trait, mask) then
           sideFloat = origSideFloat + charCounter * 40
-          if "@saranicole1980" == GetDisplayName() or "@thisbeaurielle" == GetDisplayName() then
+          if "@Saranicole1980" == GetDisplayName() then
             d("sideFloat")
             d(sideFloat)
           end
