@@ -31,7 +31,7 @@ TC.craftingTypeIndex = 1
 TC.researchLineIndex = 1
 TC.traitIndex = 1
 
-TC.charIterator = 1
+TC.charIterator = {}
 
 local SMITHING = ZO_SmithingResearch
 
@@ -241,9 +241,6 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
       sideFloat = 180
     end
     local origSideFloat = sideFloat
-    if not charIterator then
-      charIterator = TC.charIterator
-    end
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
@@ -261,8 +258,8 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
             icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
             icon:SetTexture(iconPath)
             control.altNeedIcon[id] = icon
-            sideFloat = origSideFloat + 40 * charIterator
-            TC.charIterator = TC.charIterator + 1
+            sideFloat = origSideFloat + 40 * TC.charIterator[control:GetName()]
+            TC.charIterator[control:GetName()] = TC.charIterator[control:GetName()] + 1
           end
         end
         if control.altNeedIcon[id] then
@@ -280,7 +277,7 @@ local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      TC.charIterator = 1
+      TC.charIterator[icon:GetName()] = 1
       TC.AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT, nil, nil, TC.charIterator)
   end)
 end
