@@ -36,11 +36,6 @@ local function OnSmithingCreation(eventCode, craftingType)
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
           local icon = FindLabel(selflist:GetParent():GetParent():GetParent())
           local traitIndex = findTraitIndex(craftingType, data.patternIndex, datalist.traitType)
-          if traitIndex == 0 and icon and icon.altNeedIcon then
-            for idex, ic in pairs(icon.altNeedIcon) do
-              ic:SetHidden(true)
-            end
-          end
           if icon and traitIndex and datalist.traitType ~= 0 then
             TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
           end
