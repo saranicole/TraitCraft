@@ -18,24 +18,31 @@ local function findTraitIndex(craftingSkillType, researchLineIndex, traitType)
 	return ITEM_TRAIT_TYPE_NONE
 end
 
+local function FindLabel(rowControl)
+  local child = nil
+    for i = 1, rowControl:GetNumChildren() do
+      local testchild = rowControl:GetChild(i)
+        if testchild:GetType() == CT_LABEL then
+            child = testchild
+        end
+    end
+  return child
+end
+
 local function OnSmithingCreation(eventCode, craftingType)
   if next(TC.AV.allCrafterIds) then
     if TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
       ZO_PostHook(SMITHING, "RefreshTraitList", function(self, data)
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
-          local icon = selflist:GetNamedChild("Icon")
+          local icon = FindLabel(selflist:GetParent():GetParent():GetParent())
           local traitIndex = findTraitIndex(craftingType, data.patternIndex, datalist.traitType)
-          if traitIndex == 0 and icon.altNeedIcon then
+          if traitIndex == 0 and icon and icon.altNeedIcon then
             for idex, ic in pairs(icon.altNeedIcon) do
               ic:SetHidden(true)
             end
           end
           if icon and traitIndex and datalist.traitType ~= 0 then
-            if not IsInGamepadPreferredMode() then
-              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, LEFT, RIGHT, 10, "craftId")
-            else
-              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, TOP, BOTTOM, 40, "craftId")
-            end
+            TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
           end
         end)
       end)
