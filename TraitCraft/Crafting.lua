@@ -9,7 +9,7 @@ end
 local function findTraitIndex(craftingSkillType, researchLineIndex, traitType)
 	local _, _, numTraits, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
 	for traitIndex = 1, numTraits do
-		local foundTraitType, _, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+		local foundTraitType, description, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 		if foundTraitType == traitType then
 			return traitIndex
 		end
@@ -21,7 +21,10 @@ local function findResearchLineIndex(craftingSkillType, patternName)
 	local numResearchLines = GetNumSmithingResearchLines(craftingSkillType)
 	for researchLineIndex = 1, numResearchLines do
 		local foundResearchLine, _, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
-		if foundResearchLine:find(patternName) then
+		if foundResearchLine == "Robe & Jerkin" and (patternName == "Robe" or patternName == "Jerkin"  or patternName == "Shirt") then
+			return researchLineIndex
+		end
+		if foundResearchLine == patternName then
 			return researchLineIndex
 		end
 	end
@@ -45,10 +48,14 @@ local function OnSmithingCreation(eventCode, craftingType)
       ZO_PostHook(SMITHING, "RefreshTraitList", function(self, data)
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
           local icon = FindLabel(selflist:GetParent():GetParent():GetParent())
-          local researchLineIndex = findResearchLineIndex(craftingType, data.patternName)
-          local traitIndex = findTraitIndex(craftingType, researchLineIndex, datalist.traitType)
-          if icon and researchLineIndex and traitIndex and datalist.traitType ~= 0 then
-            TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
+          local selectedTraitData = self.traitList.selectedData
+          if selectedTraitData then
+            local selectedTrait = selectedTraitData.traitType
+            local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
+            local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
+            if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
+              TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
+            end
           end
         end)
       end)
