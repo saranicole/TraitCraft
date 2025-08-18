@@ -252,11 +252,10 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
                 if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
                   icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
                   icon:SetDimensions(40, 40)
-                  icon:ClearAnchors()
                   if not prevCharId then
                     icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
                   else
-                    icon:SetAnchor(LEFT, control.altNeedIcon[prevCharId], RIGHT, 10, 0)
+                    icon:SetAnchor(LEFT, control.altNeedIcon[prevCharId], RIGHT, 40, 0)
                   end
                   icon:SetTexture(iconPath)
                   control.altNeedIcon[id] = icon
