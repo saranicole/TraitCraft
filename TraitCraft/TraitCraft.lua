@@ -31,8 +31,6 @@ TC.craftingTypeIndex = 1
 TC.researchLineIndex = 1
 TC.traitIndex = 1
 
-TC.charIterator = {}
-
 local SMITHING = ZO_SmithingResearch
 
 if IsInGamepadPreferredMode() then
@@ -232,7 +230,7 @@ local function TC_Event_Player_Activated(event, isA)
   end
 end
 
-function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix, charIterator)
+function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     local icon
     if not prefix then
       prefix = "iconId"
@@ -240,7 +238,6 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
     if not sideFloat then
       sideFloat = 180
     end
-    local origSideFloat = sideFloat
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
@@ -252,14 +249,12 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
         end
         if not control.altNeedIcon[id] then
           if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
-
             icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
             icon:SetDimensions(40, 40)
             icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
             icon:SetTexture(iconPath)
             control.altNeedIcon[id] = icon
-            sideFloat = origSideFloat + 40 * TC.charIterator[control:GetName()]
-            TC.charIterator[control:GetName()] = TC.charIterator[control:GetName()] + 1
+            sideFloat = sideFloat + 40
           end
         end
         if control.altNeedIcon[id] then
@@ -277,8 +272,7 @@ local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      TC.charIterator[icon:GetName()] = 1
-      TC.AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT, nil, nil, TC.charIterator)
+      TC.AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
   end)
 end
 
