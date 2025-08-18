@@ -34,7 +34,7 @@ local function OnSmithingCreation(eventCode, craftingType)
             if not IsInGamepadPreferredMode() then
               TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, LEFT, RIGHT, 10, "craftId")
             else
-              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, BOTTOM, TOP, 10, "craftId")
+              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, TOP, BOTTOM, 40, "craftId")
             end
           end
         end)
