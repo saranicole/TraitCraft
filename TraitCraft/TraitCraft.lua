@@ -230,16 +230,13 @@ local function TC_Event_Player_Activated(event, isA)
   end
 end
 
-function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix, offsetY)
+function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     local icon
     if not sideFloat then
       sideFloat = 180
     end
     if not prefix then
       prefix = "iconId"
-    end
-    if not offsetY then
-      offsetY = 0
     end
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
@@ -254,17 +251,14 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
                 if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
                   icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
                   icon:SetDimensions(40, 40)
-                  icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, offsetY)
+                  icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
                   icon:SetTexture(iconPath)
                   control.altNeedIcon[id] = icon
+                  sideFloat = sideFloat + 40
                 end
               end
               if control.altNeedIcon[id] then
                 control.altNeedIcon[id]:SetHidden(false)
-                sideFloat = sideFloat + 40
-                if offsetY > 0 then
-                  offsetY = offsetY + 40
-                end
               end
         elseif control.altNeedIcon and control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(true)
