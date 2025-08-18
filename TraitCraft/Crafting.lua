@@ -7,7 +7,7 @@ if IsInGamepadPreferredMode() then
 end
 
 local function findTraitIndex(craftingSkillType, researchLineIndex, traitType)
-  --First Implemented in TraitBuddy
+	--Trying not to hard code the trait type indexes
 	local _, _, numTraits, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
 	for traitIndex = 1, numTraits do
 		local foundTraitType, _, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
@@ -31,7 +31,11 @@ local function OnSmithingCreation(eventCode, craftingType)
             end
           end
           if icon and traitIndex and datalist.traitType ~= 0 then
-            TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, LEFT, RIGHT, 10, "craftId")
+            if not IsInGamepadPreferredMode() then
+              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, LEFT, RIGHT, 10, "craftId")
+            else
+              TC.AddAltNeedIcon(icon, craftingType, data.patternIndex, traitIndex, BOTTOM, TOP, 10, "craftId")
+            end
           end
         end)
       end)
