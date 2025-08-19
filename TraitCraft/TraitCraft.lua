@@ -31,6 +31,9 @@ TC.craftingTypeIndex = 1
 TC.researchLineIndex = 1
 TC.traitIndex = 1
 
+TC.charIds = {}
+TC.sideFloat = {}
+
 local SMITHING = ZO_SmithingResearch
 
 if IsInGamepadPreferredMode() then
@@ -230,7 +233,7 @@ local function TC_Event_Player_Activated(event, isA)
   end
 end
 
-function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     local icon
     if not prefix then
       prefix = "iconId"
@@ -238,11 +241,10 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
     if not sideFloat then
       sideFloat = 180
     end
-    local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-    local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
-    local prevId = "place"
-    local counter = 0
-    for id, value in pairs(TC.AV.activelyResearchingCharacters) do
+    local id, value = next(TC.AV.activelyResearchingCharacters, charId)
+    if id and value then
+      local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+      local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
       local mask = TC.bitwiseChars[id]
       local iconPath = value.icon or TC.IconList[1]
       if TC.charBitMissing(trait, mask) then
@@ -250,9 +252,6 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
             control.altNeedIcon = {}
         end
         if not control.altNeedIcon[id] then
-          if prevId ~= "place" and GetControl(prefix..prevId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
-            sideFloat = sideFloat + 40 * counter
-          end
           if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
             icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
             icon:SetDimensions(40, 40)
@@ -264,21 +263,23 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
         if control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(false)
         end
-      prevId = id
-      counter = counter + 1
+        TC.sideFloat[control:GetName()] = TC.sideFloat[control:GetName()] + 40
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:ClearAnchors()
         control.altNeedIcon[id]:SetHidden(true)
       end
     end
-  return icon
+  return id
 end
 
 local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      TC.AddAltNeedIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
+      if not TC.sideFloat[icon:GetName()] then
+        TC.sideFloat[icon:GetName()] = 180
+      end
+      TC.charIds[icon:GetName()] = TC.AddAltNeedIcon(icon, TC.charIds[icon:GetName()], researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT, TC.sideFloat[icon:GetName()])
   end)
 end
 
