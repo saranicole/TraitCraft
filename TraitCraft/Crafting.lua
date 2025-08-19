@@ -50,14 +50,10 @@ local function OnSmithingCreation(eventCode, craftingType)
           local icon = FindLabel(selflist:GetParent():GetParent():GetParent())
           local selectedTraitData = self.traitList.selectedData
           if selectedTraitData then
-            if icon.iconSetupTraitDone == selectedTraitData.traitType then
-              return
-            end
             local selectedTrait = selectedTraitData.traitType
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              icon.iconSetupTraitDone = selectedTraitData.traitType
               TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 10, "craftId")
             end
           end
