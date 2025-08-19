@@ -240,7 +240,7 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
     local id, value = next(TC.AV.activelyResearchingCharacters, charId)
     if id and value then
       local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-      local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
+      local trait = TC.AV.traitTable[key] or 0
       local mask = TC.bitwiseChars[id]
       local iconPath = value.icon or TC.IconList[1]
       if TC.charBitMissing(trait, mask) then
