@@ -240,6 +240,8 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
     end
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     local trait = TC.AV.traitTable[key] or 2^GetNumCharacters()
+    local prevId = "place"
+    local counter = 0
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
       local mask = TC.bitwiseChars[id]
       local iconPath = value.icon or TC.IconList[1]
@@ -247,27 +249,23 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
         if not control.altNeedIcon then
             control.altNeedIcon = {}
         end
-        if GetDisplayName() == "@Saranicole1980" then
-          d("id")
-          d(id)
-          d("traitIndex")
-          d(traitIndex)
-          d("sideFloat")
-          d(sideFloat)
-        end
         if not control.altNeedIcon[id] then
+          if prevId ~= "place" and GetControl(prefix..prevId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
+            sideFloat = sideFloat + 40 * counter
+          end
           if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
             icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
             icon:SetDimensions(40, 40)
             icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
             icon:SetTexture(iconPath)
             control.altNeedIcon[id] = icon
-            sideFloat = sideFloat + 40
           end
         end
         if control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(false)
         end
+      prevId = id
+      counter = counter + 1
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:ClearAnchors()
         control.altNeedIcon[id]:SetHidden(true)
