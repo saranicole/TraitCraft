@@ -54,12 +54,7 @@ local function OnSmithingCreation(eventCode, craftingType)
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              TC.sideFloat[icon:GetName()] = 10
-              local charId = TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, TC.sideFloat[icon:GetName()], "craftId")
-              for id, value in pairs(TC.AV.activelyResearchingCharacters) do
-                TC.sideFloat[icon:GetName()] = TC.sideFloat[icon:GetName()] + 40
-                TC.AddAltNeedIcon(icon, id, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, TC.sideFloat[icon:GetName()], "craftId")
-              end
+              TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
             end
           end
         end)
