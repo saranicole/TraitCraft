@@ -57,7 +57,9 @@ local function OnSmithingCreation(eventCode, craftingType)
                 if not TC.sideFloat[icon:GetName()] then
                   TC.sideFloat[icon:GetName()] = 10
                 end
-                TC.charIds[icon:GetName()] = TC.AddAltNeedIcon(icon, TC.charIds[icon:GetName()], craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, TC.sideFloat[icon:GetName()], "craftId")
+                for id, value in pairs(TC.AV.activelyResearchingCharacters) do
+                  TC.AddAltNeedIcon(icon, id, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, TC.sideFloat[icon:GetName()], "craftId")
+                end
             end
           end
         end)
