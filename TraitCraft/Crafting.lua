@@ -54,16 +54,6 @@ local function OnSmithingCreation(eventCode, craftingType)
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              if GetDisplayName() == "@Saranicole1980" then
-                  d("craftingType")
-                  d(craftingType)
-                  d("researchLineIndex")
-                  d(researchLineIndex)
-                  d("traitIndex")
-                  d(traitIndex)
-                  d("traitType")
-                  d(selectedTrait)
-              end
               TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
             end
           end
