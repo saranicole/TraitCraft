@@ -254,12 +254,12 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
             icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
             icon:SetTexture(iconPath)
             control.altNeedIcon[id] = icon
-            sideFloat = sideFloat + 40
           end
         end
         if control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(false)
         end
+        sideFloat = sideFloat + 40
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:ClearAnchors()
         control.altNeedIcon[id]:SetHidden(true)
