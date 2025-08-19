@@ -247,6 +247,14 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
         if not control.altNeedIcon then
             control.altNeedIcon = {}
         end
+        if GetDisplayName() == "@Saranicole1980" then
+          d("id")
+          d(id)
+          d("traitIndex")
+          d(traitIndex)
+          d("sideFloat")
+          d(sideFloat)
+        end
         if not control.altNeedIcon[id] then
           if not GetControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex) then
             icon = WINDOW_MANAGER:CreateControl(prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
