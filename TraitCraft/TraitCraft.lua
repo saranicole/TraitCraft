@@ -180,9 +180,9 @@ function TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
-local function checkTrait(charBitId, craftingType, researchLineIndex, traitIndex)
+local function checkTrait(craftingType, researchLineIndex, traitIndex)
   if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
-    TraitCraft:SetTraitKnown(nil, craftingType, researchLineIndex, traitIndex)
+    TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
@@ -195,11 +195,10 @@ end
 
 function TraitCraft:ScanKnownTraits()
   local start = GetFrameTimeMilliseconds()
-  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
   local traitLimit = 9
   while true do
-    checkTrait(charBitId, craftTypes[TC.craftingTypeIndex], TC.researchLineIndex, TC.traitIndex)
+    checkTrait(craftTypes[TC.craftingTypeIndex], TC.researchLineIndex, TC.traitIndex)
     TC.traitIndex = TC.traitIndex + 1
     if TC.traitIndex > traitLimit then
       TC.traitIndex = 1
