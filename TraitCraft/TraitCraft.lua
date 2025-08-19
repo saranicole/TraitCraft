@@ -31,8 +31,6 @@ TC.craftingTypeIndex = 1
 TC.researchLineIndex = 1
 TC.traitIndex = 1
 
-TC.sideFloat = {}
-
 local SMITHING = ZO_SmithingResearch
 
 if IsInGamepadPreferredMode() then
@@ -262,6 +260,8 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
         if control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(false)
         end
+        sideFloat = sideFloat + 40
+        TC.AddAltNeedIcon(control, id, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:ClearAnchors()
         control.altNeedIcon[id]:SetHidden(true)
@@ -274,12 +274,7 @@ local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      TC.sideFloat[icon:GetName()] = 180
-      TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT, TC.sideFloat[icon:GetName()])
-      for id, value in pairs(TC.AV.activelyResearchingCharacters) do
-        TC.sideFloat[icon:GetName()] = TC.sideFloat[icon:GetName()] + 40
-        TC.AddAltNeedIcon(icon, id, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT, TC.sideFloat[icon:GetName()])
-      end
+      TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
   end)
 end
 
