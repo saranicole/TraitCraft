@@ -259,11 +259,11 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
         if control.altNeedIcon[id] then
           control.altNeedIcon[id]:SetHidden(false)
         end
-        sideFloat = sideFloat + 40
       elseif control.altNeedIcon and control.altNeedIcon[id] then
         control.altNeedIcon[id]:ClearAnchors()
         control.altNeedIcon[id]:SetHidden(true)
-      end
+        end
+      sideFloat = sideFloat + 40
       TC.AddAltNeedIcon(control, id, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     end
   return id
