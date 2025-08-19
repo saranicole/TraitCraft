@@ -229,11 +229,7 @@ local function TC_Event_Player_Activated(event, isA)
   end
 end
 
-function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation,
-                           secondOrientation, sideFloat, prefix)
-    if GetDisplayName == "@Saranicole1980" then
-        d("charId="..tostring(id).." craft="..craftingType.." line="..researchLineIndex.." trait="..traitIndex.." type="..tostring(GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, traitIndex)))
-    end
+function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     local icon
     if not prefix then
       prefix = "iconId"
