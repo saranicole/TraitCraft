@@ -13,6 +13,10 @@ TC.Lang = {
   STATUS_ADDED            =         "¡Configurado!",
   ACTIVELY_RESEARCHING    =         "Investigando activamente personajes",
   CLEAR_ACTIVELY_RESEARCHING =      "Reiniciar personajes que están investigando",
+  REMOVE_RESEARCHER       =         "Eliminar un personaje de investigación específico",
   SHORT_CLEAR             =         "Reiniciar",
+  SHORT_REMOVE            =         "Eliminar",
+  STATUS_REMOVED          =         "¡Eliminado!",
+  STATUS_EXCEEDED_RESEARCHERS =     "Número de investigadores limitado a ",
 
 }
