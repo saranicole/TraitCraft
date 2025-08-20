@@ -12,7 +12,7 @@ if IsInGamepadPreferredMode() then
   researcherLimit = 6
 end
 
-local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID, RESEARCHER_TO_REMOVE_NAME, RESEARCHER_TO_REMOVE_ID, HIDE_WHEN_TRAITS_UNKNOWN
+local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID, RESEARCHER_TO_REMOVE_NAME, RESEARCHER_TO_REMOVE_ID
 local BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID, CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID, WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID, JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID
 
 --Icon
@@ -211,9 +211,9 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.HIDE_CRAFTER_UNKNOWN_TRAITS,
-    getFunction = function() return HIDE_WHEN_TRAITS_UNKNOWN or false end,
+    getFunction = function() return TC.HideIconsWhenTraitsUnknown end,
     setFunction = function(var)
-      HIDE_WHEN_TRAITS_UNKNOWN = var
+      TC.HideIconsWhenTraitsUnknown = var
     end,
     default = false,
   }
@@ -290,7 +290,6 @@ function TC.BuildMenu()
         end
       end
       Status = Status or TC.Lang.STATUS_ADDED
-      TC.HideIconsWhenTraitsUnknown = HIDE_WHEN_TRAITS_UNKNOWN or false
       panel:UpdateControls()
     end
   }
