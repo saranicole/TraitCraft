@@ -56,7 +56,6 @@ TC.IconList = {
   "/esoui/art/lfg/lfg_indexicon_alliancewar_up.dds",
   "/esoui/art/lfg/lfg_indexicon_trial_up.dds",
   "/esoui/art/lfg/lfg_indexicon_zonestories_up.dds",
-  "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds",
   "/esoui/art/mail/mail_tabicon_inbox_up.dds",
   "/esoui/art/market/keyboard/tabicon_crownstore_up.dds",
   "/esoui/art/market/keyboard/tabicon_daily_up.dds",
