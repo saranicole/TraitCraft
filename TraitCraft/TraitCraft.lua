@@ -268,6 +268,10 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
     sideFloat = 180
   end
 
+  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
+    TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+    return
+  end
   local id, value = next(TC.AV.activelyResearchingCharacters, charId)
   if id and value then
     if control.researchIcon and control.researchIcon.icon then
@@ -307,11 +311,7 @@ local function addSmithingHook()
       local icon = nil
       icon = control:GetNamedChild("Icon")
       if traitIndex then
-        if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineId, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
-          TC.addResearchIcon(icon, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
-        else
-          TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
-        end
+        TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
       end
   end)
 end
