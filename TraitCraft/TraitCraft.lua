@@ -153,6 +153,12 @@ function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex
 	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
 end
 
+function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return true end
+	return false
+end
+
 function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 	if knows then return true end
@@ -251,7 +257,7 @@ function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex
   else
     control.researchIcon.icon:SetHidden(false)
   end
-
+  return icon
 end
 
 function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
@@ -264,12 +270,11 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
   end
   local id, value = next(TC.AV.activelyResearchingCharacters, charId)
 
-  if not TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
-    TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
-    return
+  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
+    icon = TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
   end
 
-  if id and value then
+  if id and value and not icon then
     if control.researchIcon and control.researchIcon.icon then
       control.researchIcon.icon:SetHidden(true)
     end
