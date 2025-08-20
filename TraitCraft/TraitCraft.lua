@@ -247,23 +247,7 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
   end
 
   local id, value = next(TC.AV.activelyResearchingCharacters, charId)
-  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
-      if not control.researchIcon then
-        control.researchIcon = { path = "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds" }
-      end
-      if not control.researchIcon.icon then
-        icon = WINDOW_MANAGER:CreateControl(prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
-        icon:SetDimensions(40, 40)
-        icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-        icon:SetTexture(control.researchIcon.path)
-        control.researchIcon.icon = icon
-      else
-        control.researchIcon.icon:SetHidden(false)
-      end
-      if id and control.altNeedIcon and control.altNeedIcon[id] then
-        control.altNeedIcon[id]:SetHidden(true)
-      end
-  else
+  if TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) or not TC.AV.HideIconsWhenTraitsUnknown then
     if id and value then
       if control.researchIcon and control.researchIcon.icon then
         control.researchIcon.icon:SetHidden(true)
@@ -294,6 +278,23 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
       end
       sideFloat = sideFloat + 40
       TC.AddAltNeedIcon(control, id, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+    end
+  end
+  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
+    if not control.researchIcon then
+      control.researchIcon = { path = "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds" }
+    end
+    if not control.researchIcon.icon then
+      icon = WINDOW_MANAGER:CreateControl(prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+      icon:SetDimensions(40, 40)
+      icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+      icon:SetTexture(control.researchIcon.path)
+      control.researchIcon.icon = icon
+    else
+      control.researchIcon.icon:SetHidden(false)
+    end
+    if id and control.altNeedIcon and control.altNeedIcon[id] then
+      control.altNeedIcon[id]:SetHidden(true)
     end
   end
 end
