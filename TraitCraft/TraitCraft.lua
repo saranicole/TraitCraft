@@ -161,12 +161,6 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
-	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
-	if knows then return true end
-	return false
-end
-
 function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
@@ -257,6 +251,7 @@ function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex
   else
     control.researchIcon.icon:SetHidden(false)
   end
+
 end
 
 function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
@@ -269,14 +264,8 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
   end
   local id, value = next(TC.AV.activelyResearchingCharacters, charId)
 
-  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
+  if not TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
-    if control.altNeedIcon and control.altNeedIcon[id] then
-      control.altNeedIcon[id]:SetHidden(true)
-    end
-    if charId and control.altNeedIcon and control.altNeedIcon[charId] then
-      control.altNeedIcon[charId]:SetHidden(true)
-    end
     return
   end
 
