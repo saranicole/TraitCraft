@@ -254,25 +254,25 @@ function TC.BuildMenu()
         end
       end
       if BLACKSMITHING_CHARACTER_NAME and BLACKSMITHING_CHARACTER_ID then
-        if not TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] or TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] ~= BLACKSMITHING_CHARACTER_ID then
           table.insert(TC.AV.allCrafterIds, BLACKSMITHING_CHARACTER_ID)
           TC.AV.allCrafters[CRAFTING_TYPE_BLACKSMITHING] = BLACKSMITHING_CHARACTER_ID
         end
       end
       if CLOTHING_CHARACTER_NAME and CLOTHING_CHARACTER_ID then
-        if not TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] or TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] ~= CLOTHING_CHARACTER_ID then
           table.insert(TC.AV.allCrafterIds, CLOTHING_CHARACTER_ID)
           TC.AV.allCrafters[CRAFTING_TYPE_CLOTHIER] = CLOTHING_CHARACTER_ID
         end
       end
       if WOODWORKING_CHARACTER_NAME and WOODWORKING_CHARACTER_ID then
-        if not TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] or TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] ~= WOODWORKING_CHARACTER_ID then
           table.insert(TC.AV.allCrafterIds, WOODWORKING_CHARACTER_ID)
           TC.AV.allCrafters[CRAFTING_TYPE_WOODWORKING] = WOODWORKING_CHARACTER_ID
         end
       end
       if JEWELRY_CHARACTER_NAME and JEWELRY_CHARACTER_ID then
-        if not TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] then
+        if not TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] or TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] ~= JEWELRY_CHARACTER_ID then
           table.insert(TC.AV.allCrafterIds, JEWELRY_CHARACTER_ID)
           TC.AV.allCrafters[CRAFTING_TYPE_JEWELRYCRAFTING] = JEWELRY_CHARACTER_ID
         end
