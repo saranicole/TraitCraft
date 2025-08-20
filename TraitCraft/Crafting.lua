@@ -43,8 +43,8 @@ local function FindLabel(rowControl)
 end
 
 local function OnSmithingCreation(eventCode, craftingType)
-  if next(TC.AV.allCrafterIds) then
-    if TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
+  if TC.AV.allCrafterIds and next(TC.AV.allCrafterIds) then
+    if TC.AV.allCrafters and TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
       ZO_PostHook(SMITHING, "RefreshTraitList", function(self, data)
         local icon = FindLabel(self.traitList.control:GetParent())
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
