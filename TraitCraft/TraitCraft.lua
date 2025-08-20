@@ -267,12 +267,19 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
   if not sideFloat then
     sideFloat = 180
   end
+  local id, value = next(TC.AV.activelyResearchingCharacters, charId)
 
   if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+    if control.altNeedIcon and control.altNeedIcon[id] then
+      control.altNeedIcon[id]:SetHidden(true)
+    end
+    if charId and control.altNeedIcon and control.altNeedIcon[charId] then
+      control.altNeedIcon[charId]:SetHidden(true)
+    end
     return
   end
-  local id, value = next(TC.AV.activelyResearchingCharacters, charId)
+
   if id and value then
     if control.researchIcon and control.researchIcon.icon then
       control.researchIcon.icon:SetHidden(true)
