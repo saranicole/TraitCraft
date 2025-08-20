@@ -338,6 +338,15 @@ function TC.BuildMenu()
       panel:UpdateControls()
     end
     }
+    -- Reload UI
+    panel:AddSetting {
+    type = LAM.ST_BUTTON,
+    label = TC.Lang.RELOAD_UI,
+    buttonText = TC.Lang.SHORT_RELOAD_UI,
+    clickHandler  = function()
+      ReloadUI("ingame")
+    end
+    }
   --Configured
   panel:AddSetting {
     type = LAM.ST_SECTION,
