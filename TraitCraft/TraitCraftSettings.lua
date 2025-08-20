@@ -289,9 +289,8 @@ function TC.BuildMenu()
           Status = TC.Lang.STATUS_EXCEEDED_RESEARCHERS..tostring(researcherLimit)
         end
       end
-      if HIDE_WHEN_TRAITS_UNKNOWN ~= nil then
-        TC.HideIconsWhenTraitsUnknown = HIDE_WHEN_TRAITS_UNKNOWN
-      end
+      Status = Status or TC.Lang.STATUS_ADDED
+      TC.HideIconsWhenTraitsUnknown = HIDE_WHEN_TRAITS_UNKNOWN or false
       panel:UpdateControls()
     end
   }
