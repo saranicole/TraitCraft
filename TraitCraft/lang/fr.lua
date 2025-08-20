@@ -13,6 +13,9 @@ TC.Lang = {
   STATUS_ADDED            =         "Configuré!",
   ACTIVELY_RESEARCHING    =         "Personnages qui font activement des recherches",
   CLEAR_ACTIVELY_RESEARCHING =      "Réinitialiser les personnages qui font des recherches",
+  REMOVE_RESEARCHER       =         "Supprimer un personnage de recherche spécifique",
   SHORT_CLEAR             =         "Réinitialiser",
-
+  SHORT_REMOVE            =         "Supprimer",
+  STATUS_REMOVED          =         "Supprimé!",
+  STATUS_EXCEEDED_RESEARCHERS =     "Nombre de chercheurs limité à ",
 }
