@@ -211,9 +211,9 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.HIDE_CRAFTER_UNKNOWN_TRAITS,
-    getFunction = function() return TC.HideIconsWhenTraitsUnknown end,
+    getFunction = function() return TC.AV.HideIconsWhenTraitsUnknown end,
     setFunction = function(var)
-      TC.HideIconsWhenTraitsUnknown = var
+      TC.AV.HideIconsWhenTraitsUnknown = var
     end,
     default = false,
   }
