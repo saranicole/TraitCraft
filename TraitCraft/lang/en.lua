@@ -19,5 +19,6 @@ TC.Lang = {
   STATUS_REMOVED          =         "Removed!",
   STATUS_EXCEEDED_RESEARCHERS =     "Number of researchers limited to ",
   HIDE_CRAFTER_UNKNOWN_TRAITS =     "Hide icons when unknown by crafter",
-
+  RELOAD_UI               =         "Reload UI (needed when researchers removed)",
+  SHORT_RELOAD_UI         =         "Reload UI",
 }
