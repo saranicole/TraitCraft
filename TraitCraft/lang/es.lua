@@ -19,4 +19,6 @@ TC.Lang = {
   STATUS_REMOVED          =         "¡Eliminado!",
   STATUS_EXCEEDED_RESEARCHERS =     "Número de investigadores limitado a ",
   HIDE_CRAFTER_UNKNOWN_TRAITS =     "Ocultar iconos cuando el artesano los desconoce",
+  RELOAD_UI               =         "Actualizar la interfaz de usuario\n(necesario cuando se eliminan investigadores)",
+  SHORT_RELOAD_UI         =         "Actualizar",
 }
