@@ -54,11 +54,7 @@ local function OnSmithingCreation(eventCode, craftingType)
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineId, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
-                TC.addResearchIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
-              else
-                TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
-              end
+              TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
             end
           end
         end)
