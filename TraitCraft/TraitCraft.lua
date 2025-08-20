@@ -238,6 +238,13 @@ local function TC_Event_Player_Activated(event, isA)
 end
 
 function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
+  local icon
+  if not prefix then
+    prefix = "iconId"
+  end
+  if not sideFloat then
+    sideFloat = 180
+  end
   if not control.researchIcon then
     control.researchIcon = { path = "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds" }
   end
