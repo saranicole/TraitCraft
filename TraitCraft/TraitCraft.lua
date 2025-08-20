@@ -18,6 +18,7 @@ TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
 TC.traitIndexKey = nil
+TC.HideIconsWhenTraitsUnknown = false
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineId = nil
@@ -159,6 +160,12 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
+function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return true end
+	return false
+end
+
 function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
@@ -230,15 +237,36 @@ local function TC_Event_Player_Activated(event, isA)
 end
 
 function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
-    local icon
-    if not prefix then
-      prefix = "iconId"
-    end
-    if not sideFloat then
-      sideFloat = 180
-    end
-    local id, value = next(TC.AV.activelyResearchingCharacters, charId)
+  local icon
+  if not prefix then
+    prefix = "iconId"
+  end
+  if not sideFloat then
+    sideFloat = 180
+  end
+
+  local id, value = next(TC.AV.activelyResearchingCharacters, charId)
+  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.HideIconsWhenTraitsUnknown then
+      if not control.researchIcon then
+        control.researchIcon = { path = "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds" }
+      end
+      if not control.researchIcon.icon then
+        icon = WINDOW_MANAGER:CreateControl(prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex, control, CT_TEXTURE)
+        icon:SetDimensions(40, 40)
+        icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+        icon:SetTexture(control.researchIcon.path)
+        control.researchIcon.icon = icon
+      else
+        control.researchIcon.icon:SetHidden(false)
+      end
+      if id and control.altNeedIcon and control.altNeedIcon[id] then
+        control.altNeedIcon[id]:SetHidden(true)
+      end
+  else
     if id and value then
+      if control.researchIcon and control.researchIcon.icon then
+        control.researchIcon.icon:SetHidden(true)
+      end
       local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
       local trait = TC.AV.traitTable[key] or 0
       local mask = TC.bitwiseChars[id]
@@ -266,14 +294,18 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
       sideFloat = sideFloat + 40
       TC.AddAltNeedIcon(control, id, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
     end
-  return id
+  end
 end
 
 local function addSmithingHook()
   ZO_PreHook(SMITHING, "SetupTraitDisplay", function(self, control, researchLine, known, duration, traitIndex)
       local icon = nil
       icon = control:GetNamedChild("Icon")
-      TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
+      if traitIndex then
+        TC.AddAltNeedIcon(icon, nil, researchLine.craftingType, researchLineId, traitIndex, RIGHT, RIGHT)
+      else
+        return
+      end
   end)
 end
 
