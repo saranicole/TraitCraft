@@ -18,4 +18,5 @@ TC.Lang = {
   SHORT_REMOVE            =         "Supprimer",
   STATUS_REMOVED          =         "Supprimé!",
   STATUS_EXCEEDED_RESEARCHERS =     "Nombre de chercheurs limité à ",
+  HIDE_CRAFTER_UNKNOWN_TRAITS =     "Masquer les icônes quand l'artisan les ignore",
 }
