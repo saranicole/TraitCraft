@@ -12,13 +12,14 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
+    HideIconsWhenTraitsUnknown = false,
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
 TC.traitIndexKey = nil
-TC.HideIconsWhenTraitsUnknown = false
+
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineId = nil
@@ -246,7 +247,7 @@ function TC.AddAltNeedIcon(control, charId, craftingType, researchLineIndex, tra
   end
 
   local id, value = next(TC.AV.activelyResearchingCharacters, charId)
-  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.HideIconsWhenTraitsUnknown then
+  if not TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) and TC.AV.HideIconsWhenTraitsUnknown then
       if not control.researchIcon then
         control.researchIcon = { path = "/esoui/art/lfg/lfg_tabicon_grouptools_up.dds" }
       end
