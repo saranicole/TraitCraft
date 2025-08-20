@@ -7,7 +7,12 @@ if not LibHarvensAddonSettings then
     return
 end
 
-local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID
+local researcherLimit = 25
+if IsInGamepadPreferredMode() then
+  researcherLimit = 6
+end
+
+local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID, RESEARCHER_TO_REMOVE_NAME, RESEARCHER_TO_REMOVE_ID
 local BLACKSMITHING_CHARACTER_NAME, BLACKSMITHING_CHARACTER_ID, CLOTHING_CHARACTER_NAME, CLOTHING_CHARACTER_ID, WOODWORKING_CHARACTER_NAME, WOODWORKING_CHARACTER_ID, JEWELRY_CHARACTER_NAME, JEWELRY_CHARACTER_ID
 
 --Icon
@@ -97,6 +102,22 @@ function TC.CurrentActivelyResearching()
     summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n  "
   end
   return summary
+end
+
+function TC.ResearchersToDropdown()
+  local researchers = {}
+  for k, v in pairs(TC.AV.activelyResearchingCharacters) do
+    table.insert(researchers, { name = v.name, data = k } )
+  end
+  return researchers
+end
+
+function TC.ResearchersCount()
+  local counter = 0
+  for k, v in pairs(TC.AV.activelyResearchingCharacters) do
+    counter = counter + 1
+  end
+  return counter
 end
 
 function TC.SetCrafterDefaults(characters)
@@ -247,12 +268,16 @@ function TC.BuildMenu()
         end
       end
       if ACTIVELY_RESEARCHING_ID then
-        if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
-          TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] = {}
+        if TC.ResearchersCount() <= researcherLimit then
+          if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
+            TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] = {}
+          end
+          TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].name = ACTIVELY_RESEARCHING_NAME
+          TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].icon = IconName
+          Status = TC.Lang.STATUS_ADDED
+        else
+          Status = TC.Lang.STATUS_EXCEEDED_RESEARCHERS..tostring(researcherLimit)
         end
-        TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].name = ACTIVELY_RESEARCHING_NAME
-        TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID].icon = IconName
-        Status = TC.Lang.STATUS_ADDED
         panel:UpdateControls()
       end
     end
@@ -274,7 +299,32 @@ function TC.BuildMenu()
       TC.AV.activelyResearchingCharacters = {}
       panel:UpdateControls()
     end
-  }
+    }
+
+  --Delete specific actively researching character
+  panel:AddSetting {
+    type = LAM.ST_DROPDOWN,
+    label = TC.Lang.REMOVE_RESEARCHER,
+    items = TC.ResearchersToDropdown(),
+    getFunction = function() return RESEARCHER_TO_REMOVE_NAME end,
+    setFunction = function(var, itemName, itemData)
+      RESEARCHER_TO_REMOVE_NAME = itemName
+      RESEARCHER_TO_REMOVE_ID = itemData.data
+    end,
+    }
+
+  panel:AddSetting {
+    type = LAM.ST_BUTTON,
+    label = TC.Lang.SHORT_REMOVE,
+    buttonText = TC.Lang.SHORT_REMOVE,
+    clickHandler  = function()
+      if RESEARCHER_TO_REMOVE_ID and TC.AV.activelyResearchingCharacters[RESEARCHER_TO_REMOVE_ID] then
+          TC.AV.activelyResearchingCharacters[RESEARCHER_TO_REMOVE_ID] = nil
+      end
+      Status = TC.Lang.STATUS_REMOVED
+      panel:UpdateControls()
+    end
+    }
   --Configured
   panel:AddSetting {
     type = LAM.ST_SECTION,
