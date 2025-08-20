@@ -18,5 +18,5 @@ TC.Lang = {
   SHORT_REMOVE            =         "Eliminar",
   STATUS_REMOVED          =         "¡Eliminado!",
   STATUS_EXCEEDED_RESEARCHERS =     "Número de investigadores limitado a ",
-
+  HIDE_CRAFTER_UNKNOWN_TRAITS =     "Ocultar iconos cuando el artesano los desconoce",
 }
