@@ -214,7 +214,7 @@ function TC.BuildMenu()
     setFunction = function(var)
       TC.AV.HideIconsWhenTraitsUnknown = var
     end,
-    default = false,
+    default = true,
   }
 
   panel:AddSetting {
