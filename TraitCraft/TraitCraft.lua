@@ -12,7 +12,7 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
-    HideIconsWhenTraitsUnknown = false,
+    HideIconsWhenTraitsUnknown = true,
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
