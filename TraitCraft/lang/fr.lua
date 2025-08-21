@@ -13,6 +13,12 @@ TC.Lang = {
   STATUS_ADDED            =         "Configuré!",
   ACTIVELY_RESEARCHING    =         "Personnages qui font activement des recherches",
   CLEAR_ACTIVELY_RESEARCHING =      "Réinitialiser les personnages qui font des recherches",
+  REMOVE_RESEARCHER       =         "Supprimer un personnage de recherche spécifique",
   SHORT_CLEAR             =         "Réinitialiser",
-
+  SHORT_REMOVE            =         "Supprimer",
+  STATUS_REMOVED          =         "Supprimé!",
+  STATUS_EXCEEDED_RESEARCHERS =     "Nombre de chercheurs limité à ",
+  HIDE_CRAFTER_UNKNOWN_TRAITS =     "Masquer les icônes quand l'artisan les ignore",
+  RELOAD_UI               =         "Rafraîchir l'interface utilisateur\n(nécessaire lorsque les chercheurs sont supprimés)",
+  SHORT_RELOAD_UI         =         "Rafraîchir",
 }

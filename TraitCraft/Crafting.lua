@@ -43,8 +43,8 @@ local function FindLabel(rowControl)
 end
 
 local function OnSmithingCreation(eventCode, craftingType)
-  if next(TC.AV.allCrafterIds) then
-    if TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
+  if TC.AV.allCrafterIds and next(TC.AV.allCrafterIds) then
+    if TC.AV.allCrafters and TC.AV.allCrafters[craftingType] == TC.currentlyLoggedInCharId then
       ZO_PostHook(SMITHING, "RefreshTraitList", function(self, data)
         local icon = FindLabel(self.traitList.control:GetParent())
         ZO_PostHook(self.traitList, "setupFunction", function(selflist, datalist)
@@ -54,7 +54,7 @@ local function OnSmithingCreation(eventCode, craftingType)
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
             local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
-              TC.AddAltNeedIcon(icon, nil, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
+              TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
             end
           end
         end)
