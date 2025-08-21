@@ -9,7 +9,7 @@ end
 
 local researcherLimit = 25
 if IsInGamepadPreferredMode() then
-  researcherLimit = 6
+  researcherLimit = 5
 end
 
 local MAIN_CRAFTER_NAME, MAIN_CRAFTER_ID, ACTIVELY_RESEARCHING_NAME, ACTIVELY_RESEARCHING_ID, RESEARCHER_TO_REMOVE_NAME, RESEARCHER_TO_REMOVE_ID
@@ -111,9 +111,9 @@ function TC.ResearchersToDropdown()
   return researchers
 end
 
-function TC.ResearchersCount()
+function TC.unindexedCount(unindexed)
   local counter = 0
-  for k, v in pairs(TC.AV.activelyResearchingCharacters) do
+  for _, _ in pairs(unindexed) do
     counter = counter + 1
   end
   return counter
@@ -277,7 +277,7 @@ function TC.BuildMenu()
         end
       end
       if ACTIVELY_RESEARCHING_ID then
-        if TC.ResearchersCount() <= researcherLimit then
+        if TC.unindexedCount(TC.AV.activelyResearchingCharacters) < researcherLimit then
           if not TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] then
             TC.AV.activelyResearchingCharacters[ACTIVELY_RESEARCHING_ID] = {}
           end
