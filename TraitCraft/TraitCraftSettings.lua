@@ -96,7 +96,7 @@ end
 
 function TC.CurrentActivelyResearching()
   local summary = " "
-  local separator =
+  local separator = ""
   if ZO_IsConsoleUI() then
     separator = "\r\n  "
   else
