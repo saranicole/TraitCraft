@@ -21,4 +21,5 @@ TC.Lang = {
   HIDE_CRAFTER_UNKNOWN_TRAITS =     "Hide icons when unknown by crafter",
   RELOAD_UI               =         "Reload UI (needed when researchers removed)",
   SHORT_RELOAD_UI         =         "Reload UI",
+  CHOICES_EDIT            =         "Edit",
 }
