@@ -96,9 +96,15 @@ end
 
 function TC.CurrentActivelyResearching()
   local summary = " "
+  local separator =
+  if ZO_IsConsoleUI() then
+    separator = "\r\n  "
+  else
+    separator = "\r\n\n  "
+  end
   for k, v in pairs(TC.AV.activelyResearchingCharacters) do
     local icon = v.icon or TC.IconList[1]
-    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n\n  "
+    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r"..separator
   end
   return summary
 end
