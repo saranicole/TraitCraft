@@ -98,7 +98,7 @@ function TC.CurrentActivelyResearching()
   local summary = " "
   for k, v in pairs(TC.AV.activelyResearchingCharacters) do
     local icon = v.icon or TC.IconList[1]
-    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n  "
+    summary = summary.."  |t40:40:"..icon.."|t  "..v.name.."|r\r\n\n  "
   end
   return summary
 end
@@ -208,16 +208,6 @@ function TC.BuildMenu()
   }
 
   panel:AddSetting {
-    type = LAM.ST_CHECKBOX,
-    label = TC.Lang.HIDE_CRAFTER_UNKNOWN_TRAITS,
-    getFunction = function() return TC.AV.HideIconsWhenTraitsUnknown end,
-    setFunction = function(var)
-      TC.AV.HideIconsWhenTraitsUnknown = var
-    end,
-    default = true,
-  }
-
-  panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.SELECT_ACTIVELY_RESEARCHING,
     items = characterList,
@@ -300,7 +290,13 @@ function TC.BuildMenu()
       return Status or " "
     end
   }
---Clear Researching Characters
+
+  --Breakpoint
+  panel:AddSetting {
+    type = LAM.ST_SECTION,
+    label = TC.Lang.CHOICES_EDIT,
+  }
+  --Clear Researching Characters
   panel:AddSetting {
     type = LAM.ST_BUTTON,
     label = TC.Lang.CLEAR_ACTIVELY_RESEARCHING,
