@@ -12,7 +12,6 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
-    HideIconsWhenTraitsUnknown = true,
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
@@ -300,7 +299,7 @@ end
 function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
   local controlName
   local knows = TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex)
-  if not knows and TC.AV.HideIconsWhenTraitsUnknown then
+  if not knows then
     controlName = prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
   else
