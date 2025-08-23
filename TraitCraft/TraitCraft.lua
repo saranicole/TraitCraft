@@ -12,7 +12,6 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
-    HideIconsWhenTraitsUnknown = true,
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
@@ -199,7 +198,9 @@ end
 local function SetResearchHooks()
   EVENT_MANAGER:UnregisterForEvent("TC_ResearchComplete", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED)
   EVENT_MANAGER:UnregisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED)
+  EVENT_MANAGER:UnregisterForEvent("TC_ResearchStarted", EVENT_SMITHING_TRAIT_RESEARCH_STARTED)
   EVENT_MANAGER:RegisterForEvent("TC_ResearchComplete", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, TC.SetTraitKnown)
+  EVENT_MANAGER:RegisterForEvent("TC_ResearchStarted", EVENT_SMITHING_TRAIT_RESEARCH_STARTED, TC.SetTraitKnown)
   EVENT_MANAGER:RegisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
@@ -300,7 +301,7 @@ end
 function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
   local controlName
   local knows = TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex)
-  if not knows and TC.AV.HideIconsWhenTraitsUnknown then
+  if not knows then
     controlName = prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
   else

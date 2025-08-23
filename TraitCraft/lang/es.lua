@@ -21,4 +21,5 @@ TC.Lang = {
   HIDE_CRAFTER_UNKNOWN_TRAITS =     "Ocultar iconos cuando el artesano los desconoce",
   RELOAD_UI               =         "Actualizar la interfaz de usuario\n(necesario cuando se eliminan investigadores)",
   SHORT_RELOAD_UI         =         "Actualizar",
+  CHOICES_EDIT            =         "Editar",
 }

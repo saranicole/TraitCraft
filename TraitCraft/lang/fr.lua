@@ -21,4 +21,5 @@ TC.Lang = {
   HIDE_CRAFTER_UNKNOWN_TRAITS =     "Masquer les icônes quand l'artisan les ignore",
   RELOAD_UI               =         "Rafraîchir l'interface utilisateur\n(nécessaire lorsque les chercheurs sont supprimés)",
   SHORT_RELOAD_UI         =         "Rafraîchir",
+  CHOICES_EDIT            =         "Corriger",
 }
