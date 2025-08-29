@@ -198,7 +198,7 @@ function TC_Inventory:GetWhoKnows(craftingSkillType, researchLineIndex, traitInd
 end
 
 function TC_Inventory:formatWhoKnows(kk, dd)
-  local formatted = " "
+  local formatted = ""
   if kk and #kk>0 then
     local knows = table.concat(kk, ", ")
     formatted = self.parent.Lang.RESEARCHED..": "..knows..".  \r\n"
@@ -213,14 +213,8 @@ end
 function TC_Inventory:GetDetails(itemLink)
 	local toHide = true
 	local col = self.parent.AV.settings.inventory.colours.othersCan
-	local r = col.r
-	local g = col.g
-	local b = col.b
 	local kk = {}
 	local dd = {}
--- 	if GetItemTraitInformation(dataEntry.bagId, dataEntry.slotIndex) == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED then
--- 		return toHide, r, g, b
--- 	end
 	local itemType = GetItemLinkItemType(itemLink)
   local traitType = GetItemLinkTraitInfo(itemLink)
   if self:IsResearchableTrait(traitType) then
@@ -237,7 +231,7 @@ function TC_Inventory:GetDetails(itemLink)
       end
     end
   end
-	return toHide, kk, dd, r, g, b
+	return toHide, kk, dd
 end
 
 function TC_Inventory:HookInventory(parent, bagId, slotIndex)
@@ -264,7 +258,7 @@ function TC_Inventory:HookInventory(parent, bagId, slotIndex)
   local itemType = GetItemType(bagId, slotIndex)
   local equipType = GetItemLinkEquipType(itemLink)
   if itemLink and self:IsWeapon(itemType) or self:IsArmour(itemType, equipType) then
-    local toHide, kk, dd, r, g, b = self:GetDetails(itemLink)
+    local toHide, kk, dd = self:GetDetails(itemLink)
     currentSection:AddLine(self:formatWhoKnows(kk, dd), currentBodyDescription)
     currentTooltip:AddSection(currentSection)
   end
@@ -279,37 +273,5 @@ end
 
 function TC_Inventory:Initialize(parent)
   self.parent = parent
-	self.inventories = {
-		bag = {
-			list = ZO_PlayerInventoryList,
-			showKey = "bag",
-			invKey = INVENTORY_BACKPACK,
-		},
-		bank = {
-			list = ZO_PlayerBankBackpack,
-			showKey = "bank",
-			invKey = INVENTORY_BANK
-		},
-		guild = {
-			list = ZO_GuildBankBackpack,
-			showKey = "guild",
-			invKey = INVENTORY_GUILD_BANK
-		},
-		deconstruction = {
-			list = ZO_GamepadSmithingExtraction,
-			showKey = "crafting",
-			invKey = nil
-		},
-		improvement = {
-			list = ZO_InventoryItemImprovement_Gamepad,
-			showKey = "crafting",
-			invKey = nil
-		},
-		assistant = {
-			list = ZO_UniversalDeconstruction_Gamepad,
-			showKey = "crafting",
-			invKey = nil
-		},
-	}
 	self:setHookOnInventoryOpen()
 end
