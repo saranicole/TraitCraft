@@ -197,15 +197,15 @@ function TC_Inventory:GetWhoKnows(craftingSkillType, researchLineIndex, traitInd
   return know, dontKnow
 end
 
-local function formatWhoKnows(kk, dd)
+function TC_Inventory:formatWhoKnows(kk, dd)
   local formatted = " "
   if kk and #kk>0 then
     local knows = table.concat(kk, ", ")
-    formatted = TC.Lang.RESEARCHED..": "..knows..".  \r\n"
+    formatted = self.parent.Lang.RESEARCHED..": "..knows..".  \r\n"
   end
   if dd and #dd>0 then
     local dontknow = table.concat(dd, ", ")
-    formatted = formatted..TC.Lang.UNRESEARCHED..": "..dontknow..".\r\n"
+    formatted = formatted..self.parent.Lang.UNRESEARCHED..": "..dontknow..".\r\n"
   end
   return formatted
 end
@@ -265,7 +265,7 @@ function TC_Inventory:HookInventory(parent, bagId, slotIndex)
   local equipType = GetItemLinkEquipType(itemLink)
   if itemLink and self:IsWeapon(itemType) or self:IsArmour(itemType, equipType) then
     local toHide, kk, dd, r, g, b = self:GetDetails(itemLink)
-    currentSection:AddLine(formatWhoKnows(kk, dd), currentBodyDescription)
+    currentSection:AddLine(TC_Inventory:formatWhoKnows(kk, dd), currentBodyDescription)
     currentTooltip:AddSection(currentSection)
   end
 end
