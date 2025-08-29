@@ -6,17 +6,13 @@
 
 Tired of writing down which traits you need across which alts so that you can craft them on your main and research them on your alts?  This addon is for you!
 
-Currently shows the unresearched traits on the research tab.
+PC and Console:  Shows the unresearched traits on the research tab and crafting tab via icons specific to researching characters (which you specify).
+
+Console only:  Shows researched and unresearched actively researching characters on inventory/bank/guild bank/decon tooltips.
 
 <img width="318" height="756" alt="TraitCraft_screenshot" src="https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1" />
 
 Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968)
-
-
-### Roadmap
-
-* Autocraft option
-* Possibly show traits on banked items (similar to TraitBuddy)
 
 ### How to Use
 1. Log into your main crafter ( the one with the most traits researched already )
@@ -61,7 +57,9 @@ The result is that the trait table can contain the needed information, while onl
 
 ### Thanks, Credit, and Inspiration
 
-I give credit to Baertram and the other developers ingeniousclown, katkat42, and Randactyl who developed [LibResearch](https://www.esoui.com/downloads/info517-LibResearch.html) and [Research Assistant](https://www.esoui.com/downloads/info111-ResearchAssistantFindyourresearchableitems.html), some code of which I used and modified.  When I get to the autocraft feature I will no doubt look at [Dolgubon's Lazy Writ Crafter](https://www.esoui.com/downloads/info1346-DolgubonsLazyWritCrafter.html) by Dolgubon as well.
+Many thanks to wolfstar for their time - with their permission I took the entire feature of inventory tooltips from TraitBuddy for use on console.  The inventory tooltip feature is only available on consoles to preserve compatibility with TraitBuddy on PC.
+
+I give credit to Baertram and the other developers ingeniousclown, katkat42, and Randactyl who developed [LibResearch](https://www.esoui.com/downloads/info517-LibResearch.html) and [Research Assistant](https://www.esoui.com/downloads/info111-ResearchAssistantFindyourresearchableitems.html), some code of which I used and modified.  
 
 Special thanks to [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968) for the original ESO UI post that got me thinking about this problem in ESO, and for alpha testing some very unstable releases. 
 
