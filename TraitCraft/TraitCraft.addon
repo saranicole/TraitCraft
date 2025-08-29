@@ -1,11 +1,12 @@
 ## Title: TraitCraft
 ## Author: @thisbeaurielle
-## Version: 1.0.5
+## Version: 1.1.1
 ## APIVersion: 101047 101048
 ## AddOnVersion: 1
 ## SavedVariables: TraitCraft_Vars
 ## DependsOn: LibHarvensAddonSettings>=2.0.7
 
+Console/Inventory.lua
 TraitCraft.lua
 TraitCraftSettings.lua
 Crafting.lua

@@ -22,4 +22,6 @@ TC.Lang = {
   RELOAD_UI               =         "Actualizar la interfaz de usuario\n(necesario cuando se eliminan investigadores)",
   SHORT_RELOAD_UI         =         "Actualizar",
   CHOICES_EDIT            =         "Editar",
+  RESEARCHED              =         "Investigado",
+  UNRESEARCHED            =         "No investigado",
 }

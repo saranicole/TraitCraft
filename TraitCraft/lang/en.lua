@@ -22,4 +22,6 @@ TC.Lang = {
   RELOAD_UI               =         "Reload UI (needed when researchers removed)",
   SHORT_RELOAD_UI         =         "Reload UI",
   CHOICES_EDIT            =         "Edit",
+  RESEARCHED              =         "Researched",
+  UNRESEARCHED            =         "Unresearched",
 }
