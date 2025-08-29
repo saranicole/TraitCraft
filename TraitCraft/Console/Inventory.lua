@@ -248,6 +248,10 @@ function TC_Inventory:HookInventory(parent, bagId, slotIndex)
     ['gamepad_smithing_deconstruct'] = 2,
     ['gamepad_guild_bank'] = 2,
   }
+  if GetDisplayName() == "Saranicole1980" then
+    d("bagId")
+    d(bagId)
+  end
   local currentScene = SCENE_MANAGER:GetCurrentSceneName()
   if not scenes[currentScene] or scenes[currentScene] ~= bagId then return end
 
