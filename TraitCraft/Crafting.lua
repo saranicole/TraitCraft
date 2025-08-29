@@ -6,17 +6,6 @@ if IsInGamepadPreferredMode() then
   SMITHING = ZO_GamepadSmithingCreation
 end
 
-local function findTraitIndex(craftingSkillType, researchLineIndex, traitType)
-	local _, _, numTraits, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
-	for traitIndex = 1, numTraits do
-		local foundTraitType, description, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
-		if foundTraitType == traitType then
-			return traitIndex
-		end
-	end
-	return ITEM_TRAIT_TYPE_NONE
-end
-
 local function findResearchLineIndex(craftingSkillType, patternName)
 	local numResearchLines = GetNumSmithingResearchLines(craftingSkillType)
 	for researchLineIndex = 1, numResearchLines do
@@ -52,7 +41,7 @@ local function OnSmithingCreation(eventCode, craftingType)
           if selectedTraitData then
             local selectedTrait = selectedTraitData.traitType
             local researchLineIndex = findResearchLineIndex(craftingType, self.patternList.selectedData.patternName)
-            local traitIndex = findTraitIndex(craftingType, researchLineIndex, selectedTrait)
+            local traitIndex = TC:FindTraitIndex(craftingType, researchLineIndex, selectedTrait)
             if icon and researchLineIndex and traitIndex and selectedTrait ~= 0 then
               TC.AddAltNeedIcon(icon, craftingType, researchLineIndex, traitIndex, TOP, BOTTOM, 0, "craftId")
             end

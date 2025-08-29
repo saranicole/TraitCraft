@@ -12,6 +12,25 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
+    settings = {
+      inventory = {
+        show = {
+          bag = true,
+          bank = true,
+          guild = true,
+          crafting = true,
+        },
+        colours = {
+          othersCan = {
+            r = 1,
+            g = 1,
+            b = 0,
+          },
+        },
+        IGVOnTop = false,
+        gameIcon = true,
+      }
+		}
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
@@ -149,6 +168,17 @@ local function getValueFromTable(t)
     return select(2, next(t))
 end
 
+function TraitCraft:FindTraitIndex(craftingSkillType, researchLineIndex, traitType)
+	local _, _, numTraits, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
+	for traitIndex = 1, numTraits do
+		local foundTraitType, description, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+		if foundTraitType == traitType then
+			return traitIndex
+		end
+	end
+	return ITEM_TRAIT_TYPE_NONE
+end
+
 function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
 	if craftingSkillType == nil or researchLineIndex == nil or traitIndex == nil then return end
 	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
@@ -237,6 +267,9 @@ local function TC_Event_Player_Activated(event, isA)
 	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
     EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
+  end
+  if IsConsoleUI() then
+    TC.inventory = TC_Inventory:New(TC)
   end
 end
 
