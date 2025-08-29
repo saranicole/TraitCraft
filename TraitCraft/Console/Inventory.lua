@@ -265,7 +265,7 @@ function TC_Inventory:HookInventory(parent, bagId, slotIndex)
   local equipType = GetItemLinkEquipType(itemLink)
   if itemLink and self:IsWeapon(itemType) or self:IsArmour(itemType, equipType) then
     local toHide, kk, dd, r, g, b = self:GetDetails(itemLink)
-    currentSection:AddLine(TC_Inventory:formatWhoKnows(kk, dd), currentBodyDescription)
+    currentSection:AddLine(self:formatWhoKnows(kk, dd), currentBodyDescription)
     currentTooltip:AddSection(currentSection)
   end
 end
