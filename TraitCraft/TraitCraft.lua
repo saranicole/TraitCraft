@@ -12,25 +12,6 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
-    settings = {
-      inventory = {
-        show = {
-          bag = true,
-          bank = true,
-          guild = true,
-          crafting = true,
-        },
-        colours = {
-          othersCan = {
-            r = 1,
-            g = 1,
-            b = 0,
-          },
-        },
-        IGVOnTop = false,
-        gameIcon = true,
-      }
-		}
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
