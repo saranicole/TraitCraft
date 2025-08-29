@@ -201,11 +201,11 @@ local function formatWhoKnows(kk, dd)
   local formatted = " "
   if kk and #kk>0 then
     local knows = table.concat(kk, ", ")
-    formatted = "Researched: "..knows..".  \r\n"
+    formatted = TC.Lang.RESEARCHED..": "..knows..".  \r\n"
   end
   if dd and #dd>0 then
     local dontknow = table.concat(dd, ", ")
-    formatted = formatted.."Unresearched: "..dontknow..".\r\n"
+    formatted = formatted..TC.Lang.UNRESEARCHED..": "..dontknow..".\r\n"
   end
   return formatted
 end

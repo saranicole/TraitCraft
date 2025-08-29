@@ -22,4 +22,6 @@ TC.Lang = {
   RELOAD_UI               =         "Rafraîchir l'interface utilisateur\n(nécessaire lorsque les chercheurs sont supprimés)",
   SHORT_RELOAD_UI         =         "Rafraîchir",
   CHOICES_EDIT            =         "Corriger",
+  RESEARCHED              =         "Recherché",
+  UNRESEARCHED            =         "Non recherché",
 }
