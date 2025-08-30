@@ -324,7 +324,7 @@ function TraitCraft:ScanForResearchExpired()
       if char.research and next(char.research) then
         for key, done in pairs(char.research) do
           local timeRemaining = GetDiffBetweenTimeStamps(done, now)
-          if timeRemaining and timeRemainingSecs <= 0 then
+          if timeRemaining <= 0 then
             TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
             char.research[key] = nil
             local traitKey = TraitCraft:GetTraitStringFromKey(key)
