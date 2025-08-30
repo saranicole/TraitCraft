@@ -418,6 +418,8 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
     local char = TC.AV.activelyResearchingCharacters[id]
     --Researching
     if GetDisplayName() == "@Saranicole1980" then
+      d("key")
+      d(key)
       d("Setting")
       d(TC.AV.settings.showResearching)
       d("char")
