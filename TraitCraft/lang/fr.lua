@@ -24,4 +24,12 @@ TC.Lang = {
   CHOICES_EDIT            =         "Corriger",
   RESEARCHED              =         "Recherché",
   UNRESEARCHED            =         "Non recherché",
+  RESEARCH_EXPIRED        =         "Recherche terminée pour ",
+  SHOW_KNOWN_TRAITS       =         "Afficher les icônes si les personnages connaissent les traits",
+  SHOW_UNKNOWN_TRAITS     =         "Afficher les icônes si les personnages ne connaissent pas les traits",
+  SHOW_RESEARCHING        =         "Afficher les icônes si les personnages recherchent les traits",
+  DISPLAY_SETTINGS        =         "Paramètres d'affichage",
+  SELECT_KNOWN_COLOR      =         "Sélectionnez la couleur du trait connu",
+  SELECT_UNKNOWN_COLOR    =         "Sélectionnez une couleur de trait inconnue",
+  SELECT_RESEARCHING_COLOR =        "Sélectionnez la couleur pour la recherche",
 }

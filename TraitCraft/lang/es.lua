@@ -24,4 +24,12 @@ TC.Lang = {
   CHOICES_EDIT            =         "Editar",
   RESEARCHED              =         "Investigado",
   UNRESEARCHED            =         "No investigado",
+  RESEARCH_EXPIRED        =         "Investigación finalizada para ",
+  SHOW_KNOWN_TRAITS       =         "Mostrar íconos si los personajes conocen los rasgos",
+  SHOW_UNKNOWN_TRAITS     =         "Mostrar íconos si los personajes no conocen los rasgos",
+  SHOW_RESEARCHING        =         "Mostrar íconos si los personajes están investigando los rasgos",
+  DISPLAY_SETTINGS        =         "Configuración de pantalla",
+  SELECT_KNOWN_COLOR      =         "Seleccionar color de rasgo conocido",
+  SELECT_UNKNOWN_COLOR    =         "Seleccionar color de rasgo desconocido",
+  SELECT_RESEARCHING_COLOR =        "Seleccione el color para investigar",
 }

@@ -12,6 +12,26 @@ TC.Default = {
     activelyResearchingCharacters = {},
     traitTable = {},
     savedCharacterList = {},
+    settings = {
+      showKnown = false,
+      showResearching = true,
+      showUnknown = true,
+      knownColor = {
+        r = 0.0,
+        g = 0.447,
+        b = 0.698
+      },
+      unknownColor = {
+        r = 0.4,
+        g = 0.4,
+        b = 0.4
+      },
+      researchingColor = {
+        r = 0.902,
+        g = 0.624,
+        b = 0.0
+      }
+    }
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
@@ -179,9 +199,33 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
-  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
-  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+function TraitCraft:IsResearchingTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	if knows then return false end
+	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
+	if willKnow ~= nil then return true end
+	return false
+end
+
+function TraitCraft:GetResearchTimeForTrait(craftingSkillType, researchLineIndex, traitIndex)
+	local duration, timeRemaining = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
+  local whenDoneTimeStamp = GetTimeStamp() + timeRemaining
+  return whenDoneTimeStamp
+end
+
+function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex, whenDone)
+  local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
+  if char then
+    local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    if not char.research then
+      char.research = {}
+    end
+    char.research[key] = whenDone
+  end
+end
+
+function TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
+  local charBitId = TC.bitwiseChars[id]
   if key and not TC.AV.traitTable[key] then
     TC.AV.traitTable[key] = 0
   end
@@ -190,19 +234,51 @@ function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
+function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
+  local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
+  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  if key and not TC.AV.traitTable[key] then
+    TC.AV.traitTable[key] = 0
+  end
+  if key then
+    if TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
+      TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
+    end
+    local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
+    if char and char.research and next(char.research) then
+      if char.research[key] then
+        char.research[key] = nil
+      end
+    end
+  end
+end
+
 function TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-  if key and TC.AV.traitTable[key] and TC.AV.traitTable[key] > 0 then
-    if key and not TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
-      TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
+  if key then
+    if TC.AV.traitTable[key] and TC.AV.traitTable[key] > 0 then
+      if key and not TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
+        TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
+      end
+    end
+    local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
+    if char and char.research and next(char.research) then
+      if char.research[key] then
+        char.research[key] = nil
+      end
     end
   end
 end
 
 local function checkTrait(craftingType, researchLineIndex, traitIndex)
-  if TraitCraft:WillCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+  if TraitCraft:IsResearchingTrait(craftingType, researchLineIndex, traitIndex) then
+    local whenDone = TraitCraft:GetResearchTimeForTrait(craftingType, researchLineIndex, traitIndex)
+    TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex, whenDone)
+  elseif TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
     TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
+  else
+    TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
@@ -241,6 +317,25 @@ function TraitCraft:ScanKnownTraits()
   end
 end
 
+function TraitCraft:ScanForResearchExpired()
+  if not IsUnitInCombat("player") and not IsUnitDead("player") then
+    local now = GetTimeStamp()
+    for id, char in pairs(TC.AV.activelyResearchingCharacters) do
+      if char.research and next(char.research) then
+        for key, done in pairs(char.research) do
+          local timeRemaining = GetDiffBetweenTimeStamps(done, now)
+          if timeRemainingSecs <= 0 then
+            TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
+            char.research[key] = nil
+            local traitKey = TraitCraft:GetTraitStringFromKey(key)
+            d(TraitCraft.Lang.RESEARCH_EXPIRED..char.name.." - "..traitKey)
+          end
+        end
+      end
+    end
+  end
+end
+
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
@@ -252,6 +347,9 @@ local function TC_Event_Player_Activated(event, isA)
   if IsConsoleUI() then
     TC.inventory = TC_Inventory:New(TC)
   end
+  local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
+  EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
+  EVENT_MANAGER:RegisterForUpdate("TC_ScanForResearchExpired", FIVE_MINUTES_MS, TC.ScanForResearchExpired)
 end
 
 function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
@@ -281,6 +379,27 @@ local function setupNoop()
   return
 end
 
+function TC.CreateIcon(control, id, iconPath, r, g, b, sideFloat, firstOrientation, secondOrientation, controlName)
+  local icon
+  if not control.altNeedIcon then
+      control.altNeedIcon = {}
+  end
+  if not control.altNeedIcon[id] then
+    if not GetControl(controlName) then
+      icon = WINDOW_MANAGER:CreateControl(controlName, control, CT_TEXTURE)
+      icon:SetDimensions(40, 40)
+      icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+      icon:SetTexture(iconPath)
+      icon:SetColor(r, g, b, 1)
+      control.altNeedIcon[id] = icon
+    end
+  end
+  if control.altNeedIcon[id] then
+    control.altNeedIcon[id]:SetHidden(false)
+  end
+  return icon
+end
+
 function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, secondOrientation, controlName)
   local icon
   if control.researchIcon and control.researchIcon.icon then
@@ -290,25 +409,18 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
   local iconPath = value.icon or TC.IconList[1]
+  --Unknown
   if TC.charBitMissing(trait, mask) then
-    if not control.altNeedIcon then
-        control.altNeedIcon = {}
+    local char = TC.AV.activelyResearchingCharacters[id]
+    --Researching
+    if TC.AV.settings.showResearching and char and char.research and char.research[key] then
+      TC.CreateIcon(control, id, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
+    elseif TC.AV.settings.showUnknown then
+      TC.CreateIcon(control, id, iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
     end
-    if not control.altNeedIcon[id] then
-      if not GetControl(controlName) then
-        icon = WINDOW_MANAGER:CreateControl(controlName, control, CT_TEXTURE)
-        icon:SetDimensions(40, 40)
-        icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-        icon:SetTexture(iconPath)
-        control.altNeedIcon[id] = icon
-      end
-    end
-    if control.altNeedIcon[id] then
-      control.altNeedIcon[id]:SetHidden(false)
-    end
-  elseif control.altNeedIcon and control.altNeedIcon[id] then
-    control.altNeedIcon[id]:ClearAnchors()
-    control.altNeedIcon[id]:SetHidden(true)
+  --Known
+  elseif TC.AV.settings.showKnown then
+    TC.CreateIcon(control, id, iconPath, TC.AV.settings.knownColor.r, TC.AV.settings.knownColor.g, TC.AV.settings.knownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
   end
 end
 
@@ -362,6 +474,17 @@ function TraitCraft:GetTraitFromKey(key)
 --   local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
 --   local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
 	return craftingSkillType, researchLineIndex, traitIndex
+end
+
+function TraitCraft:GetTraitStringFromKey(key)
+  traitIndex = key % 10000 % 100
+  researchLineIndex = (key % 10000 - traitIndex) / 100
+  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
+  local craftingName = GetCraftingSkillName(craftingSkillType)
+  local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
+  local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
+  local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+	return researchLineName..": "..traitName
 end
 
 EVENT_MANAGER:RegisterForEvent(TC.Name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)

@@ -24,4 +24,12 @@ TC.Lang = {
   CHOICES_EDIT            =         "Edit",
   RESEARCHED              =         "Researched",
   UNRESEARCHED            =         "Unresearched",
+  RESEARCH_EXPIRED        =         "Research finished for ",
+  SHOW_KNOWN_TRAITS       =         "Show icons if characters know the traits",
+  SHOW_UNKNOWN_TRAITS     =         "Show icons if characters do not know the traits",
+  SHOW_RESEARCHING        =         "Show icons if characters are researching the traits",
+  DISPLAY_SETTINGS        =         "Display Settings",
+  SELECT_KNOWN_COLOR      =         "Select Known Trait Color",
+  SELECT_UNKNOWN_COLOR    =         "Select Unknown Trait Color",
+  SELECT_RESEARCHING_COLOR =        "Select Researching Color",
 }
