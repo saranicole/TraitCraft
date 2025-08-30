@@ -413,27 +413,18 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
   local iconPath = value.icon or TC.IconList[1]
+
+  local char = TC.AV.activelyResearchingCharacters[id]
+  --Researching
+  if TC.AV.settings.showResearching and char and char.research and char.research[key] then
+    TC.CreateIcon(control, id, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
+  end
   --Unknown
-  if TC.charBitMissing(trait, mask) then
-    local char = TC.AV.activelyResearchingCharacters[id]
-    --Researching
-    if GetDisplayName() == "@Saranicole1980" then
-      d("key")
-      d(key)
-      d("Setting")
-      d(TC.AV.settings.showResearching)
-      d("char")
-      d(char)
-      d("research")
-      d(char.research)
-    end
-    if TC.AV.settings.showResearching and char and char.research and char.research[key] then
-      TC.CreateIcon(control, id, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
-    elseif TC.AV.settings.showUnknown then
-      TC.CreateIcon(control, id, iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
-    end
+  if TC.AV.settings.showUnknown and TC.charBitMissing(trait, mask) then
+    TC.CreateIcon(control, id, iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
+  end
   --Known
-  elseif TC.AV.settings.showKnown then
+  if TC.AV.settings.showKnown then
     TC.CreateIcon(control, id, iconPath, TC.AV.settings.knownColor.r, TC.AV.settings.knownColor.g, TC.AV.settings.knownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
   end
 end
