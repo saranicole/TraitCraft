@@ -223,7 +223,7 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.SHOW_KNOWN_TRAITS,
-    getFunction = function() return TC.AV.settings.showKnown or false end,
+    getFunction = function() return TC.AV.settings.showKnown end,
     setFunction = function(var)
       TC.AV.settings.showKnown = var
     end,
@@ -247,11 +247,11 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.SHOW_UNKNOWN_TRAITS,
-    getFunction = function() return TC.AV.settings.showUnknown or true end,
+    getFunction = function() return TC.AV.settings.showUnknown end,
     setFunction = function(var)
       TC.AV.settings.showUnknown = var
     end,
-    default = true,
+    default = TC.AV.settings.showUnknown,
   }
 
   panel:AddSetting({
@@ -271,11 +271,11 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.SHOW_RESEARCHING,
-    getFunction = function() return TC.AV.settings.showResearching or true end,
+    getFunction = function() return TC.AV.settings.showResearching end,
     setFunction = function(var)
       TC.AV.settings.showResearching = var
     end,
-    default = true,
+    default = TC.AV.settings.showResearching,
   }
 
   panel:AddSetting({
