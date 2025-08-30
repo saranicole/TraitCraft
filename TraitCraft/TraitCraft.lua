@@ -406,6 +406,10 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
     control.researchIcon.icon:ClearAnchors()
     control.researchIcon.icon:SetHidden(true)
   end
+  if control.altNeedIcon and control.altNeedIcon[id] then
+    control.altNeedIcon[id]:ClearAnchors()
+    control.altNeedIcon[id]:SetHidden(true)
+  end
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
   local iconPath = value.icon or TC.IconList[1]
