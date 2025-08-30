@@ -395,7 +395,6 @@ function TC.CreateIcon(control, id, iconPath, r, g, b, sideFloat, firstOrientati
     end
   end
   if control.altNeedIcon[id] then
-    control.altNeedIcon[id]:SetColor(r, g, b, 1)
     control.altNeedIcon[id]:SetHidden(false)
   end
   return icon
@@ -418,15 +417,17 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
   if TC.charBitMissing(trait, mask) then
     local char = TC.AV.activelyResearchingCharacters[id]
     --Researching
+    if GetDisplayName() == "@Saranicole1980" then
+      d("Setting")
+      d(TC.AV.settings.showResearching)
+      d("char")
+      d(char)
+      d("research")
+      d(char.research)
+    end
     if TC.AV.settings.showResearching and char and char.research and char.research[key] then
-      if GetDisplayName() == "@Saranicole1980" then
-        d("Should show researching"..controlName)
-      end
       TC.CreateIcon(control, id, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
     elseif TC.AV.settings.showUnknown then
-      if GetDisplayName() == "@Saranicole1980" then
-        d("Should show unknown"..controlName)
-      end
       TC.CreateIcon(control, id, iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
     end
   --Known
