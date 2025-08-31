@@ -355,9 +355,11 @@ end
 function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
   local icon
   if control.altNeedIcon and next(control.altNeedIcon) then
-    for id, icon in pairs(control.altNeedIcon) do
-      icon:ClearAnchors()
-      icon:SetHidden(true)
+    for id, value in pairs(control.altNeedIcon) do
+      for key, icon in pairs(value) do
+        icon:ClearAnchors()
+        icon:SetHidden(true)
+      end
     end
   end
   if not control.researchIcon then
@@ -379,23 +381,26 @@ local function setupNoop()
   return
 end
 
-function TC.CreateIcon(control, id, iconPath, r, g, b, sideFloat, firstOrientation, secondOrientation, controlName)
+function TC.CreateIcon(control, id, key, iconPath, r, g, b, sideFloat, firstOrientation, secondOrientation, controlName)
   local icon
   if not control.altNeedIcon then
       control.altNeedIcon = {}
   end
   if not control.altNeedIcon[id] then
-    if not GetControl(controlName) then
-      icon = WINDOW_MANAGER:CreateControl(controlName, control, CT_TEXTURE)
-      icon:SetDimensions(40, 40)
-      icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-      icon:SetTexture(iconPath)
-      icon:SetColor(r, g, b, 1)
-      control.altNeedIcon[id] = icon
-    end
+    control.altNeedIcon[id] = {}
   end
-  if control.altNeedIcon[id] then
-    control.altNeedIcon[id]:SetHidden(false)
+  if not GetControl(controlName) then
+    icon = WINDOW_MANAGER:CreateControl(controlName, control, CT_TEXTURE)
+    icon:SetDimensions(40, 40)
+    icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+    icon:SetTexture(iconPath)
+    icon:SetColor(r, g, b, 1)
+    control.altNeedIcon[id][key] = icon
+  end
+  if control.altNeedIcon[id] and control.altNeedIcon[id][key] then
+    control.altNeedIcon[id][key]:SetColor(r, g, b, 1)
+    control.altNeedIcon[id][key]:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+    control.altNeedIcon[id][key]:SetHidden(false)
   end
   return icon
 end
@@ -406,9 +411,9 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
     control.researchIcon.icon:ClearAnchors()
     control.researchIcon.icon:SetHidden(true)
   end
-  if control.altNeedIcon and control.altNeedIcon[id] then
-    control.altNeedIcon[id]:ClearAnchors()
-    control.altNeedIcon[id]:SetHidden(true)
+  if control.altNeedIcon and control.altNeedIcon[id] and control.altNeedIcon[id][key] then
+    control.altNeedIcon[id][key]:ClearAnchors()
+    control.altNeedIcon[id][key]:SetHidden(true)
   end
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
@@ -417,15 +422,13 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
   local char = TC.AV.activelyResearchingCharacters[id]
   --Researching
   if TC.AV.settings.showResearching and char and char.research and char.research[key] then
-    TC.CreateIcon(control, id, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
-  end
+    TC.CreateIcon(control, id, key, iconPath, TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g, TC.AV.settings.researchingColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
   --Unknown
-  if TC.AV.settings.showUnknown and TC.charBitMissing(trait, mask) then
-    TC.CreateIcon(control, id, iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
-  end
+  elseif TC.AV.settings.showUnknown and TC.charBitMissing(trait, mask) then
+    TC.CreateIcon(control, id, key,iconPath, TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g, TC.AV.settings.unknownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
   --Known
-  if TC.AV.settings.showKnown then
-    TC.CreateIcon(control, id, iconPath, TC.AV.settings.knownColor.r, TC.AV.settings.knownColor.g, TC.AV.settings.knownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
+  elseif TC.AV.settings.showKnown and not TC.charBitMissing(trait, mask) then
+    TC.CreateIcon(control, id, key, iconPath, TC.AV.settings.knownColor.r, TC.AV.settings.knownColor.g, TC.AV.settings.knownColor.b, sideFloat, firstOrientation, secondOrientation, controlName)
   end
 end
 
