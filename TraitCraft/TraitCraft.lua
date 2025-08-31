@@ -213,10 +213,11 @@ function TraitCraft:GetResearchTimeForTrait(craftingSkillType, researchLineIndex
   return whenDoneTimeStamp
 end
 
-function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex, whenDone)
+function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
   local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
   if char then
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    local whenDone = TraitCraft:GetResearchTimeForTrait(craftingType, researchLineIndex, traitIndex)
     if not char.research then
       char.research = {}
     end
@@ -273,8 +274,7 @@ end
 
 local function checkTrait(craftingType, researchLineIndex, traitIndex)
   if TraitCraft:IsResearchingTrait(craftingType, researchLineIndex, traitIndex) then
-    local whenDone = TraitCraft:GetResearchTimeForTrait(craftingType, researchLineIndex, traitIndex)
-    TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex, whenDone)
+    TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
   elseif TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
     TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   else
