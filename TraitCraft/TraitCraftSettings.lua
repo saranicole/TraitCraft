@@ -213,6 +213,84 @@ function TC.BuildMenu()
     end
   }
 
+  --Breakpoint
+  panel:AddSetting {
+    type = LAM.ST_SECTION,
+    label = TC.Lang.DISPLAY_SETTINGS,
+  }
+
+  --Show known traits
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.SHOW_KNOWN_TRAITS,
+    getFunction = function() return TC.AV.settings.showKnown end,
+    setFunction = function(var)
+      TC.AV.settings.showKnown = var
+    end,
+    default = false,
+  }
+
+  panel:AddSetting({
+    type = LAM.ST_COLOR,
+    label = TC.Lang.SELECT_KNOWN_COLOR,
+    getFunction = function()
+        return TC.AV.settings.knownColor.r, TC.AV.settings.knownColor.g,
+               TC.AV.settings.knownColor.b
+    end,
+    setFunction = function(r, g, b)
+        TC.AV.settings.knownColor = {r = r, g = g, b = b}
+    end,
+    default = TC.AV.settings.knownColor
+})
+
+  --Show unknown traits
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.SHOW_UNKNOWN_TRAITS,
+    getFunction = function() return TC.AV.settings.showUnknown end,
+    setFunction = function(var)
+      TC.AV.settings.showUnknown = var
+    end,
+    default = TC.AV.settings.showUnknown,
+  }
+
+  panel:AddSetting({
+    type = LAM.ST_COLOR,
+    label = TC.Lang.SELECT_UNKNOWN_COLOR,
+    getFunction = function()
+        return TC.AV.settings.unknownColor.r, TC.AV.settings.unknownColor.g,
+               TC.AV.settings.unknownColor.b
+    end,
+    setFunction = function(r, g, b)
+        TC.AV.settings.unknownColor = {r = r, g = g, b = b}
+    end,
+    default = TC.AV.settings.unknownColor
+  })
+
+  --Show researching traits
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.SHOW_RESEARCHING,
+    getFunction = function() return TC.AV.settings.showResearching end,
+    setFunction = function(var)
+      TC.AV.settings.showResearching = var
+    end,
+    default = TC.AV.settings.showResearching,
+  }
+
+  panel:AddSetting({
+    type = LAM.ST_COLOR,
+    label = TC.Lang.SELECT_RESEARCHING_COLOR,
+    getFunction = function()
+        return TC.AV.settings.researchingColor.r, TC.AV.settings.researchingColor.g,
+               TC.AV.settings.researchingColor.b
+    end,
+    setFunction = function(r, g, b)
+        TC.AV.settings.researchingColor = {r = r, g = g, b = b}
+    end,
+    default = TC.AV.settings.researchingColor
+  })
+
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.SELECT_ACTIVELY_RESEARCHING,
