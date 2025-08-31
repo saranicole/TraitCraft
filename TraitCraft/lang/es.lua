@@ -23,6 +23,7 @@ TC.Lang = {
   SHORT_RELOAD_UI         =         "Actualizar",
   CHOICES_EDIT            =         "Editar",
   RESEARCHED              =         "Investigado",
+  RESEARCHING             =         "Investigando",
   UNRESEARCHED            =         "No investigado",
   RESEARCH_EXPIRED        =         "Investigación finalizada para ",
   SHOW_KNOWN_TRAITS       =         "Mostrar íconos si los personajes conocen los rasgos",

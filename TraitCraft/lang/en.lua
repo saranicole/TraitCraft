@@ -23,6 +23,7 @@ TC.Lang = {
   SHORT_RELOAD_UI         =         "Reload UI",
   CHOICES_EDIT            =         "Edit",
   RESEARCHED              =         "Researched",
+  RESEARCHING             =         "Researching",
   UNRESEARCHED            =         "Unresearched",
   RESEARCH_EXPIRED        =         "Research finished for ",
   SHOW_KNOWN_TRAITS       =         "Show icons if characters know the traits",

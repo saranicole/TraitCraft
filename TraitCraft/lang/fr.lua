@@ -23,6 +23,7 @@ TC.Lang = {
   SHORT_RELOAD_UI         =         "Rafraîchir",
   CHOICES_EDIT            =         "Corriger",
   RESEARCHED              =         "Recherché",
+  RESEARCHING             =         "Recherche active",
   UNRESEARCHED            =         "Non recherché",
   RESEARCH_EXPIRED        =         "Recherche terminée pour ",
   SHOW_KNOWN_TRAITS       =         "Afficher les icônes si les personnages connaissent les traits",

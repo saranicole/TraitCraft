@@ -183,25 +183,32 @@ end
 
 function TC_Inventory:GetWhoKnows(craftingSkillType, researchLineIndex, traitIndex)
   local know = {}
+  local researching = {}
 	local dontKnow = {}
 	local key = self.parent:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
 	local trait = self.parent.AV.traitTable[key] or 0
   for id, value in pairs(self.parent.AV.activelyResearchingCharacters) do
     local mask = self.parent.bitwiseChars[id]
-    if self.parent.charBitMissing(trait, mask) then
+    if value.research and value.research[key] then
+      researching[#researching+1] = value.name
+    elseif self.parent.charBitMissing(trait, mask) then
       dontKnow[#dontKnow+1] = value.name
     else
       know[#know+1] = value.name
     end
   end
-  return know, dontKnow
+  return know, researching, dontKnow
 end
 
-function TC_Inventory:formatWhoKnows(kk, dd)
+function TC_Inventory:formatWhoKnows(kk, rr, dd)
   local formatted = ""
   if kk and #kk>0 then
     local knows = table.concat(kk, ", ")
     formatted = self.parent.Lang.RESEARCHED..": "..knows..".  \r\n"
+  end
+  if rr and #rr>0 then
+    local researching = table.concat(rr, ", ")
+    formatted = formatted..self.parent.Lang.RESEARCHING..": "..researching..".\r\n"
   end
   if dd and #dd>0 then
     local dontknow = table.concat(dd, ", ")
@@ -211,8 +218,8 @@ function TC_Inventory:formatWhoKnows(kk, dd)
 end
 
 function TC_Inventory:GetDetails(itemLink)
-	local toHide = true
 	local kk = {}
+	local rr = {}
 	local dd = {}
 	local itemType = GetItemLinkItemType(itemLink)
   local traitType = GetItemLinkTraitInfo(itemLink)
@@ -225,12 +232,12 @@ function TC_Inventory:GetDetails(itemLink)
     local traitIndex = self.parent:FindTraitIndex(craftingSkillType, researchLineIndex, traitType)
     if craftingSkillType and researchLineIndex and traitIndex then
       if craftingSkillType>0 and researchLineIndex>0 and traitIndex>0 then
-        kk, dd = self:GetWhoKnows(craftingSkillType, researchLineIndex, traitIndex)
+        kk, rr, dd = self:GetWhoKnows(craftingSkillType, researchLineIndex, traitIndex)
         toHide = (#dd==0)
       end
     end
   end
-	return toHide, kk, dd
+	return kk, rr, dd
 end
 
 function TC_Inventory:HookInventory(parent, bagId, slotIndex)
@@ -257,8 +264,8 @@ function TC_Inventory:HookInventory(parent, bagId, slotIndex)
   local itemType = GetItemType(bagId, slotIndex)
   local equipType = GetItemLinkEquipType(itemLink)
   if itemLink and self:IsWeapon(itemType) or self:IsArmour(itemType, equipType) then
-    local toHide, kk, dd = self:GetDetails(itemLink)
-    currentSection:AddLine(self:formatWhoKnows(kk, dd), currentBodyDescription)
+    local kk, rr, dd = self:GetDetails(itemLink)
+    currentSection:AddLine(self:formatWhoKnows(kk, rr, dd), currentBodyDescription)
     currentTooltip:AddSection(currentSection)
   end
 end
