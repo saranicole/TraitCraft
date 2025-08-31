@@ -389,15 +389,14 @@ function TC.CreateIcon(control, id, key, iconPath, r, g, b, sideFloat, firstOrie
   if not control.altNeedIcon[id] then
     control.altNeedIcon[id] = {}
   end
-  if not GetControl(controlName) then
+  if not control.altNeedIcon[id][key] and not GetControl(controlName) then
     icon = WINDOW_MANAGER:CreateControl(controlName, control, CT_TEXTURE)
     icon:SetDimensions(40, 40)
     icon:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
     icon:SetTexture(iconPath)
     icon:SetColor(r, g, b, 1)
     control.altNeedIcon[id][key] = icon
-  end
-  if control.altNeedIcon[id] and control.altNeedIcon[id][key] then
+  else
     control.altNeedIcon[id][key]:SetColor(r, g, b, 1)
     control.altNeedIcon[id][key]:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
     control.altNeedIcon[id][key]:SetHidden(false)
