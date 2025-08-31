@@ -349,6 +349,7 @@ local function TC_Event_Player_Activated(event, isA)
   end
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
+  zo_callLater(TC.ScanForResearchExpired, 90000)
   EVENT_MANAGER:RegisterForUpdate("TC_ScanForResearchExpired", FIVE_MINUTES_MS, TC.ScanForResearchExpired)
 end
 
