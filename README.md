@@ -6,9 +6,9 @@
 
 Tired of writing down which traits you need across which alts so that you can craft them on your main and research them on your alts?  This addon is for you!
 
-PC and Console:  Shows the unresearched traits on the research tab and crafting tab via icons specific to researching characters (which you specify).
+PC and Console: Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
 
-Console only:  Shows researched and unresearched actively researching characters on inventory/bank/guild bank/decon tooltips.
+Console only: Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
 
 <img width="318" height="756" alt="TraitCraft_screenshot" src="https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1" />
 
@@ -20,11 +20,11 @@ Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u
 3. Select your crafters from the addon menu
 4. Select your actively researching character(s) from the dropdown and select an icon for it - that icon will show up in the research tab of your selected crafters next to the trait they need
 5. Click "Apply Settings" - note that settings do not automatically apply in this addon's menu
-6. Log onto the actively researching character(s) - this can be quick, just log on and you don't have to do anything else
+6. Log onto the actively researching character(s)
 7. Log back onto the desired crafter
 8. Open a crafting interaction
 9. Open the Research view
-10. See the icon(s) of the actively researching character(s) next to their needed traits - you will need to manually craft for now
+10. See the icon(s) of the actively researching character(s) next to their needed traits
 
 ### How it works
 
