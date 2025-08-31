@@ -396,10 +396,10 @@ function TC.CreateIcon(control, id, key, iconPath, r, g, b, sideFloat, firstOrie
     icon:SetTexture(iconPath)
     icon:SetColor(r, g, b, 1)
     control.altNeedIcon[id][key] = icon
-  else
-    control.altNeedIcon[id][key]:SetColor(r, g, b, 1)
-    control.altNeedIcon[id][key]:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
-    control.altNeedIcon[id][key]:SetHidden(false)
+--   else
+--     control.altNeedIcon[id][key]:SetColor(r, g, b, 1)
+--     control.altNeedIcon[id][key]:SetAnchor(firstOrientation, control, secondOrientation, sideFloat, 0)
+--     control.altNeedIcon[id][key]:SetHidden(false)
   end
   return icon
 end
@@ -410,10 +410,10 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
     control.researchIcon.icon:ClearAnchors()
     control.researchIcon.icon:SetHidden(true)
   end
-  if control.altNeedIcon and control.altNeedIcon[id] and control.altNeedIcon[id][key] then
-    control.altNeedIcon[id][key]:ClearAnchors()
-    control.altNeedIcon[id][key]:SetHidden(true)
-  end
+--   if control.altNeedIcon and control.altNeedIcon[id] and control.altNeedIcon[id][key] then
+--     control.altNeedIcon[id][key]:ClearAnchors()
+--     control.altNeedIcon[id][key]:SetHidden(true)
+--   end
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
   local iconPath = value.icon or TC.IconList[1]
