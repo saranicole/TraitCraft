@@ -410,14 +410,6 @@ function TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, se
     control.researchIcon.icon:ClearAnchors()
     control.researchIcon.icon:SetHidden(true)
   end
-  if control.altNeedIcon and next(control.altNeedIcon) then
-    for id, value in pairs(control.altNeedIcon) do
-      for key, iconval in pairs(value) do
-        iconval:ClearAnchors()
-        iconval:SetHidden(true)
-      end
-    end
-  end
   local trait = TC.AV.traitTable[key] or 0
   local mask = TC.bitwiseChars[id]
   local iconPath = value.icon or TC.IconList[1]
@@ -443,6 +435,14 @@ function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex,
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
   else
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    if control.altNeedIcon and next(control.altNeedIcon) then
+      for id, value in pairs(control.altNeedIcon) do
+        for key, iconval in pairs(value) do
+          iconval:ClearAnchors()
+          iconval:SetHidden(true)
+        end
+      end
+    end
     for id, value in pairs(TC.AV.activelyResearchingCharacters) do
       controlName = prefix..id.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex
       TC.addCharIcon(control, id, value, sideFloat, key, firstOrientation, secondOrientation, controlName)
