@@ -212,7 +212,6 @@ end
 
 function TC_Inventory:GetDetails(itemLink)
 	local toHide = true
-	local col = self.parent.AV.settings.inventory.colours.othersCan
 	local kk = {}
 	local dd = {}
 	local itemType = GetItemLinkItemType(itemLink)
