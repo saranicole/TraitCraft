@@ -287,7 +287,7 @@ local function SetResearchHooks()
   EVENT_MANAGER:UnregisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED)
   EVENT_MANAGER:UnregisterForEvent("TC_ResearchStarted", EVENT_SMITHING_TRAIT_RESEARCH_STARTED)
   EVENT_MANAGER:RegisterForEvent("TC_ResearchComplete", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, TC.SetTraitKnown)
-  EVENT_MANAGER:RegisterForEvent("TC_ResearchStarted", EVENT_SMITHING_TRAIT_RESEARCH_STARTED, TC.SetTraitKnown)
+  EVENT_MANAGER:RegisterForEvent("TC_ResearchStarted", EVENT_SMITHING_TRAIT_RESEARCH_STARTED, TC.SetTraitResearching)
   EVENT_MANAGER:RegisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
