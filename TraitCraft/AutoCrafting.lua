@@ -211,7 +211,7 @@ function TC_Autocraft:Initialize(parent)
   if TC.AV.settings.autoDepositOption then
     SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
       local sceneName = scene:GetName()
-      if sceneName == bankingSceneName then
+      if sceneName == bankingSceneName and newState == SCENE_SHOWING then
         self:DepositCreatedItems()
       end
     end)
