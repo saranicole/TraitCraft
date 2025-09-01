@@ -7,7 +7,14 @@ function TC_Autocraft:New(...)
 end
 
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
-  return self.interactionTable:CraftSmithingItemByLevel(researchIndex, true, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, nil, 1, nil, false)
+  if not TC.AV.settings.debugAutocraft then
+    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, true, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, nil, 1, nil, false)
+  else
+    local craftingType = GetCraftingInteractionType()
+    local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
+    local craftItems = self.parent:GetTraitStringFromKey(key)
+    d("Would have crafted: "..craftItems)
+  end
 end
 
 local function FindItemByLink(itemLink)

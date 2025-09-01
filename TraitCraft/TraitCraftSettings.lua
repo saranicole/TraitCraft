@@ -217,7 +217,7 @@ function TC.BuildMenu()
     type = LAM.ST_SECTION,
     label = TC.Lang.DISPLAY_SETTINGS,
   }
-
+  if GetDisplayName() == "@Saranicole1980" then
   --Enable autocraft
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
@@ -230,6 +230,17 @@ function TC.BuildMenu()
       end
     end,
     default = false,
+  }
+
+  --Temp debug checkbox
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = "Temp debug autocraft",
+    getFunction = function() return TC.AV.settings.debugAutocraft end,
+    setFunction = function(var)
+      TC.AV.settings.debugAutocraft = var
+    end,
+    default = true,
   }
 
   --Enable autodeposit
@@ -245,6 +256,7 @@ function TC.BuildMenu()
       return not TC.AV.settings.autoCraftOption
     end
   }
+  end
 
   --Show known traits
   panel:AddSetting {
