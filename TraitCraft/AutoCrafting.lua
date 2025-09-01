@@ -27,6 +27,7 @@ function TC_Autocraft:DepositCreatedItems()
       local slotIndex = FindItemByLink(itemLink)
       if slotIndex then
         RequestMoveItem(BAG_BACKPACK, slotIndex, BAG_BANK, 0, 1)
+        self.resultsTable[key] = nil
       end
     end
   end
