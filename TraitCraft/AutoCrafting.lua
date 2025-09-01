@@ -213,6 +213,6 @@ function TC_Autocraft:Initialize(parent)
     local sceneName = scene:GetName()
     if sceneName == bankingSceneName then
       self:DepositCreatedItems()
-    end
+    end)
   end
 end
