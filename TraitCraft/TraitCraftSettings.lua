@@ -32,7 +32,6 @@ TC.IconList = {
   "/esoui/art/crafting/gamepad/gp_jewelry_tabicon_icon.dds",
   "/esoui/art/crafting/gamepad/gp_reconstruct_tabicon.dds",
   "/esoui/art/crafting/jewelryset_tabicon_icon_up.dds",
-  "/esoui/art/crafting/patterns_tabicon_up.dds",
   "/esoui/art/crafting/provisioner_indexicon_fish_up.dds",
   "/esoui/art/crafting/provisioner_indexicon_furnishings_up.dds",
   "/esoui/art/crafting/retrait_tabicon_up.dds",

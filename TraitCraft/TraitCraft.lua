@@ -4,6 +4,7 @@ local TC = TraitCraft
 
 --Basic Info
 TC.Name = "TraitCraft"
+TC.Author = "@thisbeaurielle"
 
 TC.Default = {
     allCrafterIds = {},
@@ -69,6 +70,16 @@ function TC.GetCharacterBitwise()
       characterList[id or backupId] = 2^(i-1)
   end
   return characterList
+end
+
+function TC.GetCharIdByName(name)
+  local charId
+  for i = 1, GetNumCharacters() do
+      local n, _, _, _, _, backupId, id = GetCharacterInfo(i)
+      if ZO_CachedStrFormat(SI_UNIT_NAME, n) == name then
+        return id
+      end
+  end
 end
 
 function TC.CompareCharChanges(savedList, currentList)
@@ -336,6 +347,16 @@ function TraitCraft:ScanForResearchExpired()
   end
 end
 
+function TraitCraft:ScanMaxNumResearch()
+  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  if not TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"] then
+    TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"] = {}
+  end
+  for i = 1, #craftTypes do
+    TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"][craftTypes[i]] = GetMaxSimultaneousSmithingResearch(craftTypes[i])
+  end
+end
+
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
@@ -343,9 +364,13 @@ local function TC_Event_Player_Activated(event, isA)
 	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
     EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
+    TC:ScanMaxNumResearch()
   end
   if IsConsoleUI() then
     TC.inventory = TC_Inventory:New(TC)
+  end
+  if LibLazyCrafting then
+    TC.autocraft = TC_Autocraft:New(TC)
   end
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
@@ -473,6 +498,9 @@ local function OnCraftingInteract(eventCode, craftingType)
         researchLineIndex = data.researchLineIndex
         addSmithingHook()
       end)
+      if TC.autocraft then
+
+      end
     end
   end
 end

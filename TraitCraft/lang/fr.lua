@@ -33,4 +33,6 @@ TC.Lang = {
   SELECT_KNOWN_COLOR      =         "Sélectionnez la couleur du trait connu",
   SELECT_UNKNOWN_COLOR    =         "Sélectionnez une couleur de trait inconnue",
   SELECT_RESEARCHING_COLOR =        "Sélectionnez la couleur pour la recherche",
+  CRAFT_ALL               =         "Fabriquez tous les objets qui pourraient être recherchés",
+  CRAFT_SPECIFIC          =         "Changer de personnage pour créer",
 }
