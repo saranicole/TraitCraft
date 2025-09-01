@@ -50,8 +50,11 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local traitLimit = 9
   local key
   local trait
+  if not self.lastCrafted[charId] then
+    self.lastCrafted[charId] = {}
+  end
   for r = 1, researchLineLimit do
-    if not self.lastCrafted[charId] or not self.lastCrafted[charId][r] then
+    if not self.lastCrafted[charId][r] then
       for t = 1, traitLimit do
         if not self.lastCrafted[charId][r] or not self.lastCrafted[charId][r][t] then
           key = self.parent:GetTraitKey(craftingType, r, t)
