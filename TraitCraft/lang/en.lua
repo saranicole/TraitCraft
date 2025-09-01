@@ -33,6 +33,8 @@ TC.Lang = {
   SELECT_KNOWN_COLOR      =         "Select Known Trait Color",
   SELECT_UNKNOWN_COLOR    =         "Select Unknown Trait Color",
   SELECT_RESEARCHING_COLOR =        "Select Researching Color",
-  CRAFT_ALL               =         "Craft all researchable items",
+  ENABLE_AUTOCRAFT        =         "Enable autocraft",
+  ENABLE_AUTODEPOSIT      =         "Enable automatic deposit of autocrafted items into bank",
+  CRAFT_ALL               =         "Craft next researchable items",
   CRAFT_SPECIFIC          =         "Change character to craft for",
 }

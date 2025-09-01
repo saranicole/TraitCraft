@@ -7,7 +7,29 @@ function TC_Autocraft:New(...)
 end
 
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
-  self.interactionTable:CraftSmithingItemByLevel(researchIndex, true, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, nil, 1, nil, false)
+  return self.interactionTable:CraftSmithingItemByLevel(researchIndex, true, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, nil, 1, nil, false)
+end
+
+local function FindItemByLink(itemLink)
+    for slotIndex = 0, GetBagSize(BAG_BACKPACK) - 1 do
+        local slotLink = GetItemLink(BAG_BACKPACK, slotIndex)
+        if slotLink == itemLink then
+            return slotIndex
+        end
+    end
+    return nil
+end
+
+function TC_Autocraft:DepositCreatedItems()
+  if next(self.resultsTable) then
+    for key, itemTable in pairs(self.resultsTable) do
+      local itemLink = LibLazyCrafting:getItemLinkFromRequest(itemTable)
+      local slotIndex = FindItemByLink(itemLink)
+      if slotIndex then
+        RequestMoveItem(BAG_BACKPACK, slotIndex, BAG_BANK, 0, 1)
+      end
+    end
+  end
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
@@ -15,29 +37,40 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local charTable = {}
   local mask = self.parent.bitwiseChars[charId]
   local char = self.parent.AV.activelyResearchingCharacters[charId]
+  local research = char.research or {}
   local researchLineLimit = GetNumSmithingResearchLines(craftingType)
   local traitLimit = 9
   local key
   local trait
   for r = 1, researchLineLimit do
-    local didCraft = false
-    for t = 1, traitLimit do
-      if not didCraft then
-        key = self.parent:GetTraitKey(craftingType, r, t)
-        trait = self.parent.AV.traitTable[key] or 0
-        if self.parent.charBitMissing(trait, mask) and (not charTable[charId] or charTable[charId] < char["maxSimultResearch"][craftingType] ) then
-          self:QueueItems(r, t)
-          if not charTable[charId] then
-            charTable[charId] = 1
+    if not self.lastCrafted[charId] or not self.lastCrafted[charId][r] then
+      for t = 1, traitLimit do
+        if not self.lastCrafted[charId][r] or not self.lastCrafted[charId][r][t] then
+          key = self.parent:GetTraitKey(craftingType, r, t)
+          trait = self.parent.AV.traitTable[key] or 0
+          if self.parent.charBitMissing(trait, mask) and not research[key] and (not charTable[charId] or charTable[charId] < char["maxSimultResearch"][craftingType] ) then
+            if not self.resultsTable[key] then
+              self.resultsTable[key] = {}
+            end
+            self.resultsTable[key] = self:QueueItems(r, t)
+            if not self.lastCrafted[charId] then
+              self.lastCrafted[charId] = {}
+            end
+            if not self.lastCrafted[charId][r] then
+              self.lastCrafted[charId][r] = {}
+            end
+            self.lastCrafted[charId][r][t] = true
+            if not charTable[charId] then
+              charTable[charId] = 1
+            else
+              charTable[charId] = charTable[charId] + 1
+            end
           else
-            charTable[charId] = charTable[charId] + 1
-            didCraft = true
+            break
           end
-        else
-          break
-        end
-        if not char["maxSimultResearch"] or not char["maxSimultResearch"][craftingType] or charTable[charId] >= char["maxSimultResearch"][craftingType] then
-          return
+          if not char["maxSimultResearch"] or not char["maxSimultResearch"][craftingType] or charTable[charId] >= char["maxSimultResearch"][craftingType] then
+            return
+          end
         end
       end
     end
@@ -147,10 +180,13 @@ function TC_Autocraft:Initialize(parent)
   if not LibLazyCrafting then
     return
   end
+  self.resultsTable = {}
+  self.lastCrafted = {}
   self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
     d(event)
     return
   end, parent.Author)
+  local bankingSceneName = "bank"
   if not IsInGamepadPreferredMode() then
     self:CreateKeyboardUI()
   else
@@ -162,5 +198,13 @@ function TC_Autocraft:Initialize(parent)
         self:RemoveGamepadUI()
       end
     end)
+    local bankingSceneName = "gamepad_banking"
+  end
+  if TC.AV.settings.autoDepositOption then
+    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
+    local sceneName = scene:GetName()
+    if sceneName == bankingSceneName then
+      self:DepositCreatedItems()
+    end
   end
 end

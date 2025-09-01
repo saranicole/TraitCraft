@@ -218,6 +218,34 @@ function TC.BuildMenu()
     label = TC.Lang.DISPLAY_SETTINGS,
   }
 
+  --Enable autocraft
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_AUTOCRAFT,
+    getFunction = function() return TC.AV.settings.autoCraftOption end,
+    setFunction = function(var)
+      TC.AV.settings.autoCraftOption = var
+      if not TC.autocraft then
+        TC.autocraft = TC_Autocraft:New(TC)
+      end
+    end,
+    default = false,
+  }
+
+  --Enable autodeposit
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_AUTODEPOSIT,
+    getFunction = function() return TC.AV.settings.autoDepositOption end,
+    setFunction = function(var)
+      TC.AV.settings.autoDepositOption = var
+    end,
+    default = false,
+    disable = function()
+      return not TC.AV.settings.autoCraftOption
+    end
+  }
+
   --Show known traits
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,

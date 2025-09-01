@@ -33,6 +33,8 @@ TC.Lang = {
   SELECT_KNOWN_COLOR      =         "Sélectionnez la couleur du trait connu",
   SELECT_UNKNOWN_COLOR    =         "Sélectionnez une couleur de trait inconnue",
   SELECT_RESEARCHING_COLOR =        "Sélectionnez la couleur pour la recherche",
-  CRAFT_ALL               =         "Fabriquez tous les objets qui pourraient être recherchés",
+  ENABLE_AUTOCRAFT        =         "Activer la création automatique",
+  ENABLE_AUTODEPOSIT      =         "Activer le dépôt automatique des objets fabriqués automatiquement dans la banque",
+  CRAFT_ALL               =         "Fabriquez les prochains articles à surveiller",
   CRAFT_SPECIFIC          =         "Changer de personnage pour créer",
 }

@@ -14,6 +14,8 @@ TC.Default = {
     traitTable = {},
     savedCharacterList = {},
     settings = {
+      autoCraftOption = false,
+      autoDepositOption = false,
       showKnown = false,
       showResearching = true,
       showUnknown = true,
@@ -369,7 +371,7 @@ local function TC_Event_Player_Activated(event, isA)
   if IsConsoleUI() then
     TC.inventory = TC_Inventory:New(TC)
   end
-  if LibLazyCrafting then
+  if LibLazyCrafting and TC.settings.autoCraftOption then
     TC.autocraft = TC_Autocraft:New(TC)
   end
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
