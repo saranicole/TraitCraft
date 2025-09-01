@@ -208,7 +208,7 @@ function TC_Autocraft:Initialize(parent)
     end)
     local bankingSceneName = "gamepad_banking"
   end
-  if TC.AV.settings.autoDepositOption then
+  if parent.AV.settings.autoDepositOption then
     SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
       local sceneName = scene:GetName()
       if sceneName == bankingSceneName and newState == SCENE_SHOWING then
