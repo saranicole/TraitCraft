@@ -225,8 +225,14 @@ function TC.BuildMenu()
     getFunction = function() return TC.AV.settings.autoCraftOption end,
     setFunction = function(var)
       TC.AV.settings.autoCraftOption = var
-      if not TC.autocraft then
-        TC.autocraft = TC_Autocraft:New(TC)
+      if var then
+        if not TC.autocraft then
+          TC.autocraft = TC_Autocraft:New(TC)
+        end
+      else
+        if TC.autocraft then
+          TC.autocraft:Destroy()
+        end
       end
     end,
     default = false,

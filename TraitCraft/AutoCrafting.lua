@@ -152,6 +152,29 @@ function TC_Autocraft:RemoveGamepadUI()
   self.showing = false
 end
 
+function TC_Autocraft:RemoveKeyboardUI()
+  local smithingSceneName = "smithing"
+  local toplevel = ZO_SmithingTopLevel
+  local smithing_scene = SCENE_MANAGER:GetScene(smithingSceneName)
+  if self.allFragment then
+    smithing_scene:RemoveFragment(self.allFragment)
+  end
+  if self.altFragment then
+    smithing_scene:RemoveFragment(self.altFragment)
+  end
+end
+
+function TC_Autocraft:RegisterDepositItems(scene, newState)
+  local bankingSceneName = "bank"
+  if IsInGamepadPreferredMode() then
+    bankingSceneName = "gamepad_banking"
+  end
+  local sceneName = scene:GetName()
+  if sceneName == bankingSceneName and newState == SCENE_SHOWING then
+    self:DepositCreatedItems()
+  end
+end
+
 function TC_Autocraft:CreateKeyboardUI()
   local smithingSceneName = "smithing"
   local toplevel = ZO_SmithingTopLevel
@@ -171,7 +194,7 @@ function TC_Autocraft:CreateKeyboardUI()
       self:ScanUnknownTraitsForCrafting(id)
     end
   end)
-  local allFragment = ZO_SimpleSceneFragment:New(allBtn)
+  self.allFragment = ZO_SimpleSceneFragment:New(allBtn)
   smithing_scene:AddFragment(allFragment)
   for id, char in pairs(self.parent.AV.activelyResearchingCharacters) do
     local altBtn = CreateControlFromVirtual("TC_ALT_CTL_"..char.name, toplevel, "TC_ALT")
@@ -183,7 +206,8 @@ function TC_Autocraft:CreateKeyboardUI()
     altBtn:SetHandler("OnClicked", function()
       self:ScanUnknownTraitsForCrafting(id)
     end)
-    smithing_scene:AddFragment(ZO_SimpleSceneFragment:New(altBtn))
+    self.altFragment = ZO_SimpleSceneFragment:New(altBtn)
+    smithing_scene:AddFragment(self.altFragment)
   end
 end
 
@@ -198,7 +222,6 @@ function TC_Autocraft:Initialize(parent)
     d(event)
     return
   end, parent.Author)
-  local bankingSceneName = "bank"
   if not IsInGamepadPreferredMode() then
     self:CreateKeyboardUI()
   else
@@ -210,14 +233,18 @@ function TC_Autocraft:Initialize(parent)
         self:RemoveGamepadUI()
       end
     end)
-    local bankingSceneName = "gamepad_banking"
   end
   if parent.AV.settings.autoDepositOption then
-    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
-      local sceneName = scene:GetName()
-      if sceneName == bankingSceneName and newState == SCENE_SHOWING then
-        self:DepositCreatedItems()
-      end
-    end)
+    SCENE_MANAGER:RegisterCallback("SceneStateChanged", self:RegisterDepositItems)
   end
+end
+
+function TC_Autocraft:Destroy()
+  if IsInGamepadPreferredMode() then
+    self:RemoveGamepadUI()
+  else
+    self:RemoveKeyboardUI()
+  end
+  SCENE_MANAGER:UnregisterCallback("SceneStateChanged", self:RegisterDepositItems)
+  self.parent.autocraft = nil
 end
