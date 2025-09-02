@@ -217,13 +217,14 @@ function TC.BuildMenu()
     type = LAM.ST_SECTION,
     label = TC.Lang.DISPLAY_SETTINGS,
   }
-  if GetDisplayName() == "@Saranicole1980" then
+  if GetDisplayName() == "@Saranicole1980" or GetDisplayName() == "@thisbeaurielle" then
   --Enable autocraft
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.ENABLE_AUTOCRAFT,
     getFunction = function() return TC.AV.settings.autoCraftOption end,
     setFunction = function(var)
+      local oldOption = TC.AV.settings.autoCraftOption
       TC.AV.settings.autoCraftOption = var
       if var then
         if not TC.autocraft then
@@ -233,6 +234,9 @@ function TC.BuildMenu()
         if TC.autocraft then
           TC.autocraft:Destroy()
         end
+      end
+      if oldOption ~= var then
+        ReloadUI("ingame")
       end
     end,
     default = false,
