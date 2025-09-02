@@ -2,17 +2,6 @@ TC_Autocraft = ZO_Object:Subclass()
 
 function TC_Autocraft:New(...)
     local object = ZO_Object.New(self)
-    self.styleTable = {
-        ITEMSTYLE_RACIAL_BRETON,
-        ITEMSTYLE_RACIAL_REDGUARD,
-        ITEMSTYLE_RACIAL_ORC,
-        ITEMSTYLE_RACIAL_DARK_ELF,
-        ITEMSTYLE_RACIAL_NORD,
-        ITEMSTYLE_RACIAL_ARGONIAN,
-        ITEMSTYLE_RACIAL_HIGH_ELF,
-        ITEMSTYLE_RACIAL_WOOD_ELF,
-        ITEMSTYLE_RACIAL_KHAJIIT
-    }
     object:Initialize(...)
     return object
 end
@@ -45,7 +34,6 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
     local craftItems = self.parent:GetTraitStringFromKey(key)
     local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
     local traitType = findTraitType(craftingType, researchIndex, traitIndex) + 1
-    d("Trying to craft: "..craftItems)
     return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
   else
     local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
@@ -256,6 +244,20 @@ function TC_Autocraft:CreateKeyboardUI()
   end
 end
 
+function TC_Autocraft:GetCommonStyles()
+	-- Courtesy of Weolo and wolfstar's TraitBuddy
+	local styles = {}
+	local STYLE_KHAJIIT = 9
+	for itemStyleIndex = 1, STYLE_KHAJIIT do
+		local itemStyleId = GetValidItemStyleId(itemStyleIndex)
+		if itemStyleId > 0 then
+			-- d(sf("Adding style %s itemStyleId %s", GetItemStyleName(itemStyleId), itemStyleId))
+			styles[itemStyleId] = true
+		end
+	end
+	return styles
+end
+
 function TC_Autocraft:Initialize(parent)
   self.parent = parent
   if not LibLazyCrafting then
@@ -264,12 +266,13 @@ function TC_Autocraft:Initialize(parent)
   self.resultsTable = {}
   self.lastCrafted = {}
   if not LibLazyCrafting:GetRequestingAddon(parent.Name) then
+    local styles = self:GetCommonStyles()
     self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
       if not LLC_NO_FURTHER_CRAFT_POSSIBLE then
         d(event)
       end
       return
-    end, parent.Author, self.styleTable)
+    end, parent.Author, styles)
   end
   if not IsInGamepadPreferredMode() then
     EVENT_MANAGER:RegisterForEvent(parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
