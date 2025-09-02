@@ -235,7 +235,7 @@ function TC_Autocraft:Initialize(parent)
     end)
   end
   if parent.AV.settings.autoDepositOption then
-    SCENE_MANAGER:RegisterCallback("SceneStateChanged", self:RegisterDepositItems)
+    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
   end
 end
 
@@ -245,6 +245,6 @@ function TC_Autocraft:Destroy()
   else
     self:RemoveKeyboardUI()
   end
-  SCENE_MANAGER:UnregisterCallback("SceneStateChanged", self:RegisterDepositItems)
+  SCENE_MANAGER:UnregisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
   self.parent.autocraft = nil
 end
