@@ -35,6 +35,7 @@ TC.Lang = {
   SELECT_RESEARCHING_COLOR =        "Select Researching Color",
   ENABLE_AUTOCRAFT        =         "Enable autocraft",
   ENABLE_AUTODEPOSIT      =         "Enable automatic deposit of autocrafted items into bank",
+  ENABLE_NIRNHONED        =         "Enable autocrafting nirnhoned equipment",
   CRAFT_ALL               =         "Craft next researchable items",
   CRAFT_SPECIFIC          =         "Change character to craft for",
 }

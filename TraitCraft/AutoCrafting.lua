@@ -42,8 +42,8 @@ function TC_Autocraft:DepositCreatedItems()
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
-  d("In scan unknown traits for crafting")
   local craftingType = GetCraftingInteractionType()
+  local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local charTable = {}
   charTable[charId] = 0
   local mask = self.parent.bitwiseChars[charId]
@@ -51,6 +51,9 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local research = char.research or {}
   local researchLineLimit = GetNumSmithingResearchLines(craftingType)
   local traitLimit = 9
+  if not self.parent.AV.settings.autoCraftNirnhoned and self.parent.isValueInTable(nirnCraftTypes, craftingType) then
+    traitLimit = 8
+  end
   local key
   local trait
   if not self.lastCrafted[charId] then
@@ -62,10 +65,8 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
         if not self.lastCrafted[charId][r] or not self.lastCrafted[charId][r][t] then
           if self.parent:DoesCharacterKnowTrait(craftingType, r, t) then
             key = self.parent:GetTraitKey(craftingType, r, t)
-            d("key"..key)
             trait = self.parent.AV.traitTable[key] or 0
             if self.parent.charBitMissing(trait, mask) and not research[key] and (not charTable[charId] or charTable[charId] < char["maxSimultResearch"][craftingType] ) then
-              d("in if charbitmissing")
               if not self.resultsTable[key] then
                 self.resultsTable[key] = {}
               end

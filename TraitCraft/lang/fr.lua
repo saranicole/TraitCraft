@@ -35,6 +35,7 @@ TC.Lang = {
   SELECT_RESEARCHING_COLOR =        "Sélectionnez la couleur pour la recherche",
   ENABLE_AUTOCRAFT        =         "Activer la création automatique",
   ENABLE_AUTODEPOSIT      =         "Activer le dépôt automatique des objets fabriqués automatiquement dans la banque",
+  ENABLE_NIRNHONED        =         "Activer la fabrication automatique d'équipements Nirnhoned",
   CRAFT_ALL               =         "Fabriquez les prochains articles à surveiller",
   CRAFT_SPECIFIC          =         "Changer de personnage pour créer",
 }

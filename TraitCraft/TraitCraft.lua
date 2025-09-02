@@ -16,6 +16,7 @@ TC.Default = {
     settings = {
       autoCraftOption = false,
       autoDepositOption = false,
+      autoCraftNirnhoned = false,
       debugAutocraft = true,
       showKnown = false,
       showResearching = true,

@@ -242,6 +242,17 @@ function TC.BuildMenu()
     default = false,
   }
 
+  --Whether to autocraft nirnhoned materials
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_NIRNHONED,
+    getFunction = function() return TC.AV.settings.autoCraftNirnhoned end,
+    setFunction = function(var)
+      TC.AV.settings.autoCraftNirnhoned = var
+    end,
+    default = false,
+  }
+
   --Temp debug checkbox
   panel:AddSetting {
     type = LAM.ST_CHECKBOX,
