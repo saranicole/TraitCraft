@@ -17,10 +17,36 @@ function TC_Autocraft:New(...)
     return object
 end
 
+function TC_Autocraft:GetPatternIndexFromResearchLine(craftingType, researchLineIndex)
+    -- Get the research line's name (e.g., "Axe", "Chest", "Bow")
+    local name, _, _, numTraits = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
+    if not name then
+        return nil
+    end
+    -- Scan through patterns to find one with the same name
+    for patternIndex = 1, GetNumSmithingPatterns() do
+        local patternName = GetSmithingPatternInfo(patternIndex)
+        if patternName == name then
+            return patternIndex
+        end
+    end
+    return nil
+end
+
+local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
+  local foundTraitType, description, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
+	return foundTraitType or ITEM_TRAIT_TYPE_NONE
+end
+
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
   if not self.parent.AV.settings.debugAutocraft then
-    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitIndex, false, craftingType, 0, 0, true)
+    local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
+    local craftItems = self.parent:GetTraitStringFromKey(key)
+    local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
+    local traitType = findTraitType(craftingType, researchIndex, traitIndex) + 1
+    d("Trying to craft: "..craftItems)
+    return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
   else
     local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
     local craftItems = self.parent:GetTraitStringFromKey(key)
@@ -58,6 +84,10 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   charTable[charId] = 0
   local mask = self.parent.bitwiseChars[charId]
   local char = self.parent.AV.activelyResearchingCharacters[charId]
+  if not char["maxSimultResearch"] then
+    d(self.parent.Lang.LOG_INTO_CHAR)
+    return
+  end
   local research = char.research or {}
   local researchLineLimit = GetNumSmithingResearchLines(craftingType)
   local traitLimit = 9
@@ -194,7 +224,10 @@ function TC_Autocraft:CreateKeyboardUI()
   local font = "ZoFontGameLarge"
   local buttonClass = "ZO_DefaultButton"
   local smithing_scene = SCENE_MANAGER:GetScene(smithingSceneName)
-  local allBtn = CreateControlFromVirtual("TC_ALL_CTL", toplevel, "TC_ALL")
+  local allBtn = GetControl("TC_ALL_CTL")
+  if not allBtn then
+    allBtn = CreateControlFromVirtual("TC_ALL_CTL", toplevel, "TC_ALL")
+  end
   allBtn:SetText(self.parent.Lang.CRAFT_ALL)
   allBtn:SetFont(font)
   allBtn:SetAnchor(allBtnOrientation, toplevel, allBtnOrientation, 100, 0)
@@ -204,9 +237,12 @@ function TC_Autocraft:CreateKeyboardUI()
     end
   end)
   self.allFragment = ZO_SimpleSceneFragment:New(allBtn)
-  smithing_scene:AddFragment(allFragment)
+  smithing_scene:AddFragment(self.allFragment)
   for id, char in pairs(self.parent.AV.activelyResearchingCharacters) do
-    local altBtn = CreateControlFromVirtual("TC_ALT_CTL_"..char.name, toplevel, "TC_ALT")
+    local altBtn = GetControl("TC_ALT_CTL_"..char.name)
+    if not altBtn then
+      altBtn = CreateControlFromVirtual("TC_ALT_CTL_"..char.name, toplevel, "TC_ALT")
+    end
     altBtn:SetAnchor(altBtnOrientation, allBtn, altBtnOrientation, offsetX, offsetY)
     offsetX = offsetX + offsetX
     offsetY = offsetY + offsetY
@@ -236,7 +272,9 @@ function TC_Autocraft:Initialize(parent)
     end, parent.Author, self.styleTable)
   end
   if not IsInGamepadPreferredMode() then
-    self:CreateKeyboardUI()
+    EVENT_MANAGER:RegisterForEvent(parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
+      self:CreateKeyboardUI()
+    end)
   else
     SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
       local sceneName = scene:GetName()
@@ -247,6 +285,9 @@ function TC_Autocraft:Initialize(parent)
       end
     end)
   end
+  EVENT_MANAGER:RegisterForEvent(parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
+    self.interactionTable:CraftAllItems()
+  end)
   if parent.AV.settings.autoDepositOption then
     SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
   end
@@ -259,5 +300,6 @@ function TC_Autocraft:Destroy()
     self:RemoveKeyboardUI()
   end
   SCENE_MANAGER:UnregisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
+  EVENT_MANAGER:UnregisterForEvent(self.parent.Name, EVENT_CRAFTING_STATION_INTERACT)
   self.parent.autocraft = nil
 end

@@ -20,5 +20,7 @@
 				</Backdrop>
 			</Controls>
 		</TopLevelControl>
+        <Button name="TC_ALT" inherits="ZO_DefaultButton" virtual="true"/>
+        <Button name="TC_ALL" inherits="ZO_DefaultButton"  virtual="true"/>
     </Controls>
 </GuiXml>

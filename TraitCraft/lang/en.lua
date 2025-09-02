@@ -38,4 +38,5 @@ TC.Lang = {
   ENABLE_NIRNHONED        =         "Enable autocrafting nirnhoned equipment",
   CRAFT_ALL               =         "Craft next researchable items",
   CRAFT_SPECIFIC          =         "Change character to craft for",
+  LOG_INTO_CHAR           =         "Log into researching characters to refresh data",
 }

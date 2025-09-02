@@ -38,4 +38,5 @@ TC.Lang = {
   ENABLE_NIRNHONED        =         "Habilitar la fabricación automática de equipo nirnhoned",
   CRAFT_ALL               =         "Crea los próximos objetos investigables",
   CRAFT_SPECIFIC          =         "Cambiar personaje para crear",
+  LOG_INTO_CHAR           =         "Inicie sesión en los personajes para actualizar los datos",
 }
