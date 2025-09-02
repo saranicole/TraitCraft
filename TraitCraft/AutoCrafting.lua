@@ -20,7 +20,7 @@ end
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
   if not self.parent.AV.settings.debugAutocraft then
-    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitIndex, false, craftingType, 1, 0, true)
+    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitIndex, false, craftingType, 0, 0, true)
   else
     local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
     local craftItems = self.parent:GetTraitStringFromKey(key)
@@ -89,10 +89,6 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
               break
             end
             if charTable[charId] >= char["maxSimultResearch"][craftingType] then
-              if next(self.resultsTable) then
-                d("calling craft all items")
-                self.interactionTable:CraftAllItems()
-              end
               return
             end
           end
