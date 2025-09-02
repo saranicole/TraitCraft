@@ -259,7 +259,7 @@ function TC.BuildMenu()
     end,
     default = false,
     disable = function()
-      return not TC.AV.settings.autoCraftOption
+      return not TC.AV.settings.autoCraftOption or checkLLCAbsent()
     end
   }
 
