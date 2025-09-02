@@ -44,7 +44,7 @@ end
 
 local function FindItemByLink(itemLink)
     for slotIndex = 0, GetBagSize(BAG_BACKPACK) - 1 do
-        local slotLink = GetItemLink(BAG_BACKPACK, slotIndex)
+        local slotLink = GetItemLink(BAG_BACKPACK, slotIndex, LINK_STYLE_BRACKETS)
         if slotLink == itemLink then
             return slotIndex
         end
