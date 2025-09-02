@@ -42,11 +42,13 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   end
 end
 
-local function FindItemByLink(itemLink)
+function TC_Autocraft:FindItemByLink(itemLink)
     for slotIndex = 0, GetBagSize(BAG_BACKPACK) - 1 do
         local slotLink = GetItemLink(BAG_BACKPACK, slotIndex, LINK_STYLE_BRACKETS)
-        if slotLink == itemLink then
+        if slotLink then
+          if slotLink == itemLink then
             return slotIndex
+          end
         end
     end
     return nil
@@ -58,7 +60,7 @@ function TC_Autocraft:DepositCreatedItems()
       local itemLink = LibLazyCrafting.getItemLinkFromRequest(itemTable)
       d("itemLink")
       d(itemLink)
-      local slotIndex = FindItemByLink(itemLink)
+      local slotIndex = self:FindItemByLink(itemLink)
       d("slotIndex")
       d(slotIndex)
       if slotIndex then
