@@ -144,7 +144,7 @@ function TC.SetCrafterDefaults(characters)
   end
 end
 
-local function checkLLC()
+local function checkLLCAbsent()
   return LibLazyCrafting == nil
 end
 
@@ -245,7 +245,7 @@ function TC.BuildMenu()
     end,
     default = false,
     disable = function()
-      return checkLLC()
+      return checkLLCAbsent()
     end
   }
 
