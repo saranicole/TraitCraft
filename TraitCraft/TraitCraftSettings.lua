@@ -258,6 +258,9 @@ function TC.BuildMenu()
       TC.AV.settings.autoCraftNirnhoned = var
     end,
     default = false,
+    disable = function()
+      return not TC.AV.settings.autoCraftOption
+    end
   }
 
   --Show known traits
