@@ -56,8 +56,13 @@ function TC_Autocraft:DepositCreatedItems()
   if next(self.resultsTable) then
     for key, itemTable in pairs(self.resultsTable) do
       local itemLink = LibLazyCrafting:getItemLinkFromRequest(itemTable)
+      d("itemLink")
+      d(itemLink)
       local slotIndex = FindItemByLink(itemLink)
+      d("slotIndex")
+      d(slotIndex)
       if slotIndex then
+        d("requesting move item")
         RequestMoveItem(BAG_BACKPACK, slotIndex, BAG_BANK, 0, 1)
         self.resultsTable[key] = nil
       end
@@ -198,6 +203,7 @@ function TC_Autocraft:RegisterDepositItems(scene, newState)
   end
   local sceneName = scene:GetName()
   if sceneName == bankingSceneName and newState == SCENE_SHOWING then
+    d("calling deposit created items")
     self:DepositCreatedItems()
   end
 end
