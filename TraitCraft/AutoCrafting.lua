@@ -33,7 +33,7 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
-  return requestTable = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
+  return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
