@@ -144,6 +144,10 @@ function TC.SetCrafterDefaults(characters)
   end
 end
 
+local function checkLLC()
+  return LibLazyCrafting ~= nil
+end
+
 function TC.BuildMenu()
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
@@ -240,6 +244,9 @@ function TC.BuildMenu()
       end
     end,
     default = false,
+    disable = function()
+      return checkLLC()
+    end
   }
 
   --Whether to autocraft nirnhoned materials
