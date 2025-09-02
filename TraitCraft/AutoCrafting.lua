@@ -7,9 +7,8 @@ function TC_Autocraft:New(...)
 end
 
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
-  d("in queue items")
   if not self.parent.AV.settings.debugAutocraft then
-    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, nil, 1, nil, true)
+    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, GetCraftingInteractionType(), 1, 0, true)
   else
     local craftingType = GetCraftingInteractionType()
     local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
