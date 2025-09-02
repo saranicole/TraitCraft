@@ -45,6 +45,7 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   d("In scan unknown traits for crafting")
   local craftingType = GetCraftingInteractionType()
   local charTable = {}
+  charTable[charId] = 0
   local mask = self.parent.bitwiseChars[charId]
   local char = self.parent.AV.activelyResearchingCharacters[charId]
   local research = char.research or {}
@@ -73,14 +74,10 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
                 self.lastCrafted[charId][r] = {}
               end
               self.lastCrafted[charId][r][t] = true
-              if not charTable[charId] then
-                charTable[charId] = 1
-              else
-                charTable[charId] = charTable[charId] + 1
-              end
+              charTable[charId] = charTable[charId] + 1
               break
             end
-            if not char["maxSimultResearch"] or not char["maxSimultResearch"][craftingType] or charTable[charId] >= char["maxSimultResearch"][craftingType] then
+            if charTable[charId] >= char["maxSimultResearch"][craftingType] then
               return
             end
           end
