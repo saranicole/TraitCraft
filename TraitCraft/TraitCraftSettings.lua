@@ -145,7 +145,7 @@ function TC.SetCrafterDefaults(characters)
 end
 
 local function checkLLC()
-  return LibLazyCrafting ~= nil
+  return LibLazyCrafting == nil
 end
 
 function TC.BuildMenu()
