@@ -29,46 +29,10 @@ end
 
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
-  if not self.parent.AV.settings.debugAutocraft then
-    local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
-    local craftItems = self.parent:GetTraitStringFromKey(key)
-    local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
-    local traitType = findTraitType(craftingType, researchIndex, traitIndex) + 1
-    return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
-  else
-    local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
-    local craftItems = self.parent:GetTraitStringFromKey(key)
-    d("Would have crafted: "..craftItems)
-  end
-end
-
-function TC_Autocraft:FindItemByLink(itemLink)
-    for slotIndex = 0, GetBagSize(BAG_BACKPACK) - 1 do
-        local slotLink = GetItemLink(BAG_BACKPACK, slotIndex, LINK_STYLE_BRACKETS)
-        if slotLink then
-          if slotLink == itemLink then
-            return slotIndex
-          end
-        end
-    end
-    return nil
-end
-
-function TC_Autocraft:DepositCreatedItems()
-  if next(self.resultsTable) then
-    for key, itemTable in pairs(self.resultsTable) do
-      local itemLink = LibLazyCrafting.getItemLinkFromRequest(itemTable)
-      d("itemLink")
-      d(itemLink)
-      local slotIndex = self:FindItemByLink(itemLink)
-      d("slotIndex")
-      d(slotIndex)
-      if slotIndex then
-        d("requesting move item")
-        RequestMoveItem(BAG_BACKPACK, slotIndex, BAG_BANK, 0, 1)
-        self.resultsTable[key] = nil
-      end
-    end
+  local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
+  local traitType = findTraitType(craftingType, researchIndex, traitIndex) + 1
+  if patternIndex and traitType then
+    return requestTable = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
   end
 end
 
@@ -198,18 +162,6 @@ function TC_Autocraft:RemoveKeyboardUI()
   end
 end
 
-function TC_Autocraft:RegisterDepositItems(scene, newState)
-  local bankingSceneName = "bank"
-  if IsInGamepadPreferredMode() then
-    bankingSceneName = "gamepad_banking"
-  end
-  local sceneName = scene:GetName()
-  if sceneName == bankingSceneName and newState == SCENE_SHOWING then
-    d("calling deposit created items")
-    self:DepositCreatedItems()
-  end
-end
-
 function TC_Autocraft:CreateKeyboardUI()
   local smithingSceneName = "smithing"
   local toplevel = ZO_SmithingTopLevel
@@ -296,12 +248,6 @@ function TC_Autocraft:Initialize(parent)
       end
     end)
   end
-  EVENT_MANAGER:RegisterForEvent(parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
-    self.interactionTable:CraftAllItems()
-  end)
-  if parent.AV.settings.autoDepositOption then
-    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
-  end
 end
 
 function TC_Autocraft:Destroy()
@@ -310,7 +256,5 @@ function TC_Autocraft:Destroy()
   else
     self:RemoveKeyboardUI()
   end
-  SCENE_MANAGER:UnregisterCallback("SceneStateChanged", function(scene, newState) self:RegisterDepositItems(scene, newState) end)
-  EVENT_MANAGER:UnregisterForEvent(self.parent.Name, EVENT_CRAFTING_STATION_INTERACT)
   self.parent.autocraft = nil
 end
