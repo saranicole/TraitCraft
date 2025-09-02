@@ -15,7 +15,8 @@ function TC_Autocraft:GetPatternIndexFromResearchLine(craftingType, researchLine
     -- Scan through patterns to find one with the same name
     for patternIndex = 1, GetNumSmithingPatterns() do
         local patternName = GetSmithingPatternInfo(patternIndex)
-        if patternName == name then
+        local found = string.find(name, patternName, 1, true)
+        if found ~= nil then
             return patternIndex
         end
     end
@@ -30,9 +31,9 @@ end
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
-  local traitType = findTraitType(craftingType, researchIndex, traitIndex) + 1
+  local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   if patternIndex and traitType then
-    return requestTable = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
+    return requestTable = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType + 1, false, craftingType, 0, 0, true)
   end
 end
 
