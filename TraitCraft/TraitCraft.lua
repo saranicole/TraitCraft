@@ -4,7 +4,7 @@ local TC = TraitCraft
 
 --Basic Info
 TC.Name = "TraitCraft"
-TC.Author = "@thisbeaurielle"
+TC.Author = "@Saranicole1980"
 
 TC.Default = {
     allCrafterIds = {},
@@ -371,7 +371,7 @@ local function TC_Event_Player_Activated(event, isA)
   if IsConsoleUI() then
     TC.inventory = TC_Inventory:New(TC)
   end
-  if GetDisplayName() == "@Saranicole1980" or GetDisplayName() == "@thisbeaurielle" and LibLazyCrafting and TC.AV.settings.autoCraftOption then
+  if LibLazyCrafting and TC.AV.settings.autoCraftOption then
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
