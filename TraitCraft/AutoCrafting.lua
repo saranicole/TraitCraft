@@ -218,7 +218,9 @@ function TC_Autocraft:Initialize(parent)
   self.lastCrafted = {}
   if not LibLazyCrafting:GetRequestingAddon(parent.Name) then
     self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
-      d(event)
+      if not LLC_NO_FURTHER_CRAFT_POSSIBLE then
+        d(event)
+      end
       return
     end, parent.Author)
   end
