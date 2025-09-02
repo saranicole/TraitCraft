@@ -2,15 +2,28 @@ TC_Autocraft = ZO_Object:Subclass()
 
 function TC_Autocraft:New(...)
     local object = ZO_Object.New(self)
+    self.styleTable = {
+        ITEMSTYLE_RACIAL_BRETON,
+        ITEMSTYLE_RACIAL_REDGUARD,
+        ITEMSTYLE_RACIAL_ORC,
+        ITEMSTYLE_RACIAL_DARK_ELF,
+        ITEMSTYLE_RACIAL_NORD,
+        ITEMSTYLE_RACIAL_ARGONIAN,
+        ITEMSTYLE_RACIAL_HIGH_ELF,
+        ITEMSTYLE_RACIAL_WOOD_ELF,
+        ITEMSTYLE_RACIAL_KHAJIIT
+    }
     object:Initialize(...)
     return object
 end
 
 function TC_Autocraft:QueueItems(researchIndex, traitIndex)
+  local craftingType = GetCraftingInteractionType()
+  d("crafting type")
+  d(craftingType)
   if not self.parent.AV.settings.debugAutocraft then
-    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1,  traitIndex, LLC_FREE_STYLE_CHOICE, traitIndex, false, GetCraftingInteractionType(), 1, 0, true)
+    return self.interactionTable:CraftSmithingItemByLevel(researchIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitIndex, false, craftingType, 1, 0, true)
   else
-    local craftingType = GetCraftingInteractionType()
     local key = self.parent:GetTraitKey(craftingType, researchIndex, traitIndex)
     local craftItems = self.parent:GetTraitStringFromKey(key)
     d("Would have crafted: "..craftItems)
@@ -222,7 +235,7 @@ function TC_Autocraft:Initialize(parent)
         d(event)
       end
       return
-    end, parent.Author)
+    end, parent.Author, self.styleTable)
   end
   if not IsInGamepadPreferredMode() then
     self:CreateKeyboardUI()
