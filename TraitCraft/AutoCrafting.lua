@@ -55,7 +55,7 @@ end
 function TC_Autocraft:DepositCreatedItems()
   if next(self.resultsTable) then
     for key, itemTable in pairs(self.resultsTable) do
-      local itemLink = LibLazyCrafting:getItemLinkFromRequest(itemTable)
+      local itemLink = LibLazyCrafting.getItemLinkFromRequest(itemTable)
       d("itemLink")
       d(itemLink)
       local slotIndex = FindItemByLink(itemLink)
