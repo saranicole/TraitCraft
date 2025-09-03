@@ -33,4 +33,9 @@ TC.Lang = {
   SELECT_KNOWN_COLOR      =         "Seleccionar color de rasgo conocido",
   SELECT_UNKNOWN_COLOR    =         "Seleccionar color de rasgo desconocido",
   SELECT_RESEARCHING_COLOR =        "Seleccione el color para investigar",
+  ENABLE_AUTOCRAFT        =         "Habilitar la creación automática (Requiere la instalación de LibLazyCrafting)",
+  ENABLE_NIRNHONED        =         "Habilitar la fabricación automática de equipo nirnhoned",
+  CRAFT_ALL               =         "Crea los próximos objetos investigables",
+  CRAFT_SPECIFIC          =         "Cambiar personaje para crear",
+  LOG_INTO_CHAR           =         "Inicie sesión en los personajes para actualizar los datos",
 }

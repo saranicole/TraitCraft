@@ -32,7 +32,6 @@ TC.IconList = {
   "/esoui/art/crafting/gamepad/gp_jewelry_tabicon_icon.dds",
   "/esoui/art/crafting/gamepad/gp_reconstruct_tabicon.dds",
   "/esoui/art/crafting/jewelryset_tabicon_icon_up.dds",
-  "/esoui/art/crafting/patterns_tabicon_up.dds",
   "/esoui/art/crafting/provisioner_indexicon_fish_up.dds",
   "/esoui/art/crafting/provisioner_indexicon_furnishings_up.dds",
   "/esoui/art/crafting/retrait_tabicon_up.dds",
@@ -145,6 +144,10 @@ function TC.SetCrafterDefaults(characters)
   end
 end
 
+local function checkLLCAbsent()
+  return LibLazyCrafting == nil
+end
+
 function TC.BuildMenu()
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
@@ -217,6 +220,47 @@ function TC.BuildMenu()
   panel:AddSetting {
     type = LAM.ST_SECTION,
     label = TC.Lang.DISPLAY_SETTINGS,
+  }
+
+  --Enable autocraft
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_AUTOCRAFT,
+    getFunction = function() return TC.AV.settings.autoCraftOption end,
+    setFunction = function(var)
+      local oldOption = TC.AV.settings.autoCraftOption
+      TC.AV.settings.autoCraftOption = var
+      if var then
+        if not TC.autocraft then
+          TC.autocraft = TC_Autocraft:New(TC)
+        end
+      else
+        if TC.autocraft then
+          TC.autocraft:Destroy()
+        end
+      end
+      if oldOption ~= var then
+        ReloadUI("ingame")
+      end
+    end,
+    default = false,
+    disable = function()
+      return checkLLCAbsent()
+    end
+  }
+
+  --Whether to autocraft nirnhoned materials
+  panel:AddSetting {
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_NIRNHONED,
+    getFunction = function() return TC.AV.settings.autoCraftNirnhoned end,
+    setFunction = function(var)
+      TC.AV.settings.autoCraftNirnhoned = var
+    end,
+    default = false,
+    disable = function()
+      return not TC.AV.settings.autoCraftOption or checkLLCAbsent()
+    end
   }
 
   --Show known traits

@@ -33,4 +33,9 @@ TC.Lang = {
   SELECT_KNOWN_COLOR      =         "Sélectionnez la couleur du trait connu",
   SELECT_UNKNOWN_COLOR    =         "Sélectionnez une couleur de trait inconnue",
   SELECT_RESEARCHING_COLOR =        "Sélectionnez la couleur pour la recherche",
+  ENABLE_AUTOCRAFT        =         "Activer la création automatique (Nécessite l'installation de LibLazyCrafting)",
+  ENABLE_NIRNHONED        =         "Activer la fabrication automatique d'équipements Nirnhoned",
+  CRAFT_ALL               =         "Fabriquez les prochains articles à surveiller",
+  CRAFT_SPECIFIC          =         "Changer de personnage pour créer",
+  LOG_INTO_CHAR           =         "Connectez-vous aux personnages pour rafraîchir les données",
 }
