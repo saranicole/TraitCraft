@@ -34,7 +34,6 @@ TC.Lang = {
   SELECT_UNKNOWN_COLOR    =         "Select Unknown Trait Color",
   SELECT_RESEARCHING_COLOR =        "Select Researching Color",
   ENABLE_AUTOCRAFT        =         "Enable autocraft (Requires Installing LibLazyCrafting)",
-  ENABLE_AUTODEPOSIT      =         "Enable automatic deposit of autocrafted items into bank",
   ENABLE_NIRNHONED        =         "Enable autocrafting nirnhoned equipment (Requires autocraft)",
   CRAFT_ALL               =         "Craft next researchable items",
   CRAFT_SPECIFIC          =         "Change character to craft for",
