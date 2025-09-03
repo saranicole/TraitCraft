@@ -170,14 +170,26 @@ function TC_Autocraft:CreateKeyboardUI()
   local offsetX = 0
   local offsetY = 40
   local font = "ZoFontGameLarge"
-  local buttonClass = "ZO_DefaultButton"
   local smithing_scene = SCENE_MANAGER:GetScene(smithingSceneName)
-  local allBtn = GetControl("TC_ALL_CTL")
+  local allBtnParent = GetControl("TC_ALL_CTL")
+  if not allBtnParent then
+    allBtnParent = CreateControlFromVirtual("TC_ALL_CTL", toplevel, "TC_ALL_PARENT")
+  end
+  local altBtnParent = GetControl("TC_ALT_CTL")
+  if not altBtnParent then
+    altBtnParent = CreateControlFromVirtual("TC_ALT_CTL", toplevel, "TC_ALT_PARENT")
+  end
+  local allBtn = GetControl("$(parent)_TC_ALL_CTL")
   if not allBtn then
-    allBtn = CreateControlFromVirtual("TC_ALL_CTL", toplevel, "TC_ALL")
+    allBtn = CreateControl("$(parent)_TC_ALL", allBtnParent, CT_BUTTON)
   end
   allBtn:SetText(self.parent.Lang.CRAFT_ALL)
   allBtn:SetFont(font)
+  allBtn:SetDimensions( allBtnParent:GetWidth() , allBtnParent:GetHeight() )
+  allBtn:SetNormalTexture("EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds")
+  allBtn:SetPressedTexture("EsoUI/Art/Buttons/ESO_buttonlLarge_mouseDown.dds")
+  allBtn:SetMouseOverTexture("EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds")
+  allBtn:SetDisabledTexture("EsoUI/Art/Buttons/ESO_buttonLarge_disabled.dds")
   allBtn:SetAnchor(allBtnOrientation, toplevel, allBtnOrientation, 100, 0)
   allBtn:SetHandler("OnClicked", function()
     for id, char in pairs(self.parent.AV.activelyResearchingCharacters) do
@@ -187,12 +199,17 @@ function TC_Autocraft:CreateKeyboardUI()
   self.allFragment = ZO_SimpleSceneFragment:New(allBtn)
   smithing_scene:AddFragment(self.allFragment)
   for id, char in pairs(self.parent.AV.activelyResearchingCharacters) do
-    local altBtn = GetControl("TC_ALT_CTL_"..char.name)
+    local altBtn = GetControl("$(parent)_TC_ALT_"..char.name)
     if not altBtn then
-      altBtn = CreateControlFromVirtual("TC_ALT_CTL_"..char.name, toplevel, "TC_ALT")
+      altBtn = CreateControl("$(parent)_TC_ALT_"..char.name, altBtnParent, CT_BUTTON)
     end
     altBtn:SetAnchor(altBtnOrientation, allBtn, altBtnOrientation, offsetX, offsetY)
-    offsetX = offsetX + offsetX
+    altBtn:SetState( NORMAL )
+    altBtn:SetDimensions( altBtnParent:GetWidth() , altBtnParent:GetHeight() )
+    altBtn:SetNormalTexture("EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds")
+    altBtn:SetPressedTexture("EsoUI/Art/Buttons/ESO_buttonlLarge_mouseDown.dds")
+    altBtn:SetMouseOverTexture("EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds")
+    altBtn:SetDisabledTexture("EsoUI/Art/Buttons/ESO_buttonLarge_disabled.dds")
     offsetY = offsetY + offsetY
     altBtn:SetText(char.name)
     altBtn:SetFont(font)
