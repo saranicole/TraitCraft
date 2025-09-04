@@ -36,21 +36,19 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
 end
 
-local function getMinResearch(t, n)
-    local arr = {}
-    local result = {}
-    if t and next(t) then
-      local minKey, minValue
-      for key, value in pairs(t) do
-        if not minValue or value < minValue then
-            table.insert(arr, {key = key, value = value})
-        end
+local function sortKeysByValue(tbl)
+  local keys = {}
+  for k in pairs(tbl) do
+      table.insert(keys, k)
+  end
+  table.sort(keys, function(a, b)
+      if tbl[a] == tbl[b] then
+          return a < b  -- tiebreaker: smaller key first
+      else
+          return tbl[a] < tbl[b]
       end
-      for i = 1, math.min(n, #arr) do
-          table.insert(result, arr[i].key)
-      end
-    end
-    return result
+  end)
+  return keys
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
@@ -80,35 +78,46 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   for r = 1, researchLineLimit do
     if not self.lastCrafted[charId][r] then
       for t = 1, traitLimit do
-        if not self.lastCrafted[charId][r] or not self.lastCrafted[charId][r][t] then
-          if self.parent:DoesCharacterKnowTrait(craftingType, r, t) then
-            key = self.parent:GetTraitKey(craftingType, r, t)
-            trait = self.parent.AV.traitTable[key] or 0
-            if self.parent.charBitMissing(trait, mask) and not research[key] then
-              if not tempResearchTable.rCounter[r] then
-                tempResearchTable.rCounter[r] = 0
-                tempResearchTable.rObjects[r] = t
-              end
-              tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-            end
+        key = self.parent:GetTraitKey(craftingType, r, t)
+        trait = self.parent.AV.traitTable[key] or 0
+        if self.parent.charBitMissing(trait, mask) and not research[key] then
+          if not tempResearchTable.rCounter[r] then
+            tempResearchTable.rCounter[r] = 0
           end
+          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+          if not tempResearchTable.rObjects[r] then
+            tempResearchTable.rObjects[r] = {}
+          end
+          table.insert(tempResearchTable.rObjects[r], t)
         end
       end
     end
   end
   --Sort by minimum research duration
-  local rIndices = getMinResearch(tempResearchTable.rCounter, char["maxSimultResearch"][craftingType])
+  local rIndices = sortKeysByValue(tempResearchTable.rCounter)
+  local traitCounter = 0
   for i = 1, #rIndices do
-      local tIndex = tempResearchTable.rObjects[rIndices[i]]
-      local thisKey = self.parent:GetTraitKey(craftingType, rIndices[i], tIndex)
-      if not self.resultsTable[thisKey] then
-        self.resultsTable[thisKey] = {}
+    for j = 1, #tempResearchTable.rObjects[rIndices[i]] do
+      local tIndex = tempResearchTable.rObjects[rIndices[i]][j]
+      if not self.lastCrafted[charId][rIndices[i]] or not self.lastCrafted[charId][rIndices[i]][tIndex] then
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndices[i], tIndex) then
+          local thisKey = self.parent:GetTraitKey(craftingType, rIndices[i], tIndex)
+          if not self.resultsTable[thisKey] then
+            self.resultsTable[thisKey] = {}
+          end
+          self.resultsTable[key] = self:QueueItems(rIndices[i], tIndex)
+          if not self.lastCrafted[charId][rIndices[i]] then
+            self.lastCrafted[charId][rIndices[i]] = {}
+          end
+          self.lastCrafted[charId][rIndices[i]][tIndex] = true
+          traitCounter = traitCounter + 1
+          break
+        end
       end
-      self.resultsTable[key] = self:QueueItems(rIndices[i], tIndex)
-      if not self.lastCrafted[charId][rIndices[i]] then
-        self.lastCrafted[charId][rIndices[i]] = {}
-      end
-      self.lastCrafted[charId][rIndices[i]][tIndex] = true
+    end
+    if traitCounter >= char["maxSimultResearch"][craftingType] then
+      return
+    end
   end
 end
 
