@@ -95,6 +95,12 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   end
   --Sort by minimum research duration
   local rIndices = sortKeysByValue(tempResearchTable.rCounter)
+  if GetDisplayName() == "@Saranicole1980" then
+    d("unsorted")
+    d(tempResearchTable.rCounter)
+    d("sorted")
+    d(rIndices)
+  end
   local traitCounter = 0
   for i = 1, #rIndices do
     for j = 1, #tempResearchTable.rObjects[rIndices[i]] do
