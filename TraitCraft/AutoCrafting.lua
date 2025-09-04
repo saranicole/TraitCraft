@@ -60,6 +60,10 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   }
   local mask = self.parent.bitwiseChars[charId]
   local char = self.parent.AV.activelyResearchingCharacters[charId]
+  if not char then
+    d(self.parent.Lang.LOG_INTO_CHAR)
+    return
+  end
   if not char["maxSimultResearch"] then
     d(self.parent.Lang.LOG_INTO_CHAR)
     return
