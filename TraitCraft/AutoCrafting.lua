@@ -36,13 +36,34 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
 end
 
+local function sortKeysByValue(tbl)
+  local keys = {}
+  for k in pairs(tbl) do
+      table.insert(keys, k)
+  end
+  table.sort(keys, function(a, b)
+      if tbl[a] == tbl[b] then
+          return a < b  -- tiebreaker: smaller key first
+      else
+          return tbl[a] > tbl[b]
+      end
+  end)
+  return keys
+end
+
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local craftingType = GetCraftingInteractionType()
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
-  local charTable = {}
-  charTable[charId] = 0
+  local tempResearchTable = {
+    rCounter = {},
+    rObjects = {}
+  }
   local mask = self.parent.bitwiseChars[charId]
   local char = self.parent.AV.activelyResearchingCharacters[charId]
+  if not char then
+    d(self.parent.Lang.LOG_INTO_CHAR)
+    return
+  end
   if not char["maxSimultResearch"] then
     d(self.parent.Lang.LOG_INTO_CHAR)
     return
@@ -61,28 +82,45 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   for r = 1, researchLineLimit do
     if not self.lastCrafted[charId][r] then
       for t = 1, traitLimit do
-        if not self.lastCrafted[charId][r] or not self.lastCrafted[charId][r][t] then
-          if self.parent:DoesCharacterKnowTrait(craftingType, r, t) then
-            key = self.parent:GetTraitKey(craftingType, r, t)
-            trait = self.parent.AV.traitTable[key] or 0
-            if self.parent.charBitMissing(trait, mask) and not research[key] and (not charTable[charId] or charTable[charId] < char["maxSimultResearch"][craftingType] ) then
-              if not self.resultsTable[key] then
-                self.resultsTable[key] = {}
-              end
-              self.resultsTable[key] = self:QueueItems(r, t)
-              if not self.lastCrafted[charId][r] then
-                self.lastCrafted[charId][r] = {}
-              end
-              self.lastCrafted[charId][r][t] = true
-              charTable[charId] = charTable[charId] + 1
-              break
-            end
-            if charTable[charId] >= char["maxSimultResearch"][craftingType] then
-              return
-            end
+        key = self.parent:GetTraitKey(craftingType, r, t)
+        trait = self.parent.AV.traitTable[key] or 0
+        if self.parent.charBitMissing(trait, mask) and not research[key] then
+          if not tempResearchTable.rCounter[r] then
+            tempResearchTable.rCounter[r] = 0
           end
+          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+          if not tempResearchTable.rObjects[r] then
+            tempResearchTable.rObjects[r] = {}
+          end
+          table.insert(tempResearchTable.rObjects[r], t)
         end
       end
+    end
+  end
+  --Sort by minimum research duration
+  local rIndices = sortKeysByValue(tempResearchTable.rCounter)
+  local traitCounter = 0
+  for i = 1, #rIndices do
+    for j = 1, #tempResearchTable.rObjects[rIndices[i]] do
+      local tIndex = tempResearchTable.rObjects[rIndices[i]][j]
+      if not self.lastCrafted[charId][rIndices[i]] or not self.lastCrafted[charId][rIndices[i]][tIndex] then
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndices[i], tIndex) then
+          local thisKey = self.parent:GetTraitKey(craftingType, rIndices[i], tIndex)
+          if not self.resultsTable[thisKey] then
+            self.resultsTable[thisKey] = {}
+          end
+          self.resultsTable[key] = self:QueueItems(rIndices[i], tIndex)
+          if not self.lastCrafted[charId][rIndices[i]] then
+            self.lastCrafted[charId][rIndices[i]] = {}
+          end
+          self.lastCrafted[charId][rIndices[i]][tIndex] = true
+          traitCounter = traitCounter + 1
+          break
+        end
+      end
+    end
+    if traitCounter >= char["maxSimultResearch"][craftingType] then
+      return
     end
   end
 end
@@ -179,10 +217,7 @@ function TC_Autocraft:CreateKeyboardUI()
   if not altBtnParent then
     altBtnParent = CreateControlFromVirtual("TC_ALT_CTL", toplevel, "TC_ALT_PARENT")
   end
-  local allBtn = GetControl("$(parent)_TC_ALL_CTL")
-  if not allBtn then
-    allBtn = CreateControl("$(parent)_TC_ALL", allBtnParent, CT_BUTTON)
-  end
+  allBtn = CreateControl(nil, allBtnParent, CT_BUTTON)
   allBtn:SetText(self.parent.Lang.CRAFT_ALL)
   allBtn:SetFont(font)
   allBtn:SetDimensions( allBtnParent:GetWidth() , allBtnParent:GetHeight() )
@@ -199,10 +234,7 @@ function TC_Autocraft:CreateKeyboardUI()
   self.allFragment = ZO_SimpleSceneFragment:New(allBtn)
   smithing_scene:AddFragment(self.allFragment)
   for id, char in pairs(self.parent.AV.activelyResearchingCharacters) do
-    local altBtn = GetControl("$(parent)_TC_ALT_"..char.name)
-    if not altBtn then
-      altBtn = CreateControl("$(parent)_TC_ALT_"..char.name, altBtnParent, CT_BUTTON)
-    end
+    altBtn = CreateControl(nil, altBtnParent, CT_BUTTON)
     altBtn:SetAnchor(altBtnOrientation, allBtn, altBtnOrientation, offsetX, offsetY)
     altBtn:SetState( NORMAL )
     altBtn:SetDimensions( altBtnParent:GetWidth() , altBtnParent:GetHeight() )
