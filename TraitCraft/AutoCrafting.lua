@@ -79,41 +79,47 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   if not self.lastCrafted[charId] then
     self.lastCrafted[charId] = {}
   end
-  for r = 1, researchLineLimit do
-    if not self.lastCrafted[charId][r] then
-      for t = 1, traitLimit do
-        key = self.parent:GetTraitKey(craftingType, r, t)
-        trait = self.parent.AV.traitTable[key] or 0
-        if self.parent.charBitMissing(trait, mask) and not research[key] then
-          if not tempResearchTable.rCounter[r] then
-            tempResearchTable.rCounter[r] = 0
+  if not self.rIndices then
+    self.rIndices = {}
+  end
+  if not self.rIndices[craftingType] then
+    for r = 1, researchLineLimit do
+      if not self.lastCrafted[charId][r] then
+        for t = 1, traitLimit do
+          key = self.parent:GetTraitKey(craftingType, r, t)
+          trait = self.parent.AV.traitTable[key] or 0
+          if self.parent.charBitMissing(trait, mask) and not research[key] then
+            if not tempResearchTable.rCounter[r] then
+              tempResearchTable.rCounter[r] = 0
+            end
+            tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+            if not tempResearchTable.rObjects[r] then
+              tempResearchTable.rObjects[r] = {}
+            end
+            table.insert(tempResearchTable.rObjects[r], t)
           end
-          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-          if not tempResearchTable.rObjects[r] then
-            tempResearchTable.rObjects[r] = {}
-          end
-          table.insert(tempResearchTable.rObjects[r], t)
         end
       end
     end
+    self.rIndices[craftingType] = sortKeysByValue(tempResearchTable.rCounter)
   end
   --Sort by minimum research duration
-  local rIndices = sortKeysByValue(tempResearchTable.rCounter)
   local traitCounter = 0
-  for i = 1, #rIndices do
-    for j = 1, #tempResearchTable.rObjects[rIndices[i]] do
-      local tIndex = tempResearchTable.rObjects[rIndices[i]][j]
-      if not self.lastCrafted[charId][rIndices[i]] or not self.lastCrafted[charId][rIndices[i]][tIndex] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndices[i], tIndex) then
-          local thisKey = self.parent:GetTraitKey(craftingType, rIndices[i], tIndex)
+  for i = 1, #self.rIndices[craftingType] do
+    local rIndex = self.rIndices[craftingType][i]
+    for j = 1, #tempResearchTable.rObjects[rIndex] do
+      local tIndex = tempResearchTable.rObjects[rIndex][j]
+      if not self.lastCrafted[charId][rIndex] or not self.lastCrafted[charId][rIndex][tIndex] then
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+          local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
           if not self.resultsTable[thisKey] then
             self.resultsTable[thisKey] = {}
           end
-          self.resultsTable[key] = self:QueueItems(rIndices[i], tIndex)
-          if not self.lastCrafted[charId][rIndices[i]] then
-            self.lastCrafted[charId][rIndices[i]] = {}
+          self.resultsTable[key] = self:QueueItems(rIndex, tIndex)
+          if not self.lastCrafted[charId][rIndex] then
+            self.lastCrafted[charId][rIndex] = {}
           end
-          self.lastCrafted[charId][rIndices[i]][tIndex] = true
+          self.lastCrafted[charId][rIndex][tIndex] = true
           traitCounter = traitCounter + 1
           break
         end
