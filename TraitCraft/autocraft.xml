@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="TC_SCREEN" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
 			<Dimensions x="600" y="150" />
-			<Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="BOTTOM" offsetX="0" offsetY="-200" />
+			<Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="BOTTOM" offsetX="0" offsetY="-300" />
 			<Controls>
 				<Backdrop name="$(parent)Backdrop" centerColor="FFFFFF" edgeColor="00000000" inherits="ZO_InsetBackdrop">
 					<Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER" offsetX="0" offsetY="0" />
