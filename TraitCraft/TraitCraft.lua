@@ -238,6 +238,13 @@ function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIn
   end
 end
 
+function TraitCraft:StopTraitResearchingWithKey(id, key)
+  local char = TC.AV.activelyResearchingCharacters[id]
+  if char and char.research and next(char.research) then
+    char.research[key] = nil
+  end
+end
+
 function TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
   local charBitId = TC.bitwiseChars[id]
   if key and not TC.AV.traitTable[key] then
@@ -246,6 +253,7 @@ function TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
   if key and TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
     TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
   end
+  TraitCraft:StopTraitResearchingWithKey(id, key)
 end
 
 function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
@@ -258,12 +266,7 @@ function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
     if TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
       TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
     end
-    local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
-    if char and char.research and next(char.research) then
-      if char.research[key] then
-        char.research[key] = nil
-      end
-    end
+    TraitCraft:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
   end
 end
 
@@ -276,12 +279,7 @@ function TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
         TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
       end
     end
-    local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
-    if char and char.research and next(char.research) then
-      if char.research[key] then
-        char.research[key] = nil
-      end
-    end
+    TraitCraft:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
   end
 end
 
@@ -339,7 +337,6 @@ function TraitCraft:ScanForResearchExpired()
           local timeRemaining = GetDiffBetweenTimeStamps(done, now)
           if timeRemaining <= 0 then
             TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
-            char.research[key] = nil
             local traitKey = TraitCraft:GetTraitStringFromKey(key)
             d(TraitCraft.Lang.RESEARCH_EXPIRED..char.name.." - "..traitKey)
           end

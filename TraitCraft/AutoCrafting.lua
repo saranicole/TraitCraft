@@ -79,41 +79,49 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   if not self.lastCrafted[charId] then
     self.lastCrafted[charId] = {}
   end
-  for r = 1, researchLineLimit do
-    if not self.lastCrafted[charId][r] then
-      for t = 1, traitLimit do
-        key = self.parent:GetTraitKey(craftingType, r, t)
-        trait = self.parent.AV.traitTable[key] or 0
-        if self.parent.charBitMissing(trait, mask) and not research[key] then
-          if not tempResearchTable.rCounter[r] then
-            tempResearchTable.rCounter[r] = 0
+  if not self.rIndices[charId] then
+    self.rIndices[charId] = {}
+  end
+  if not self.rObjects[charId] then
+    self.rObjects[charId] = {}
+  end
+  if not self.rIndices[charId][craftingType] then
+    for r = 1, researchLineLimit do
+      if not self.lastCrafted[charId][r] then
+        for t = 1, traitLimit do
+          key = self.parent:GetTraitKey(craftingType, r, t)
+          trait = self.parent.AV.traitTable[key] or 0
+          if self.parent.charBitMissing(trait, mask) and not research[key] then
+            if not tempResearchTable.rCounter[r] then
+              tempResearchTable.rCounter[r] = 0
+            end
+            tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+            if not tempResearchTable.rObjects[r] then
+              tempResearchTable.rObjects[r] = {}
+            end
+            table.insert(tempResearchTable.rObjects[r], t)
           end
-          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-          if not tempResearchTable.rObjects[r] then
-            tempResearchTable.rObjects[r] = {}
-          end
-          table.insert(tempResearchTable.rObjects[r], t)
         end
       end
     end
+    self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+    self.rObjects[charId] = tempResearchTable.rObjects
   end
+
   --Sort by minimum research duration
-  local rIndices = sortKeysByValue(tempResearchTable.rCounter)
   local traitCounter = 0
-  for i = 1, #rIndices do
-    for j = 1, #tempResearchTable.rObjects[rIndices[i]] do
-      local tIndex = tempResearchTable.rObjects[rIndices[i]][j]
-      if not self.lastCrafted[charId][rIndices[i]] or not self.lastCrafted[charId][rIndices[i]][tIndex] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndices[i], tIndex) then
-          local thisKey = self.parent:GetTraitKey(craftingType, rIndices[i], tIndex)
-          if not self.resultsTable[thisKey] then
-            self.resultsTable[thisKey] = {}
-          end
-          self.resultsTable[key] = self:QueueItems(rIndices[i], tIndex)
-          if not self.lastCrafted[charId][rIndices[i]] then
-            self.lastCrafted[charId][rIndices[i]] = {}
-          end
-          self.lastCrafted[charId][rIndices[i]][tIndex] = true
+  for i = 1, #self.rIndices[charId][craftingType] do
+    local rIndex = self.rIndices[charId][craftingType][i]
+    if not self.lastCrafted[charId][rIndex] then
+      self.lastCrafted[charId][rIndex] = {}
+    end
+    for j = 1, #self.rObjects[charId][rIndex] do
+      local tIndex = self.rObjects[charId][rIndex][j]
+      if not self.lastCrafted[charId][rIndex][tIndex] then
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+          local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
+          self:QueueItems(rIndex, tIndex)
+          self.lastCrafted[charId][rIndex][tIndex] = true
           traitCounter = traitCounter + 1
           break
         end
@@ -272,8 +280,9 @@ function TC_Autocraft:Initialize(parent)
   if not LibLazyCrafting then
     return
   end
-  self.resultsTable = {}
   self.lastCrafted = {}
+  self.rIndices = {}
+  self.rObjects = {}
   if not LibLazyCrafting:GetRequestingAddon(parent.Name) then
     local styles = self:GetCommonStyles()
     self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
