@@ -102,23 +102,25 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
       end
     end
     self.rIndices[craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+    self.rObjects = tempResearchTable.rObjects
   end
+
   --Sort by minimum research duration
   local traitCounter = 0
   for i = 1, #self.rIndices[craftingType] do
     local rIndex = self.rIndices[craftingType][i]
-    for j = 1, #tempResearchTable.rObjects[rIndex] do
-      local tIndex = tempResearchTable.rObjects[rIndex][j]
-      if not self.lastCrafted[charId][rIndex] or not self.lastCrafted[charId][rIndex][tIndex] then
+    if not self.lastCrafted[charId][rIndex] then
+      self.lastCrafted[charId][rIndex] = {}
+    end
+    for j = 1, #self.rObjects[rIndex] do
+      local tIndex = self.rObjects[rIndex][j]
+      if not self.lastCrafted[charId][rIndex][tIndex] then
         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
           local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
           if not self.resultsTable[thisKey] then
             self.resultsTable[thisKey] = {}
           end
           self.resultsTable[key] = self:QueueItems(rIndex, tIndex)
-          if not self.lastCrafted[charId][rIndex] then
-            self.lastCrafted[charId][rIndex] = {}
-          end
           self.lastCrafted[charId][rIndex][tIndex] = true
           traitCounter = traitCounter + 1
           break
