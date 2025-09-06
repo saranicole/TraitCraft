@@ -6,13 +6,22 @@
 
 Tired of writing down which traits you need across which alts so that you can craft them on your main and research them on your alts?  This addon is for you!
 
-PC and Console: Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
+### Features
+PC and Console: 
+* Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
+* Autocraft next equipment needed for desired alts' research, with priority given to shorter research times
 
 Console only: Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
 
 <img width="318" height="756" alt="TraitCraft_screenshot" src="https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1" />
 
 Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968)
+
+### Requirements
+Requires LibHarvensAddonSettings
+
+### Optional Requirements (needed for Autocrafting)
+LibLazyCrafting
 
 ### How to Use
 1. Log into your main crafter ( the one with the most traits researched already )
@@ -25,6 +34,9 @@ Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u
 8. Open a crafting interaction
 9. Open the Research view
 10. See the icon(s) of the actively researching character(s) next to their needed traits
+
+### Research Refresh
+For the autocrafting update (>=1.7.0) you will need to log into your alts another time, but after that in-progress research is expected to update without re-logging in onto characters.
 
 ### How it works
 
