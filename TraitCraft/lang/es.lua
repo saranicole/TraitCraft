@@ -38,4 +38,7 @@ TC.Lang = {
   CRAFT_ALL               =         "Crea los próximos objetos investigables",
   CRAFT_SPECIFIC          =         "Cambiar personaje para crear",
   LOG_INTO_CHAR           =         "Inicie sesión en los personajes para actualizar los datos",
+  CRAFT_FAILED            =         "No hay artesanías exitosas para ",
+  MISSING_MATS            =         "Manualidades con materiales faltantes - ",
+  MISSING_KNOWLEDGE       =         "Artesanías que carecen de conocimientos - ",
 }

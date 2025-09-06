@@ -33,7 +33,7 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
-  return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, true)
+  return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
 end
 
 local function sortKeysByValue(tbl)
@@ -49,6 +49,32 @@ local function sortKeysByValue(tbl)
       end
   end)
   return keys
+end
+
+local function getKeys(tbl)
+  local keys = {}
+  if not tbl then
+    return {}
+  end
+  for k, _ in pairs(tbl) do
+      table.insert(keys, k)
+  end
+  return keys
+end
+
+function TC_Autocraft:rollupNonCraftable(nonCraftableTotals, craftingType)
+  local skillName = ZO_GetCraftingSkillName(craftingType)
+  return self.parent.Lang.CRAFT_FAILED..skillName..":\r\n"..self.parent.Lang.MISSING_MATS..nonCraftableTotals.materials.."\r\n"..self.parent.Lang.MISSING_KNOWLEDGE..nonCraftableTotals.knowledge
+end
+
+function TC_Autocraft:incrementNonCraftable(nonCraftableTotals, nonCraftable)
+  if nonCraftable.missingMats and next(nonCraftable.missingMats.materials) then
+    nonCraftableTotals.materials = nonCraftableTotals.materials + 1
+  end
+  if nonCraftable.missingKnowledge and next(nonCraftable.missingKnowledge.knowledge) then
+    nonCraftableTotals.knowledge = nonCraftableTotals.knowledge + 1
+  end
+  return nonCraftableTotals
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
@@ -79,6 +105,9 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   if not self.lastCrafted[charId] then
     self.lastCrafted[charId] = {}
   end
+  if not self.lastCrafted[charId][craftingType] then
+    self.lastCrafted[charId][craftingType] = {}
+  end
   if not self.rIndices[charId] then
     self.rIndices[charId] = {}
   end
@@ -87,7 +116,7 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   end
   if not self.rIndices[charId][craftingType] then
     for r = 1, researchLineLimit do
-      if not self.lastCrafted[charId][r] then
+      if not self.lastCrafted[charId][craftingType][r] then
         for t = 1, traitLimit do
           key = self.parent:GetTraitKey(craftingType, r, t)
           trait = self.parent.AV.traitTable[key] or 0
@@ -110,18 +139,27 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
 
   --Sort by minimum research duration
   local traitCounter = 0
+  local nonCraftableTotals = {
+    materials = 0,
+    knowledge = 0,
+  }
   for i = 1, #self.rIndices[charId][craftingType] do
     local rIndex = self.rIndices[charId][craftingType][i]
-    if not self.lastCrafted[charId][rIndex] then
-      self.lastCrafted[charId][rIndex] = {}
+    if not self.lastCrafted[charId][craftingType][rIndex] then
+      self.lastCrafted[charId][craftingType][rIndex] = {}
     end
     for j = 1, #self.rObjects[charId][rIndex] do
       local tIndex = self.rObjects[charId][rIndex][j]
-      if not self.lastCrafted[charId][rIndex][tIndex] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
-          self:QueueItems(rIndex, tIndex)
-          self.lastCrafted[charId][rIndex][tIndex] = true
+      if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
+        local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
+        --Debug
+        local request = self:QueueItems(rIndex, tIndex)
+        if not LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+          local nonCraftableObj = LibLazyCrafting.craftInteractionTables[craftingType]["getNonCraftableReasons"](request)
+          nonCraftableTotals = self:incrementNonCraftable(nonCraftableTotals, nonCraftableObj)
+        else
+          self.interactionTable:craftItem(craftingType)
+          self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
           traitCounter = traitCounter + 1
           break
         end
@@ -130,6 +168,11 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
     if traitCounter >= char["maxSimultResearch"][craftingType] then
       return
     end
+  end
+  --No successful crafts
+  if traitCounter == 0 then
+    SCENE_MANAGER:ShowBaseScene()
+    d(self:rollupNonCraftable(nonCraftableTotals, craftingType))
   end
 end
 
