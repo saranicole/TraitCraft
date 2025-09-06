@@ -38,7 +38,7 @@ TC.Lang = {
   CRAFT_ALL               =         "Craft next researchable items",
   CRAFT_SPECIFIC          =         "Change character to craft for",
   LOG_INTO_CHAR           =         "Log into researching characters to refresh data",
-  CRAFT_FAILED            =         "Autocraft failed for ",
+  CRAFT_FAILED            =         "No successful crafts for ",
   MISSING_MATS            =         "Crafts missing materials - ",
   MISSING_KNOWLEDGE       =         "Crafts missing knowledge - ",
 }

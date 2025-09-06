@@ -171,6 +171,7 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   end
   --No successful crafts
   if traitCounter == 0 then
+    SCENE_MANAGER:ShowBaseScene()
     d(self:rollupNonCraftable(nonCraftableTotals, craftingType))
   end
 end
