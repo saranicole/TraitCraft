@@ -75,10 +75,6 @@ I give credit to Baertram and the other developers ingeniousclown, katkat42, and
 
 Special thanks to [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968) for the original ESO UI post that got me thinking about this problem in ESO, and for alpha testing some very unstable releases. 
 
-### Requirements
-
-Requires LibHarvensAddonSettings
-
 ### Development Status
 
-Development Status is working with known bugs, install at your own risk!
+Development Status: Stable
