@@ -38,4 +38,7 @@ TC.Lang = {
   CRAFT_ALL               =         "Fabriquez les prochains articles à surveiller",
   CRAFT_SPECIFIC          =         "Changer de personnage pour créer",
   LOG_INTO_CHAR           =         "Connectez-vous aux personnages pour rafraîchir les données",
+  CRAFT_FAILED            =         "La fabrication automatique a échoué pour ",
+  MISSING_MATS            =         "Matériaux manquants pour l'artisanat - ",
+  MISSING_KNOWLEDGE       =         "L'artisanat manque de connaissances - ",
 }
