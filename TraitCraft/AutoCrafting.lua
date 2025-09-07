@@ -62,21 +62,6 @@ local function getKeys(tbl)
   return keys
 end
 
-function TC_Autocraft:rollupNonCraftable(nonCraftableTotals, craftingType)
-  local skillName = ZO_GetCraftingSkillName(craftingType)
-  return self.parent.Lang.CRAFT_FAILED..skillName..":\r\n"..self.parent.Lang.MISSING_MATS..nonCraftableTotals.materials.."\r\n"..self.parent.Lang.MISSING_KNOWLEDGE..nonCraftableTotals.knowledge
-end
-
-function TC_Autocraft:incrementNonCraftable(nonCraftableTotals, nonCraftable)
-  if nonCraftable.missingMats and next(nonCraftable.missingMats.materials) then
-    nonCraftableTotals.materials = nonCraftableTotals.materials + 1
-  end
-  if nonCraftable.missingKnowledge and next(nonCraftable.missingKnowledge.knowledge) then
-    nonCraftableTotals.knowledge = nonCraftableTotals.knowledge + 1
-  end
-  return nonCraftableTotals
-end
-
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local craftingType = GetCraftingInteractionType()
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
@@ -151,17 +136,14 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
     for j = 1, #self.rObjects[charId][rIndex] do
       local tIndex = self.rObjects[charId][rIndex][j]
       if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
-        local thisKey = self.parent:GetTraitKey(craftingType, rIndex, tIndex)
-        --Debug
-        local request = self:QueueItems(rIndex, tIndex)
-        if not LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
-          local nonCraftableObj = LibLazyCrafting.craftInteractionTables[craftingType]["getNonCraftableReasons"](request)
-          nonCraftableTotals = self:incrementNonCraftable(nonCraftableTotals, nonCraftableObj)
-        else
-          self.interactionTable:craftItem(craftingType)
-          self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
-          traitCounter = traitCounter + 1
-          break
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+          local request = self:QueueItems(rIndex, tIndex)
+          if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+            self.interactionTable:craftItem(craftingType)
+            self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
+            traitCounter = traitCounter + 1
+            break
+          end
         end
       end
     end
@@ -172,7 +154,8 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   --No successful crafts
   if traitCounter == 0 then
     SCENE_MANAGER:ShowBaseScene()
-    d(self:rollupNonCraftable(nonCraftableTotals, craftingType))
+    local skillName = ZO_GetCraftingSkillName(craftingType)
+    d(self.parent.Lang.CRAFT_FAILED..skillName)
   end
 end
 

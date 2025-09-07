@@ -364,6 +364,7 @@ function TC.BuildMenu()
     label = TC.Lang.ACTIVE_APPLY,
     buttonText = TC.Lang.ACTIVE_APPLY,
     clickHandler  = function()
+      TC.AV.allCrafterIds = {}
       if MAIN_CRAFTER_NAME and MAIN_CRAFTER_ID then
         TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
         if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
