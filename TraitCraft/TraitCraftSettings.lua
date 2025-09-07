@@ -152,7 +152,7 @@ function TC.BuildMenu()
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
 
-  local IconName, Icon, LimitTraits
+  local IconName, Icon, LimitTraits,
 
   local panel = LAM:AddAddon(TC.Name, {
     allowDefaults = false,  -- Show "Reset to Defaults" button
@@ -364,6 +364,7 @@ function TC.BuildMenu()
     label = TC.Lang.ACTIVE_APPLY,
     buttonText = TC.Lang.ACTIVE_APPLY,
     clickHandler  = function()
+      TC.AV.allCrafterIds = {}
       if MAIN_CRAFTER_NAME and MAIN_CRAFTER_ID then
         TC.AV.mainCrafter = { name = MAIN_CRAFTER_NAME, data = MAIN_CRAFTER_ID }
         if not TC.isValueInTable(TC.AV.allCrafterIds, MAIN_CRAFTER_ID) then
