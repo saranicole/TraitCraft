@@ -152,7 +152,7 @@ function TC.BuildMenu()
   local characterList = TC.GetCharacterList()
   TC.SetCrafterDefaults(characterList)
 
-  local IconName, Icon, LimitTraits,
+  local IconName, Icon, LimitTraits
 
   local panel = LAM:AddAddon(TC.Name, {
     allowDefaults = false,  -- Show "Reset to Defaults" button
