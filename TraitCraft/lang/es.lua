@@ -41,4 +41,8 @@ TC.Lang = {
   CRAFT_FAILED            =         "No hay artesanías exitosas para ",
   MISSING_MATS            =         "Manualidades con materiales faltantes - ",
   MISSING_KNOWLEDGE       =         "Artesanías que carecen de conocimientos - ",
+  STATS_NAME              =         "Nombre",
+  STATS_TYPE              =         "Tipo",
+  STATS_RESEARCHING       =         "Investigación",
+  STATS_FINISH            =         "Fin",
 }
