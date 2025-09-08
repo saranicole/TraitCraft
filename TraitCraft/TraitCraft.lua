@@ -208,7 +208,7 @@ local function humanizeFutureTime(targetTime)
     end
 end
 
-function TC.StatsReport()
+function TraitCraft:StatsReport()
   --Build Stats Report on Current Research
   local headers = { TC.Lang.STATS_NAME, TC.Lang.STATS_TYPE, TC.Lang.STATS_RESEARCHING, TC.Lang.STATS_FINISH }
   local widths
@@ -268,7 +268,9 @@ local function OnAddOnLoaded(eventCode, addonName)
       EVENT_MANAGER:RegisterForUpdate("TC_TraitMaskMigration", 0, TC.ResolveTraitDiffs)
     end
   end
-  SLASH_COMMANDS["/tcstats"] = function(args) TC.StatsReport() end
+  SLASH_COMMANDS["/tcstats"] = function(args)
+    TraitCraft:StatsReport()
+  end
 end
 
 function TC.isValueInTable(table, element)
