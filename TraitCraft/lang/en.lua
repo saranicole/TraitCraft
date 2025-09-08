@@ -41,4 +41,9 @@ TC.Lang = {
   CRAFT_FAILED            =         "No successful crafts for ",
   MISSING_MATS            =         "Crafts missing materials - ",
   MISSING_KNOWLEDGE       =         "Crafts missing knowledge - ",
+  STATS_NAME              =         "Name",
+  STATS_TYPE              =         "Type",
+  STATS_RESEARCHING       =         "Research",
+  STATS_FINISH            =         "End",
+
 }

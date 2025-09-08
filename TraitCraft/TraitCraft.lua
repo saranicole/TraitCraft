@@ -141,6 +141,116 @@ function TC.ResolveTraitDiffs()
   end
 end
 
+function TraitCraft:GetTraitFromKey(key)
+  traitIndex = key % 10000 % 100
+  researchLineIndex = (key % 10000 - traitIndex) / 100
+  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
+--   local craftingName = GetCraftingSkillName(craftingSkillType)
+--   local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
+--   local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
+--   local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+	return craftingSkillType, researchLineIndex, traitIndex
+end
+
+function TraitCraft:GetTraitStringFromKey(key)
+  traitIndex = key % 10000 % 100
+  researchLineIndex = (key % 10000 - traitIndex) / 100
+  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
+  local craftingName = GetCraftingSkillName(craftingSkillType)
+  local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
+  local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
+  local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+	return researchLineName..": "..traitName
+end
+
+local function formatRow(cols, widths)
+    local out = {}
+    for i, col in ipairs(cols) do
+        local text = tostring(col)
+        local width = widths[i] or #text
+        -- pad or truncate
+        if #text < width then
+            text = text .. string.rep(" ", width - #text)
+        else
+            text = string.sub(text, 1, width)
+        end
+        table.insert(out, text)
+    end
+    return table.concat(out, " | ")
+end
+
+local function humanizeFutureTime(targetTime)
+    local now = GetTimeStamp()
+    local diff = targetTime - now
+    if diff < 0 then diff = 0 end  -- clamp if passed
+
+    if diff < 60 then
+        return "in a few seconds"
+    elseif diff < 3600 then
+        local minutes = math.floor(diff / 60)
+        return zo_strformat("in <<1>> minutes", minutes)
+    elseif diff < 2 * 3600 then
+        return "in about an hour"
+    elseif diff < 86400 then
+        local hours = math.floor(diff / 3600)
+        return zo_strformat("in <<1>> hours", hours)
+    elseif diff < 2 * 86400 then
+        return "tomorrow"
+    elseif diff < 7 * 86400 then
+        local days = math.floor(diff / 86400)
+        return zo_strformat("in <<1>> days", days)
+    elseif diff < 30 * 86400 then
+        local weeks = math.floor(diff / (7 * 86400))
+        return zo_strformat("in <<1>> weeks", weeks)
+    else
+        local months = math.floor(diff / (30 * 86400))
+        return zo_strformat("in <<1>> months", months)
+    end
+end
+
+function TC.StatsReport()
+  --Build Stats Report on Current Research
+  local headers = { TC.Lang.STATS_NAME, TC.Lang.STATS_TYPE, TC.Lang.STATS_RESEARCHING, TC.Lang.STATS_FINISH }
+  local widths
+  local namePad
+
+  if IsInGamepadPreferredMode() then
+    widths = {30, 30, 30, 25}
+    d(formatRow(headers, widths))
+    d(string.rep("-", 114))
+    namePad = 60
+  else
+    widths = {5, 5, 5, 5}
+    d(formatRow(headers, widths))
+    d(string.rep("-", 20))
+    namePad = 5
+  end
+  local summary = {}
+  for id, char in pairs(TC.AV.activelyResearchingCharacters) do
+    if not summary[id] then
+      summary[id] = {}
+    end
+    for key, done in pairs(char.research) do
+      local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
+      local keyStr = TraitCraft:GetTraitStringFromKey(key)
+      if not summary[id][craftingSkillType] then
+        summary[id][craftingSkillType] = {}
+      end
+      table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
+    end
+  end
+  for iDex, value in pairs(summary) do
+    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, "", "", "" }, widths))
+    for j, v in pairs(value) do
+      d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
+      for _, vObj in ipairs(v) do
+        d(formatRow({ "", "", vObj.keyStr, humanizeFutureTime(vObj.done) }, widths))
+      end
+    end
+    d(string.rep("- ", namePad))
+  end
+end
+
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
@@ -158,6 +268,7 @@ local function OnAddOnLoaded(eventCode, addonName)
       EVENT_MANAGER:RegisterForUpdate("TC_TraitMaskMigration", 0, TC.ResolveTraitDiffs)
     end
   end
+  SLASH_COMMANDS["/tcstats"] = function(args) TC.StatsReport() end
 end
 
 function TC.isValueInTable(table, element)
@@ -505,28 +616,6 @@ local function OnCraftingInteract(eventCode, craftingType)
       end)
     end
   end
-end
-
-function TraitCraft:GetTraitFromKey(key)
-  traitIndex = key % 10000 % 100
-  researchLineIndex = (key % 10000 - traitIndex) / 100
-  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
---   local craftingName = GetCraftingSkillName(craftingSkillType)
---   local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
---   local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
---   local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
-	return craftingSkillType, researchLineIndex, traitIndex
-end
-
-function TraitCraft:GetTraitStringFromKey(key)
-  traitIndex = key % 10000 % 100
-  researchLineIndex = (key % 10000 - traitIndex) / 100
-  craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
-  local craftingName = GetCraftingSkillName(craftingSkillType)
-  local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
-  local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
-  local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
-	return researchLineName..": "..traitName
 end
 
 EVENT_MANAGER:RegisterForEvent(TC.Name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
