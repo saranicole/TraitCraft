@@ -249,8 +249,9 @@ function TraitCraft:StatsReport()
     local sumStr = ""
     if type(summary[iDex]) == "string" then
       sumStr = summary[iDex]
-    else
-      d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
+    end
+    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
+    if type(summary[iDex]) == "table" then
       for j, v in pairs(value) do
         d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
         for _, vObj in ipairs(v) do
