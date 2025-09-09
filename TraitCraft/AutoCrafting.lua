@@ -12,19 +12,20 @@ function TC_Autocraft:GetPatternIndexFromResearchLine(craftingType, researchLine
     if not name then
         return nil
     end
+    local patternName
     -- Scan through patterns to find one with an exact match
     for patternIndex = 1, GetNumSmithingPatterns() do
-        local patternName = GetSmithingPatternInfo(patternIndex)
+        patternName = GetSmithingPatternInfo(patternIndex)
         if name == patternName then
           return patternIndex
         end
     end
     -- Fall back to approximately the same name
-    for patternIndex = 1, GetNumSmithingPatterns() do
-        local patternName = GetSmithingPatternInfo(patternIndex)
+    for pIndex = 1, GetNumSmithingPatterns() do
+        patternName = GetSmithingPatternInfo(pIndex)
         local found = string.find(name, patternName, 1, true)
         if found ~= nil then
-            return patternIndex
+            return pIndex
         end
     end
     return nil
