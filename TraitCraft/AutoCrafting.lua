@@ -12,12 +12,20 @@ function TC_Autocraft:GetPatternIndexFromResearchLine(craftingType, researchLine
     if not name then
         return nil
     end
-    -- Scan through patterns to find one with the same name
+    local patternName
+    -- Scan through patterns to find one with an exact match
     for patternIndex = 1, GetNumSmithingPatterns() do
-        local patternName = GetSmithingPatternInfo(patternIndex)
+        patternName = GetSmithingPatternInfo(patternIndex)
+        if name == patternName then
+          return patternIndex
+        end
+    end
+    -- Fall back to approximately the same name
+    for pIndex = 1, GetNumSmithingPatterns() do
+        patternName = GetSmithingPatternInfo(pIndex)
         local found = string.find(name, patternName, 1, true)
         if found ~= nil then
-            return patternIndex
+            return pIndex
         end
     end
     return nil
@@ -124,10 +132,6 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
 
   --Sort by minimum research duration
   local traitCounter = 0
-  local nonCraftableTotals = {
-    materials = 0,
-    knowledge = 0,
-  }
   for i = 1, #self.rIndices[charId][craftingType] do
     local rIndex = self.rIndices[charId][craftingType][i]
     if not self.lastCrafted[charId][craftingType][rIndex] then

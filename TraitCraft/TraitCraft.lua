@@ -213,6 +213,7 @@ function TraitCraft:StatsReport()
   local headers = { TC.Lang.STATS_NAME, TC.Lang.STATS_TYPE, TC.Lang.STATS_RESEARCHING, TC.Lang.STATS_FINISH }
   local widths
   local namePad
+  local summaryStr = ""
 
   if IsInGamepadPreferredMode() then
     widths = {30, 30, 30, 25}
@@ -230,24 +231,35 @@ function TraitCraft:StatsReport()
     if not summary[id] then
       summary[id] = {}
     end
-    for key, done in pairs(char.research) do
-      local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
-      local keyStr = TraitCraft:GetTraitStringFromKey(key)
-      if not summary[id][craftingSkillType] then
-        summary[id][craftingSkillType] = {}
+    if char.research then
+      summaryStr = ""
+      for key, done in pairs(char.research) do
+        local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
+        local keyStr = TraitCraft:GetTraitStringFromKey(key)
+        if not summary[id][craftingSkillType] then
+          summary[id][craftingSkillType] = {}
+        end
+        table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
       end
-      table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
+    else
+      summary[id] = TC.Lang.LOG_INTO_CHAR
     end
   end
   for iDex, value in pairs(summary) do
-    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, "", "", "" }, widths))
-    for j, v in pairs(value) do
-      d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
-      for _, vObj in ipairs(v) do
-        d(formatRow({ "", "", vObj.keyStr, humanizeFutureTime(vObj.done) }, widths))
-      end
+    local sumStr = ""
+    if type(summary[iDex]) == "string" then
+      sumStr = summary[iDex]
     end
-    d(string.rep("- ", namePad))
+    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
+    if type(summary[iDex]) == "table" then
+      for j, v in pairs(value) do
+        d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
+        for _, vObj in ipairs(v) do
+          d(formatRow({ "", "", vObj.keyStr, humanizeFutureTime(vObj.done) }, widths))
+        end
+      end
+      d(string.rep("- ", namePad))
+    end
   end
 end
 
@@ -466,6 +478,9 @@ function TraitCraft:ScanMaxNumResearch()
   end
   for i = 1, #craftTypes do
     TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"][craftTypes[i]] = GetMaxSimultaneousSmithingResearch(craftTypes[i])
+  end
+  if not TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].research then
+    TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].research = {}
   end
 end
 
