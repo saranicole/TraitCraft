@@ -213,6 +213,7 @@ function TraitCraft:StatsReport()
   local headers = { TC.Lang.STATS_NAME, TC.Lang.STATS_TYPE, TC.Lang.STATS_RESEARCHING, TC.Lang.STATS_FINISH }
   local widths
   local namePad
+  local summaryStr = ""
 
   if IsInGamepadPreferredMode() then
     widths = {30, 30, 30, 25}
@@ -230,17 +231,27 @@ function TraitCraft:StatsReport()
     if not summary[id] then
       summary[id] = {}
     end
-    for key, done in pairs(char.research) do
-      local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
-      local keyStr = TraitCraft:GetTraitStringFromKey(key)
-      if not summary[id][craftingSkillType] then
-        summary[id][craftingSkillType] = {}
+    if char.research then
+      summaryStr = ""
+      for key, done in pairs(char.research) do
+        local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
+        local keyStr = TraitCraft:GetTraitStringFromKey(key)
+        if not summary[id][craftingSkillType] then
+          summary[id][craftingSkillType] = {}
+        end
+        table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
       end
-      table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
+    else
+      summaryStr = TC.Lang.LOG_INTO_CHAR
     end
+    summary[id] = summaryStr
   end
   for iDex, value in pairs(summary) do
-    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, "", "", "" }, widths))
+    local sumStr = ""
+    if type(summary[iDex]) == "string" then
+      sumStr = summary[iDex]
+    end
+    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
     for j, v in pairs(value) do
       d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
       for _, vObj in ipairs(v) do
