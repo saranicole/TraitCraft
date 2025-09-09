@@ -10,6 +10,7 @@ Tired of writing down which traits you need across which alts so that you can cr
 PC and Console: 
 * Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
 * Autocraft next equipment needed for desired alts' research, with priority given to shorter research times
+* Slash command "/tcstats" will give you a quick overview of research on actively researching characters
 
 Console only: Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
 
