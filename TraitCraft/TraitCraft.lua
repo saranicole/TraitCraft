@@ -242,23 +242,23 @@ function TraitCraft:StatsReport()
         table.insert(summary[id][craftingSkillType], { keyStr = keyStr, done = done  })
       end
     else
-      summaryStr = TC.Lang.LOG_INTO_CHAR
+      summary[id] = TC.Lang.LOG_INTO_CHAR
     end
-    summary[id] = summaryStr
   end
   for iDex, value in pairs(summary) do
     local sumStr = ""
     if type(summary[iDex]) == "string" then
       sumStr = summary[iDex]
-    end
-    d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
-    for j, v in pairs(value) do
-      d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
-      for _, vObj in ipairs(v) do
-        d(formatRow({ "", "", vObj.keyStr, humanizeFutureTime(vObj.done) }, widths))
+    else
+      d(formatRow({ TC.AV.activelyResearchingCharacters[iDex].name, sumStr, "", "" }, widths))
+      for j, v in pairs(value) do
+        d(formatRow({"", GetCraftingSkillName(j), "", ""}, widths))
+        for _, vObj in ipairs(v) do
+          d(formatRow({ "", "", vObj.keyStr, humanizeFutureTime(vObj.done) }, widths))
+        end
       end
+      d(string.rep("- ", namePad))
     end
-    d(string.rep("- ", namePad))
   end
 end
 
