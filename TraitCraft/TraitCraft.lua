@@ -479,6 +479,9 @@ function TraitCraft:ScanMaxNumResearch()
   for i = 1, #craftTypes do
     TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"][craftTypes[i]] = GetMaxSimultaneousSmithingResearch(craftTypes[i])
   end
+  if not TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].research then
+    TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId].research = {}
+  end
 end
 
 local function TC_Event_Player_Activated(event, isA)
