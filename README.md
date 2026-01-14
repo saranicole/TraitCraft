@@ -36,38 +36,6 @@ LibLazyCrafting
 9. Open the Research view
 10. See the icon(s) of the actively researching character(s) next to their needed traits
 
-### Research Refresh
-For the autocrafting update (>=1.7.0) you will need to log into your alts another time, but after that in-progress research is expected to update without re-logging in onto characters.
-
-### How it works
-
-In order to operate within the limits of console addons and compress the trait table, the traits have been loaded into saved variables with their "key" set to a combined number which represents the known state of all the actively researching characters.  To accomplish this, each character is assigned a number which is 2 to the power of their order in the character lineup.  When the traits are scanned, this number is tested for in the existing trait value.  If a character now knows the trait but its power of two number is not present (or in bitwise math, its bit is not turned on), the power of two number is added.  Then when the research traits are loaded with the crafting character, the power of two number can be tested for again and the specific number identified.
-
-Example:
-* Character 1 → mask = 1   2^0 (since bitwise math operates on a zero index)
-* Character 2 → mask = 2   2^1
-* Character 3 → mask = 4   2^2
-* Character 4 → mask = 8   2^3
-* Character 5 → mask = 16  2^4
-* Character 6 → mask = 32  2^5
-* Character 7 → mask = 64  2^6
-
-This corresponds to binary numbers when added up - for instance, if characters 3 and 4 know a trait, their combined binary number is 1100, and their decimal number is 12.
-
-If character 3 learns the trait, I can subtract 4 from 12 to get 8, and later test the value with the following function:
-
-(trait % (mask*2)) < mask
-
-or with real numbers:
-
-(8 % (4*2)) < 4  
-
-(8 % (8)) < 4
-
-0 < 4
-
-The result is that the trait table can contain the needed information, while only consisting of trait keys (crafting type * 10000 + research line * 100 + trait index) set to this combined character summary.  Super compact and suitable for use on consoles!
-
 ### Thanks, Credit, and Inspiration
 
 Many thanks to wolfstar for their time - with their permission I took the entire feature of inventory tooltips from TraitBuddy for use on console.  The inventory tooltip feature is only available on consoles to preserve compatibility with TraitBuddy on PC.
@@ -79,3 +47,7 @@ Special thanks to [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=8396
 ### Development Status
 
 Development Status: Stable
+
+### Resources
+* Github - https://github.com/saranicole/TraitCraft
+* Console mod page - https://mods.bethesda.net/en/eldersc...ecb/TraitCraft
