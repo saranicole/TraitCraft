@@ -82,7 +82,7 @@ jobs:
           api_key: ${{ secrets.ESOUI_API_KEY }}
           addon_id: ${{ vars.ESOUI_ADDON_ID }}
           version: ${{ env.ADDON_VERSION }}
-          zip_file: "${{ env.ZIP_FULL_NAME }}"
+          zip_file: "${{ github.workspace }}/${{ env.ADDON_NAME }}/${{ env.ZIP_FULL_NAME }}"
           changelog_file: latest_changes.md
           description_file: 'README.md'
 
