@@ -70,7 +70,7 @@ jobs:
           name: "${{ env.ADDON_VERSION }}"
           commit: ${{ github.ref }}
           tag: "${{ env.ADDON_VERSION }}"
-          artifacts: "${{ env.ZIP_FULL_NAME }}"
+          artifacts: "${{ github.workspace }}/${{ env.ADDON_NAME }}/${{ env.ZIP_FULL_NAME }}"
           artifactContentType: application/zip
           bodyFile: latest_changes.md
           allowUpdates: true
