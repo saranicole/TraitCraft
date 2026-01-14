@@ -13,6 +13,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip3 install pipx md2bbcode
+
       - name: Get Next Version
         id: semver
         uses: ietf-tools/semver-action@v1
@@ -63,6 +67,10 @@ jobs:
           awk '/^## / { if (!found) { found=1; print; next } else { exit } } found' CHANGELOG.md > latest_changes.md
           cat latest_changes.md
 
+      - name: Convert to bbcode for ESOUI
+        run: |
+          python3 -m pipx run md2bbcode README.md > README_ESOUI.txt
+
       - name: Create GitHub Release
         #id: create_release
         uses: ncipollo/release-action@v1
@@ -84,7 +92,7 @@ jobs:
           version: ${{ env.ADDON_VERSION }}
           zip_file: "${{ github.workspace }}/${{ env.ADDON_NAME }}/${{ env.ZIP_FULL_NAME }}"
           changelog_file: latest_changes.md
-          description_file: 'README.md'
+          description_file: 'README_ESOUI.txt'
 
       - name: Upload to BNET
         uses: m00nyONE/bnet-upload@main
