@@ -7,7 +7,9 @@
 Tired of writing down which traits you need across which alts so that you can craft them on your main and research them on your alts?  This addon is for you!
 
 [size=+2]Features[/size]
+
 PC and Console: 
+
 * Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
 * Autocraft next equipment needed for desired alts' research, with priority given to shorter research times
 * Slash command "/tcstats" will give you a quick overview of research on actively researching characters
@@ -19,9 +21,11 @@ Console only: Shows researching statuses of actively researching characters on i
 Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968)
 
 [size=+2]Requirements[/size]
+
 Requires LibHarvensAddonSettings
 
 [size=+2]Optional Requirements (needed for Autocrafting)[/size]
+
 LibLazyCrafting
 
 [size=+2]How to Use[/size]
