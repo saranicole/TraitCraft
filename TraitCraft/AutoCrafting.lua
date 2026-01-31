@@ -36,12 +36,16 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 	return foundTraitType or ITEM_TRAIT_TYPE_NONE
 end
 
-function TC_Autocraft:QueueItems(researchIndex, traitIndex)
+function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
-  return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
+  local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
+  if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+    self.interactionTable:craftItem(craftingType)
+    self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
+  end
 end
 
 local function sortKeysByValue(tbl)
@@ -72,96 +76,127 @@ end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local craftingType = GetCraftingInteractionType()
-  local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
-  local tempResearchTable = {
-    rCounter = {},
-    rObjects = {}
-  }
-  local mask = self.parent.bitwiseChars[charId]
-  local char = self.parent.AV.activelyResearchingCharacters[charId]
-  if not char then
-    d(self.parent.Lang.LOG_INTO_CHAR)
-    return
-  end
-  if not char["maxSimultResearch"] then
-    d(self.parent.Lang.LOG_INTO_CHAR)
-    return
-  end
-  local research = char.research or {}
-  local researchLineLimit = GetNumSmithingResearchLines(craftingType)
-  local traitLimit = 9
-  if not self.parent.AV.settings.autoCraftNirnhoned and self.parent.isValueInTable(nirnCraftTypes, craftingType) then
-    traitLimit = 8
-  end
-  local key
-  local trait
-  if not self.lastCrafted[charId] then
-    self.lastCrafted[charId] = {}
+  if not TC_Autocraft.lastCrafted[charId] then
+    TC_Autocraft.lastCrafted[charId] = {}
   end
   if not self.lastCrafted[charId][craftingType] then
     self.lastCrafted[charId][craftingType] = {}
   end
-  if not self.rIndices[charId] then
-    self.rIndices[charId] = {}
-  end
-  if not self.rObjects[charId] then
-    self.rObjects[charId] = {}
-  end
-  if not self.rIndices[charId][craftingType] then
-    for r = 1, researchLineLimit do
-      if not self.lastCrafted[charId][craftingType][r] then
-        for t = 1, traitLimit do
-          key = self.parent:GetTraitKey(craftingType, r, t)
-          trait = self.parent.AV.traitTable[key] or 0
-          if self.parent.charBitMissing(trait, mask) and not research[key] then
-            if not tempResearchTable.rCounter[r] then
-              tempResearchTable.rCounter[r] = 0
-            end
-            tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-            if not tempResearchTable.rObjects[r] then
-              tempResearchTable.rObjects[r] = {}
-            end
-            table.insert(tempResearchTable.rObjects[r], t)
+  self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
+    local craftCounter = 0
+    for rIndex, entry in pairs(scanResults[craftingType]) do
+      if not TC_Autocraft.lastCrafted[charId][craftingType][rIndex] then
+        TC_Autocraft.lastCrafted[charId][craftingType][rIndex] = {}
+      end
+      for tIndex, obj in pairs(entry[rIndex]) do
+        if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
+          if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+            TC_Autocraft:QueueItems(charId, rIndex, tIndex)
+            craftCounter = craftCounter + 1
           end
         end
       end
     end
-    self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
-    self.rObjects[charId] = tempResearchTable.rObjects
-  end
-
-  --Sort by minimum research duration
-  local traitCounter = 0
-  for i = 1, #self.rIndices[charId][craftingType] do
-    local rIndex = self.rIndices[charId][craftingType][i]
-    if not self.lastCrafted[charId][craftingType][rIndex] then
-      self.lastCrafted[charId][craftingType][rIndex] = {}
+    if craftCounter == 0 then
+      SCENE_MANAGER:ShowBaseScene()
+      local skillName = ZO_GetCraftingSkillName(craftingType)
+      d(self.parent.Lang.CRAFT_FAILED..skillName)
     end
-    for j = 1, #self.rObjects[charId][rIndex] do
-      local tIndex = self.rObjects[charId][rIndex][j]
-      if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          local request = self:QueueItems(rIndex, tIndex)
-          if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
-            self.interactionTable:craftItem(craftingType)
-            self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
-            traitCounter = traitCounter + 1
-            break
-          end
-        end
-      end
-    end
-    if traitCounter >= char["maxSimultResearch"][craftingType] then
-      return
-    end
-  end
-  --No successful crafts
-  if traitCounter == 0 then
-    SCENE_MANAGER:ShowBaseScene()
-    local skillName = ZO_GetCraftingSkillName(craftingType)
-    d(self.parent.Lang.CRAFT_FAILED..skillName)
-  end
+  end, self.lastCrafted)
 end
+
+-- function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
+--   local craftingType = GetCraftingInteractionType()
+--   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
+--   local tempResearchTable = {
+--     rCounter = {},
+--     rObjects = {}
+--   }
+--   local mask = self.parent.bitwiseChars[charId]
+--   local char = self.parent.AV.activelyResearchingCharacters[charId]
+--   if not char then
+--     d(self.parent.Lang.LOG_INTO_CHAR)
+--     return
+--   end
+--   if not char["maxSimultResearch"] then
+--     d(self.parent.Lang.LOG_INTO_CHAR)
+--     return
+--   end
+--   local research = char.research or {}
+--   local researchLineLimit = GetNumSmithingResearchLines(craftingType)
+--   local traitLimit = 9
+--   if not self.parent.AV.settings.autoCraftNirnhoned and self.parent.isValueInTable(nirnCraftTypes, craftingType) then
+--     traitLimit = 8
+--   end
+--   local key
+--   local trait
+--   if not self.lastCrafted[charId] then
+--     self.lastCrafted[charId] = {}
+--   end
+--   if not self.lastCrafted[charId][craftingType] then
+--     self.lastCrafted[charId][craftingType] = {}
+--   end
+--   if not self.rIndices[charId] then
+--     self.rIndices[charId] = {}
+--   end
+--   if not self.rObjects[charId] then
+--     self.rObjects[charId] = {}
+--   end
+--   if not self.rIndices[charId][craftingType] then
+--     for r = 1, researchLineLimit do
+--       if not self.lastCrafted[charId][craftingType][r] then
+--         for t = 1, traitLimit do
+--           key = self.parent:GetTraitKey(craftingType, r, t)
+--           trait = self.parent.AV.traitTable[key] or 0
+--           if self.parent.charBitMissing(trait, mask) and not research[key] then
+--             if not tempResearchTable.rCounter[r] then
+--               tempResearchTable.rCounter[r] = 0
+--             end
+--             tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+--             if not tempResearchTable.rObjects[r] then
+--               tempResearchTable.rObjects[r] = {}
+--             end
+--             table.insert(tempResearchTable.rObjects[r], t)
+--           end
+--         end
+--       end
+--     end
+--     self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+--     self.rObjects[charId] = tempResearchTable.rObjects
+--   end
+--
+--   --Sort by minimum research duration
+--   local traitCounter = 0
+--   for i = 1, #self.rIndices[charId][craftingType] do
+--     local rIndex = self.rIndices[charId][craftingType][i]
+--     if not self.lastCrafted[charId][craftingType][rIndex] then
+--       self.lastCrafted[charId][craftingType][rIndex] = {}
+--     end
+--     for j = 1, #self.rObjects[charId][rIndex] do
+--       local tIndex = self.rObjects[charId][rIndex][j]
+--       if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
+--         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+--           local request = self:QueueItems(rIndex, tIndex)
+--           if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+--             self.interactionTable:craftItem(craftingType)
+--             self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
+--             traitCounter = traitCounter + 1
+--             break
+--           end
+--         end
+--       end
+--     end
+--     if traitCounter >= char["maxSimultResearch"][craftingType] then
+--       return
+--     end
+--   end
+--   --No successful crafts
+--   if traitCounter == 0 then
+--     SCENE_MANAGER:ShowBaseScene()
+--     local skillName = ZO_GetCraftingSkillName(craftingType)
+--     d(self.parent.Lang.CRAFT_FAILED..skillName)
+--   end
+-- end
 
 local function getGamepadCraftKeyIcon()
 	local key
@@ -311,8 +346,6 @@ function TC_Autocraft:Initialize(parent)
     return
   end
   self.lastCrafted = {}
-  self.rIndices = {}
-  self.rObjects = {}
   if not LibLazyCrafting:GetRequestingAddon(parent.Name) then
     local styles = self:GetCommonStyles()
     self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)

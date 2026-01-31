@@ -45,4 +45,7 @@ TC.Lang = {
   STATS_TYPE              =         "Tipo",
   STATS_RESEARCHING       =         "Investigación",
   STATS_FINISH            =         "Fin",
+  SEND_CRAFT_REQUEST      =         "Envía una solicitud para fabricar objetos investigables.",
+  SEND_BUTTON             =         "Envíar",
+  CRAFTER_REQUESTEE       =         "Gamertag del artesano para las solicitudes de investigación de fabricación.",
 }

@@ -159,6 +159,26 @@ function TC.BuildMenu()
     allowRefresh = false    -- Enable automatic control updates
   })
 
+  panel:AddSetting({
+    type = LAM.ST_EDIT,
+    label = TC.Lang.CRAFTER_REQUESTEE,
+    getFunction = function() return TC.AV.settings.crafterRequestee end,
+    setFunction = function(value) TC.AV.settings.crafterRequestee = value end,
+    default = ""
+  })
+
+  panel:AddSetting({
+    type = LAM.ST_BUTTON,
+    label = TC.Lang.SEND_CRAFT_REQUEST,
+    buttonText = TC.Lang.SEND_BUTTON,
+    clickHandler = function(control)
+      TC.requestor:SendRequest()
+    end,
+    disable = function()
+      return  TC.AV.settings.crafterRequestee == ""
+    end
+  })
+
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.MAIN_CRAFTER,

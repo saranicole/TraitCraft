@@ -45,5 +45,7 @@ TC.Lang = {
   STATS_TYPE              =         "Type",
   STATS_RESEARCHING       =         "Research",
   STATS_FINISH            =         "End",
-
+  SEND_CRAFT_REQUEST      =         "Send request to craft researchable items",
+  SEND_BUTTON             =         "Send",
+  CRAFTER_REQUESTEE       =         "Gamertag of crafter for crafting research requests",
 }

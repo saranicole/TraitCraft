@@ -14,6 +14,7 @@ TC.Default = {
     traitTable = {},
     savedCharacterList = {},
     settings = {
+      crafterRequestee = "",
       autoCraftOption = false,
       autoCraftNirnhoned = false,
       showKnown = false,
@@ -42,7 +43,8 @@ TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
 TC.traitIndexKey = nil
 TC.hookLock = false
-
+TC.rIndices = {}
+TC.rObjects = {}
 
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
@@ -141,7 +143,7 @@ function TC.ResolveTraitDiffs()
   end
 end
 
-function TraitCraft:GetTraitFromKey(key)
+function TC:GetTraitFromKey(key)
   traitIndex = key % 10000 % 100
   researchLineIndex = (key % 10000 - traitIndex) / 100
   craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
@@ -152,7 +154,7 @@ function TraitCraft:GetTraitFromKey(key)
 	return craftingSkillType, researchLineIndex, traitIndex
 end
 
-function TraitCraft:GetTraitStringFromKey(key)
+function TC:GetTraitStringFromKey(key)
   traitIndex = key % 10000 % 100
   researchLineIndex = (key % 10000 - traitIndex) / 100
   craftingSkillType = (key - traitIndex - (researchLineIndex * 100)) / 10000
@@ -208,7 +210,7 @@ local function humanizeFutureTime(targetTime)
     end
 end
 
-function TraitCraft:StatsReport()
+function TC:StatsReport()
   --Build Stats Report on Current Research
   local headers = { TC.Lang.STATS_NAME, TC.Lang.STATS_TYPE, TC.Lang.STATS_RESEARCHING, TC.Lang.STATS_FINISH }
   local widths
@@ -307,7 +309,7 @@ local function getValueFromTable(t)
     return select(2, next(t))
 end
 
-function TraitCraft:FindTraitIndex(craftingSkillType, researchLineIndex, traitType)
+function TC:FindTraitIndex(craftingSkillType, researchLineIndex, traitType)
 	local _, _, numTraits, _ = GetSmithingResearchLineInfo(craftingSkillType, researchLineIndex)
 	for traitIndex = 1, numTraits do
 		local foundTraitType, description, _ = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
@@ -318,18 +320,18 @@ function TraitCraft:FindTraitIndex(craftingSkillType, researchLineIndex, traitTy
 	return ITEM_TRAIT_TYPE_NONE
 end
 
-function TraitCraft:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
+function TC:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
 	if craftingSkillType == nil or researchLineIndex == nil or traitIndex == nil then return end
 	return craftingSkillType * 10000 + researchLineIndex * 100 + traitIndex
 end
 
-function TraitCraft:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+function TC:DoesCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 	if knows then return true end
 	return false
 end
 
-function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
+function TC:WillCharacterKnowTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 	if knows then return true end
 	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
@@ -337,7 +339,7 @@ function TraitCraft:WillCharacterKnowTrait(craftingSkillType, researchLineIndex,
 	return false
 end
 
-function TraitCraft:IsResearchingTrait(craftingSkillType, researchLineIndex, traitIndex)
+function TC:IsResearchingTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local _, _, knows = GetSmithingResearchLineTraitInfo(craftingSkillType, researchLineIndex, traitIndex)
 	if knows then return false end
 	local willKnow = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
@@ -345,13 +347,13 @@ function TraitCraft:IsResearchingTrait(craftingSkillType, researchLineIndex, tra
 	return false
 end
 
-function TraitCraft:GetResearchTimeForTrait(craftingSkillType, researchLineIndex, traitIndex)
+function TC:GetResearchTimeForTrait(craftingSkillType, researchLineIndex, traitIndex)
 	local duration, timeRemaining = GetSmithingResearchLineTraitTimes(craftingSkillType, researchLineIndex, traitIndex)
   local whenDoneTimeStamp = GetTimeStamp() + timeRemaining
   return whenDoneTimeStamp
 end
 
-function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
+function TC:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
   local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
   if char then
     local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
@@ -363,14 +365,14 @@ function TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIn
   end
 end
 
-function TraitCraft:StopTraitResearchingWithKey(id, key)
+function TC:StopTraitResearchingWithKey(id, key)
   local char = TC.AV.activelyResearchingCharacters[id]
   if char and char.research and next(char.research) then
     char.research[key] = nil
   end
 end
 
-function TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
+function TC:SetTraitKnownOnCharIdWithKey(id, key)
   local charBitId = TC.bitwiseChars[id]
   if key and not TC.AV.traitTable[key] then
     TC.AV.traitTable[key] = 0
@@ -381,7 +383,7 @@ function TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
   TraitCraft:StopTraitResearchingWithKey(id, key)
 end
 
-function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
+function TC:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
   if key and not TC.AV.traitTable[key] then
@@ -395,7 +397,7 @@ function TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
-function TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
+function TC:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
   local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
   if key then
@@ -427,7 +429,7 @@ local function SetResearchHooks()
   EVENT_MANAGER:RegisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
-function TraitCraft:ScanKnownTraits()
+function TC:ScanKnownTraits()
   local start = GetFrameTimeMilliseconds()
   local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
   local traitLimit = 9
@@ -484,6 +486,79 @@ function TraitCraft:ScanMaxNumResearch()
   end
 end
 
+function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, lastCrafted)
+  local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
+  local tempResearchTable = {
+    rCounter = {},
+    rObjects = {}
+  }
+  local char = self.AV.activelyResearchingCharacters[charId]
+  if not char["maxSimultResearch"] then
+    d(self.Lang.LOG_INTO_CHAR)
+    return
+  end
+  local scanResults = { maxSimultResearch = char["maxSimultResearch"][craftingType] }
+  local mask = self.bitwiseChars[charId]
+  if not char then
+    d(self.Lang.LOG_INTO_CHAR)
+    return
+  end
+  local research = char.research or {}
+  local researchLineLimit = GetNumSmithingResearchLines(craftingType)
+  local traitLimit = 9
+  if not self.AV.settings.autoCraftNirnhoned and self.isValueInTable(nirnCraftTypes, craftingType) then
+    traitLimit = 8
+  end
+  local key
+  local trait
+  if not self.rIndices[charId] then
+    self.rIndices[charId] = {}
+  end
+  if not self.rObjects[charId] then
+    self.rObjects[charId] = {}
+  end
+  if not self.rIndices[charId][craftingType] then
+    for r = 1, researchLineLimit do
+      if lastCrafted == nil or (lastCrafted ~= nil and not lastCrafted[charId][craftingType][r]) then
+        for t = 1, traitLimit do
+          key = self:GetTraitKey(craftingType, r, t)
+          trait = self.AV.traitTable[key] or 0
+          if self.charBitMissing(trait, mask) and not research[key] then
+            if not tempResearchTable.rCounter[r] then
+              tempResearchTable.rCounter[r] = 0
+            end
+            tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+            if not tempResearchTable.rObjects[r] then
+              tempResearchTable.rObjects[r] = {}
+            end
+            table.insert(tempResearchTable.rObjects[r], t)
+          end
+        end
+      end
+    end
+    self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+    self.rObjects[charId] = tempResearchTable.rObjects
+  end
+
+    --Sort by minimum research duration
+  local traitCounter = 0
+  for i = 1, #self.rIndices[charId][craftingType] do
+    local rIndex = self.rIndices[charId][craftingType][i]
+    if not self.lastCrafted[charId][craftingType][rIndex] then
+      self.lastCrafted[charId][craftingType][rIndex] = {}
+    end
+    for j = 1, #self.rObjects[charId][rIndex] do
+      local tIndex = self.rObjects[charId][rIndex][j]
+      scanResults[craftingType][rIndex] = tIndex
+      traitCounter = traitCounter + 1
+    end
+    if traitCounter >= char["maxSimultResearch"][craftingType] then
+      scanCallback(scanResults)
+      return
+    end
+  end
+end
+
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
@@ -505,6 +580,7 @@ local function TC_Event_Player_Activated(event, isA)
       end
     end
   end
+  TC.requestor = TC_Requestor:New(TC)
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
   zo_callLater(TC.ScanForResearchExpired, 90000)
