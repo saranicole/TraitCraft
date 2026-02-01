@@ -68,13 +68,6 @@ function TCR.NormalizeAccountName(account)
     return account
 end
 
-function TCR:SendRequest()
-  local request = self:ScanUnknownTraitsForRequesting()
-  local body = self.BuildMail(request)
-  local recipient = TCR.NormalizeAccountName(self.parent.AV.settings.crafterRequestee)
-  SendMail(recipient, TCR.protocol.SUBJECT, body)
-end
-
 function TCR.Parse(body)
   local data = {}
 
@@ -89,22 +82,19 @@ function TCR.Parse(body)
   if data.proto ~= TCR.protocol.PROTO then return nil end
   if tonumber(data.ver) ~= TCR.protocol.VERSION then return nil end
 
-  -- Parse items
-  data.items = {}
-  if data.items then end -- placeholder
-
   local itemList = Split(data.items or "", ";")
-  for _, entry in ipairs(itemList) do
+  data.itemList = {}
+
+  for ind, entry in ipairs(itemList) do
     local fields = Split(entry, "|")
     if #fields == 3 then
-      data.items[#data.items + 1] = {
+       data.itemList[#data.itemList + 1] = {
         craftingType   = CRAFT_TOKEN_REVERSE[fields[1]],
         researchIndex  = fields[2],
-        traitIndex     = fields[3],
+        traitIndex     = fields[3]
       }
     end
   end
-
   return data
 end
 
@@ -114,7 +104,7 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 end
 
 function TCR:QueueItems(item)
-  local patternIndex = self:GetPatternIndexFromResearchLine(item.craftingType, item.researchIndex)
+  local patternIndex = self.parent.autocraft:GetPatternIndexFromResearchLine(item.craftingType, item.researchIndex)
   local traitType = findTraitType(item.craftingType, item.researchIndex, item.traitIndex)
   traitType = traitType + 1
   local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, item.craftingType, 0, 0, false)
@@ -155,7 +145,7 @@ function TCR.processMail(event, mailId)
     if LLC[self.parent.Name.."TCR"].craftingQueue == nil or next(LLC[self.parent.Name.."TCR"].craftingQueue) == nil then
       local parsed = TCR.Parse(mailData:GetReceivedText())
       if parsed then
-        for k, item in pairs(parsed.items) do
+        for k, item in pairs(parsed.itemList) do
           TCR.QueueItems(item)
         end
       end

@@ -165,6 +165,14 @@ function TC:GetTraitStringFromKey(key)
 	return researchLineName..": "..traitName
 end
 
+function TC:GetItemString(craftingSkillType, researchLineIndex, traitIndex)
+  local craftingName = GetCraftingSkillName(craftingSkillType)
+  local researchLineName = GetSmithingResearchLineInfo(craftingSkillType,researchLineIndex)
+  local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingSkillType,researchLineIndex, traitIndex)
+  local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+	return researchLineName..": "..traitName
+end
+
 local function formatRow(cols, widths)
     local out = {}
     for i, col in ipairs(cols) do

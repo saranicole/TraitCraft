@@ -22,9 +22,6 @@ local CRAFT_TOKEN = {
   [JEWELRY_CRAFTING] = "JW",
 }
 
-TCR.requestBody = {}
-local requestBody = TCR.requestBody
-
 local function Split(str, delim)
   local result = {}
   for match in string.gmatch(str, "([^" .. delim .. "]+)") do
@@ -45,7 +42,7 @@ function TCR.IsRequest(subject, body)
   return body:find("proto=" .. TCR.protocol.PROTO, 1, true) ~= nil
 end
 
-function TCR.BuildMail(requestBody)
+function TCR:BuildMail()
   -- requestBody example:
   -- {
   --   [CRAFTING_TYPE_BLACKSMITHING] = {
@@ -53,16 +50,13 @@ function TCR.BuildMail(requestBody)
   --     traitIndex = tIndex,
   --   },
   -- }
-
   local items = {}
   local parts = {
-    "proto=" .. TCR.PROTO,
-    "ver="   .. TCR.VERSION,
-    "from="  .. fromAccount,
-    "char="  .. fromChar,
+    "proto=" .. TCR.protocol.PROTO,
+    "ver="   .. TCR.protocol.VERSION,
   }
 
-  for craftingType, data in pairs(requestBody) do
+  for craftingType, data in pairs(self.requestBody) do
     local token = CRAFT_TOKEN[craftingType]
 
     if token and data.itemType and data.traitIndex then
@@ -74,7 +68,7 @@ function TCR.BuildMail(requestBody)
     end
   end
 
-  parts[#parts + 1] = "items=" .. table.concat(itemStrings, ";")
+  parts[#parts + 1] = "items=" .. table.concat(items, ";")
   return table.concat(parts, "\n")
 end
 
@@ -84,23 +78,22 @@ function TCR:ScanUnknownTraitsForRequesting()
   if not TCR.lastRequested[charId] then
     TCR.lastRequested[charId] = {}
   end
+  local itemDescriptions = "\n"
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
     if not TCR.lastRequested[charId][craftingType] then
       TCR.lastRequested[charId][craftingType] = {}
     end
     self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
-      d(scanResults)
-      for rIndex, entry in pairs(scanResults[craftingType]) do
-        for tIndex, obj in pairs(entry[rIndex]) do
-          if not TCR.lastRequested[charId][craftingType][rIndex][tIndex] then
-            requestBody[craftingType] = { itemType = rIndex, traitIndex = tIndex }
-          end
+      for rIndex, tIndex in pairs(scanResults[craftingType]) do
+        if TCR.lastRequested[charId][craftingType][rIndex] == nil or not TCR.lastRequested[charId][craftingType][rIndex][tIndex] then
+          self.requestBody[craftingType] = { itemType = rIndex, traitIndex = tIndex }
+          itemDescriptions = itemDescriptions..self.parent:GetItemString(craftingType, rIndex, tIndex).."|r\r\n  "
         end
       end
     end, TCR.lastRequested)
   end
-  return requestBody
+  return self.requestBody, itemDescriptions
 end
 
 function TCR.NormalizeAccountName(account)
@@ -113,12 +106,14 @@ function TCR.NormalizeAccountName(account)
 end
 
 function TCR:SendRequest()
-  local request = self:ScanUnknownTraitsForRequesting()
+  local request, items = self:ScanUnknownTraitsForRequesting()
   local body = self.BuildMail(request)
   local recipient = TCR.NormalizeAccountName(self.parent.AV.settings.crafterRequestee)
   SendMail(recipient, TCR.protocol.SUBJECT, body)
+  d(self.parent.Lang.SENT_MAIL.." "..self.parent.AV.settings.crafterRequestee.." "..self.parent.Lang.WITH_CRAFTING_REQUEST..items)
 end
 
 function TCR:Initialize(parent)
   self.parent = parent
+  self.requestBody = {}
 end

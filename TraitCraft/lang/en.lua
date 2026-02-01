@@ -48,4 +48,6 @@ TC.Lang = {
   SEND_CRAFT_REQUEST      =         "Send request to craft researchable items",
   SEND_BUTTON             =         "Send",
   CRAFTER_REQUESTEE       =         "Gamertag of crafter for crafting research requests",
+  SENT_MAIL               =         "Sent mail to",
+  WITH_CRAFTING_REQUEST   =         "with crafting request of the following items:",
 }

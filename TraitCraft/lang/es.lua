@@ -48,4 +48,6 @@ TC.Lang = {
   SEND_CRAFT_REQUEST      =         "Envía una solicitud para fabricar objetos investigables.",
   SEND_BUTTON             =         "Envíar",
   CRAFTER_REQUESTEE       =         "Gamertag del artesano para las solicitudes de investigación de fabricación.",
+  SENT_MAIL               =         "Correo enviado a",
+  WITH_CRAFTING_REQUEST   =         "con la solicitud de fabricación de los siguientes artículos:",
 }
