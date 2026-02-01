@@ -486,6 +486,21 @@ function TraitCraft:ScanMaxNumResearch()
   end
 end
 
+function TC.sortKeysByValue(tbl)
+  local keys = {}
+  for k in pairs(tbl) do
+      table.insert(keys, k)
+  end
+  table.sort(keys, function(a, b)
+      if tbl[a] == tbl[b] then
+          return a < b  -- tiebreaker: smaller key first
+      else
+          return tbl[a] > tbl[b]
+      end
+  end)
+  return keys
+end
+
 function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, lastCrafted)
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local tempResearchTable = {
@@ -493,7 +508,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
     rObjects = {}
   }
   local char = self.AV.activelyResearchingCharacters[charId]
-  if not char["maxSimultResearch"] then
+  if char == nil or not char["maxSimultResearch"] then
     d(self.Lang.LOG_INTO_CHAR)
     return
   end
@@ -536,7 +551,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
         end
       end
     end
-    self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+    self.rIndices[charId][craftingType] = TC.sortKeysByValue(tempResearchTable.rCounter)
     self.rObjects[charId] = tempResearchTable.rObjects
   end
 
@@ -544,8 +559,11 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
   local traitCounter = 0
   for i = 1, #self.rIndices[charId][craftingType] do
     local rIndex = self.rIndices[charId][craftingType][i]
-    if not self.lastCrafted[charId][craftingType][rIndex] then
-      self.lastCrafted[charId][craftingType][rIndex] = {}
+    if not scanResults[craftingType] then
+      scanResults[craftingType] = {}
+    end
+    if not scanResults[craftingType][rIndex] then
+      scanResults[craftingType][rIndex] = {}
     end
     for j = 1, #self.rObjects[charId][rIndex] do
       local tIndex = self.rObjects[charId][rIndex][j]
@@ -581,6 +599,7 @@ local function TC_Event_Player_Activated(event, isA)
     end
   end
   TC.requestor = TC_Requestor:New(TC)
+  TC.requestee = TC_Requestee:New(TC)
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
   zo_callLater(TC.ScanForResearchExpired, 90000)
@@ -614,6 +633,20 @@ end
 
 local function setupNoop()
   return
+end
+
+function TC:GetCommonStyles()
+	-- Courtesy of Weolo and wolfstar's TraitBuddy
+	local styles = {}
+	local STYLE_KHAJIIT = 9
+	for itemStyleIndex = 1, STYLE_KHAJIIT do
+		local itemStyleId = GetValidItemStyleId(itemStyleIndex)
+		if itemStyleId > 0 then
+			-- d(sf("Adding style %s itemStyleId %s", GetItemStyleName(itemStyleId), itemStyleId))
+			styles[itemStyleId] = true
+		end
+	end
+	return styles
 end
 
 function TC.CreateIcon(control, id, key, iconPath, r, g, b, sideFloat, firstOrientation, secondOrientation, controlName)

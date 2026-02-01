@@ -1,5 +1,7 @@
 TC_Autocraft = ZO_Object:Subclass()
 
+local LLC = LibLazyCrafting
+
 function TC_Autocraft:New(...)
     local object = ZO_Object.New(self)
     object:Initialize(...)
@@ -42,25 +44,10 @@ function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
   local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
-  if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+  if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
     self.interactionTable:craftItem(craftingType)
-    self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
+    self.lastCrafted[charId][craftingType][researchIndex][traitIndex] = true
   end
-end
-
-local function sortKeysByValue(tbl)
-  local keys = {}
-  for k in pairs(tbl) do
-      table.insert(keys, k)
-  end
-  table.sort(keys, function(a, b)
-      if tbl[a] == tbl[b] then
-          return a < b  -- tiebreaker: smaller key first
-      else
-          return tbl[a] > tbl[b]
-      end
-  end)
-  return keys
 end
 
 local function getKeys(tbl)
@@ -177,7 +164,7 @@ end
 --       if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
 --         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
 --           local request = self:QueueItems(rIndex, tIndex)
---           if LibLazyCrafting.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+--           if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
 --             self.interactionTable:craftItem(craftingType)
 --             self.lastCrafted[charId][craftingType][rIndex][tIndex] = true
 --             traitCounter = traitCounter + 1
@@ -326,29 +313,15 @@ function TC_Autocraft:CreateKeyboardUI()
   end
 end
 
-function TC_Autocraft:GetCommonStyles()
-	-- Courtesy of Weolo and wolfstar's TraitBuddy
-	local styles = {}
-	local STYLE_KHAJIIT = 9
-	for itemStyleIndex = 1, STYLE_KHAJIIT do
-		local itemStyleId = GetValidItemStyleId(itemStyleIndex)
-		if itemStyleId > 0 then
-			-- d(sf("Adding style %s itemStyleId %s", GetItemStyleName(itemStyleId), itemStyleId))
-			styles[itemStyleId] = true
-		end
-	end
-	return styles
-end
-
 function TC_Autocraft:Initialize(parent)
   self.parent = parent
-  if not LibLazyCrafting then
+  if not LLC then
     return
   end
   self.lastCrafted = {}
-  if not LibLazyCrafting:GetRequestingAddon(parent.Name) then
-    local styles = self:GetCommonStyles()
-    self.interactionTable = LibLazyCrafting:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
+  if not LLC:GetRequestingAddon(parent.Name) then
+    local styles = self.parent:GetCommonStyles()
+    self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
       if not LLC_NO_FURTHER_CRAFT_POSSIBLE then
         d(event)
       end

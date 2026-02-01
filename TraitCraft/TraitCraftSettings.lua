@@ -179,6 +179,14 @@ function TC.BuildMenu()
     end
   })
 
+  panel:AddSetting({
+    type = LAM.ST_LABEL,
+    label = function()
+        return TC.AV.settings.crafterRequestee
+    end,
+    tooltip = TC.Lang.CRAFTER_REQUESTEE
+  })
+
   panel:AddSetting {
     type = LAM.ST_DROPDOWN,
     label = TC.Lang.MAIN_CRAFTER,

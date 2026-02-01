@@ -8,6 +8,8 @@ TCR.protocol = {
   VERSION = 1,
 }
 
+TCR.lastRequested = {}
+
 local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
@@ -79,15 +81,24 @@ end
 function TCR:ScanUnknownTraitsForRequesting()
   local charId = self.parent.currentlyLoggedInCharId
   local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  if not TCR.lastRequested[charId] then
+    TCR.lastRequested[charId] = {}
+  end
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
+    if not TCR.lastRequested[charId][craftingType] then
+      TCR.lastRequested[charId][craftingType] = {}
+    end
     self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
+      d(scanResults)
       for rIndex, entry in pairs(scanResults[craftingType]) do
         for tIndex, obj in pairs(entry[rIndex]) do
-          requestBody[craftingType] = { itemType = rIndex, traitIndex = tIndex }
+          if not TCR.lastRequested[charId][craftingType][rIndex][tIndex] then
+            requestBody[craftingType] = { itemType = rIndex, traitIndex = tIndex }
+          end
         end
       end
-    end, nil)
+    end, TCR.lastRequested)
   end
   return requestBody
 end
@@ -108,61 +119,6 @@ function TCR:SendRequest()
   SendMail(recipient, TCR.protocol.SUBJECT, body)
 end
 
-function TCR.Parse(body)
-  local data = {}
-
-  for line in body:gmatch("[^\r\n]+") do
-    local k, v = line:match("^(%w+)%=(.+)$")
-    if k and v then
-      data[k] = v
-    end
-  end
-
-  -- Validate
-  if data.proto ~= TCR.protocol.PROTO then return nil end
-  if tonumber(data.ver) ~= TCR.protocol.VERSION then return nil end
-
-  -- Parse items
-  data.items = {}
-  if data.items then end -- placeholder
-
-  local itemList = Split(data.items or "", ";")
-  for _, entry in ipairs(itemList) do
-    local fields = Split(entry, "|")
-    if #fields == 3 then
-      data.items[#data.items + 1] = {
-        craft   = fields[1],
-        pattern = fields[2],
-        trait   = fields[3],
-      }
-    end
-  end
-
-  return data
-end
-
-function TCR.receiveMail()
-  -- send to autocrafting
-
-
---   local subject, body = GetMailItemInfo(i)
---
---   if TCR.IsRequest(subject, body) then
---     if CraftQueue:IsEmpty() then
---       RequestReadMail(i)
---       local parsed = TCR.Parse(body)
---       if parsed then
---         QueueItems(parsed.items)
---       end
---     else
---       d("TraitCraft: Active research job in progress.")
---     end
---   end
-end
-
 function TCR:Initialize(parent)
   self.parent = parent
-  self:setupRequestor()
 end
-
-
