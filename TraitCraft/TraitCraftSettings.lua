@@ -160,22 +160,38 @@ function TC.BuildMenu()
   })
 
   panel:AddSetting({
+    type = LAM.ST_SECTION,
+    label = TC.Lang.RESEARCH_REQUESTS,
+  })
+
+  panel:AddSetting({
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.RESEARCH_REQUESTS,
+    getFunction = function() return TC.AV.settings.requestOption end,
+    setFunction = function(var)
+      TC.AV.settings.requestOption = var
+    end
+  })
+
+  panel:AddSetting({
     type = LAM.ST_EDIT,
     label = TC.Lang.CRAFTER_REQUESTEE,
-    getFunction = function() return TC.AV.settings.crafterRequestee end,
+    getFunction = function() return "" end,
     setFunction = function(value) TC.AV.settings.crafterRequestee = value end,
     default = ""
   })
 
   panel:AddSetting({
     type = LAM.ST_BUTTON,
-    label = TC.Lang.SEND_CRAFT_REQUEST,
-    buttonText = TC.Lang.SEND_BUTTON,
-    clickHandler = function(control)
-      TC.requestor:SendRequest()
+    label = TC.Lang.ACTIVE_APPLY,
+    buttonText = TC.Lang.ACTIVE_APPLY,
+    clickHandler  = function()
+      panel:UpdateControls()
+      ReloadUI("ingame")
     end,
+    tooltip = TC.Lang.REQUIRES_RELOAD,
     disable = function()
-      return  TC.AV.settings.crafterRequestee == ""
+      return TC.AV.settings.crafterRequestee == "" or not TC.AV.settings.requestOption
     end
   })
 
@@ -184,7 +200,12 @@ function TC.BuildMenu()
     label = function()
         return TC.AV.settings.crafterRequestee
     end,
-    tooltip = TC.Lang.CRAFTER_REQUESTEE
+    tooltip = TC.Lang.SEND_CRAFT_REQUEST
+  })
+
+  panel:AddSetting({
+    type = LAM.ST_SECTION,
+    label = TC.Lang.CRAFTER_SETTINGS,
   })
 
   panel:AddSetting {

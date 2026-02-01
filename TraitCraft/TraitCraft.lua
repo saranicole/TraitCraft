@@ -15,6 +15,7 @@ TC.Default = {
     savedCharacterList = {},
     settings = {
       crafterRequestee = "",
+      requestOption = false,
       autoCraftOption = false,
       autoCraftNirnhoned = false,
       showKnown = false,
@@ -606,8 +607,10 @@ local function TC_Event_Player_Activated(event, isA)
       end
     end
   end
-  TC.requestor = TC_Requestor:New(TC)
-  TC.requestee = TC_Requestee:New(TC)
+  if TC.AV.settings.requestOption then
+    TC.requestor = TC_Requestor:New(TC)
+    TC.requestee = TC_Requestee:New(TC)
+  end
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
   zo_callLater(TC.ScanForResearchExpired, 90000)

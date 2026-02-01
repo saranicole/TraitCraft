@@ -155,10 +155,10 @@ function TCR.processMail(event, mailId)
   end
 end
 
-function TCR.receiveMail()
+function TCR:receiveMail()
   local nextMail = GetNextMailId(nil)
 	if not nextMail then
-	 	EVENT_MANAGER:UnregisterForEvent(TCR.parent.Name.."mailbox", EVENT_MAIL_READABLE)
+	 	EVENT_MANAGER:UnregisterForEvent(self.parent.Name.."mailbox", EVENT_MAIL_READABLE)
 	 	return
 	end
 
@@ -173,12 +173,12 @@ function TCR.receiveMail()
   if #requesteeMails > 0 then
     zo_callLater(accessMail, 10)
   else
-    EVENT_MANAGER:UnregisterForEvent(TCR.parent.Name.."mailbox", EVENT_MAIL_READABLE)
+    EVENT_MANAGER:UnregisterForEvent(self.parent.Name.."mailbox", EVENT_MAIL_READABLE)
   end
 end
 
-function TCR.checkMail()
-	EVENT_MANAGER:RegisterForEvent(TCR.parent.Name.."mailbox", EVENT_MAIL_READABLE, TCR.receiveMail)
+function TCR:checkMail()
+	EVENT_MANAGER:RegisterForEvent(self.parent.Name.."mailbox", EVENT_MAIL_READABLE, function() self:receiveMail() end)
 end
 
 function TCR:Initialize(parent)
@@ -193,5 +193,5 @@ function TCR:Initialize(parent)
     end
     return
   end, parent.Author, styles)
-  EVENT_MANAGER:RegisterForEvent(parent.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , self.checkMail)
+  EVENT_MANAGER:RegisterForEvent(parent.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function() self:checkMail() end)
 end
