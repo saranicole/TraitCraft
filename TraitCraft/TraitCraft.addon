@@ -19,6 +19,5 @@ Console/Inventory.lua
 TraitCraft.lua
 TraitCraftSettings.lua
 Crafting.lua
-requests/Requestor.lua
 lang/en.lua
 lang/$(language).lua

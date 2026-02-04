@@ -52,6 +52,7 @@ TC.rIndices = {}
 TC.rObjects = {}
 TC.mailInstance = nil
 TC.formatter = nil
+TC.lastRequested = {}
 
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
@@ -61,6 +62,13 @@ local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+local CRAFT_TOKEN = {
+  [CRAFTING_TYPE_BLACKSMITHING]       = "BS",
+  [CRAFTING_TYPE_CLOTHIER]            = "CL",
+  [CRAFTING_TYPE_WOODWORKING]         = "WW",
+  [CRAFTING_TYPE_JEWELRYCRAFTING]     = "JW"
+}
 
 TC.craftingTypeIndex = 1
 TC.researchLineIndex = 1
@@ -619,6 +627,32 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
   end
 end
 
+function TC:ScanUnknownTraitsForRequesting()
+  local charId = GetCurrentCharacterId()
+  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  if not self.lastRequested[charId] then
+    self.lastRequested[charId] = {}
+  end
+  local itemDescriptions = "|r\r\n  "
+  local sendObject = {}
+  for i = 1, #craftTypes do
+    local craftingType = craftTypes[i]
+    if not self.lastRequested[charId][craftingType] then
+      self.lastRequested[charId][craftingType] = {}
+    end
+    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
+      local record = {}
+      for rIndex, tIndex in pairs(scanResults[craftingType]) do
+        if self.lastRequested[charId][craftingType][rIndex] == nil or not self.lastRequested[charId][craftingType][rIndex][tIndex] then
+          record = { rIndex, tIndex }
+        end
+      end
+      sendObject[#sendObject + 1] = { CRAFT_TOKEN[craftingType], record }
+    end, self.lastRequested)
+  end
+  return sendObject
+end
+
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
@@ -646,10 +680,6 @@ local function TC_Event_Player_Activated(event, isA)
         TC_Autocraft:Destroy()
       end
     end
-  end
-  if TC.AV.settings.requestOption then
-    TC.requestor = TC_Requestor:New(TC)
-    TC.requestee = TC_Requestee:New(TC)
   end
   local FIVE_MINUTES_MS = 5 * 60 * 1000  -- 5 min in ms
   EVENT_MANAGER:UnregisterForUpdate("TC_ScanForResearchExpired")
