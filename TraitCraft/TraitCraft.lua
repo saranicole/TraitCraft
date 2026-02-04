@@ -16,6 +16,7 @@ TC.Default = {
     settings = {
       crafterRequestee = "",
       requestOption = false,
+      receiveOption = false,
       autoCraftOption = false,
       autoCraftNirnhoned = false,
       showKnown = false,
@@ -293,7 +294,7 @@ end
 
 local function registerFormatter()
   TC.formatter:RegisterCore()
-  TC.formatter:RegisterProtocol("proto")
+  TC.formatter:RegisterProtocol("proto", {delimiters = { group = ":", record = ";", item = "," }})
 end
 
 local function registerTemplates()
@@ -653,6 +654,22 @@ function TC:ScanUnknownTraitsForRequesting()
   return sendObject
 end
 
+function TC.processRequestMail()
+  TC.mailInstance.Inbox:RegisterCallback("Requestee", "QueueItems", function(mailId)
+    if self:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
+      local scanResults = self:RetrieveActiveMailData(mailId)
+      if scanResults then
+        local scope = self.formatter.Scope({ text = scanResults.body })
+        local decodedResults = TC.formatter:decodeByProtocolName("proto", scope)
+        if decodedResults then
+          TC.autocraft:CraftFromInput(decodedResults)
+        end
+      end
+    end
+  end)
+  TC.mailInstance.Inbox:RegisterEvents("Requestee", "QueueItems")
+end
+
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
@@ -669,12 +686,8 @@ local function TC_Event_Player_Activated(event, isA)
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.AV.settings.requestOption then
-          TC.mailInstance.Inbox:RegisterCallback("Requestee", "QueueItems", function()
-            TC.autocraft:ScanUnknownTraitsForCrafting(currentlyLoggedInCharId)
-          end)
-          TC.mailInstance.Inbox:RegisterEvents("Requestee", "QueueItems")
-          TC.mailInstance.Inbox:WatchMailByTemplateSubject("Requestor", "equals")
+        if LibDynamicMail and TC.AV.settings.receiveOption then
+          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , TC.processRequestMail)
         end
       elseif TC.autocraft then
         TC_Autocraft:Destroy()

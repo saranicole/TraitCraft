@@ -49,6 +49,7 @@ TC.Lang = {
   REQUIRES_RELOAD         =         "Will trigger an in game reload",
   REQUIRES_LIBRARY        =         "Requires installation of library ",
   ENABLE_BUTTON           =         "Enable",
+  FULFILL_REQUEST         =         "fulfilling crafting requests from others",
   AUTOFILL_REQUEST        =         "Autofill crafting request",
   CRAFTER_REQUESTEE       =         "Gamertag of crafter for crafting research requests",
   SENT_MAIL               =         "Sending mail to",

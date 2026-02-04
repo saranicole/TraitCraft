@@ -195,6 +195,15 @@ function TC.BuildMenu()
   })
 
   panel:AddSetting({
+    type = LAM.ST_CHECKBOX,
+    label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.FULFILL_REQUEST,
+    getFunction = function() return TC.AV.settings.receiveOption end,
+    setFunction = function(var)
+      TC.AV.settings.receiveOption = var
+    end
+  })
+
+  panel:AddSetting({
     type = LAM.ST_EDIT,
     label = TC.Lang.CRAFTER_REQUESTEE,
     getFunction = function() return "" end,

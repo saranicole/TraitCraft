@@ -49,6 +49,7 @@ TC.Lang = {
   REQUIRES_RELOAD         =         "Esto provocará una recarga dentro del juego.",
   REQUIRES_LIBRARY        =         "Requiere la instalación de una dependencia ",
   ENABLE_BUTTON           =         "Permitir",
+  FULFILL_REQUEST         =         "fulfilling crafting requests from others",
   CRAFTER_REQUESTEE       =         "Gamertag del artesano para las solicitudes de investigación de fabricación.",
   SENT_MAIL               =         "Correo enviado a",
   WITH_CRAFTING_REQUEST   =         "con la solicitud de fabricación de los siguientes artículos:",
