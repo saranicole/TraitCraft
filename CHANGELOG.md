@@ -1,5 +1,6 @@
 ## 2026.02.04
 - Send is working, will see about inbox processing
+- Inbox processing possibly working
 
 ## 2026.01.31
 - First stab at auto-requesting research items via mail

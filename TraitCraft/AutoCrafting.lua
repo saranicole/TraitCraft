@@ -68,35 +68,46 @@ local function getKeys(tbl)
   return keys
 end
 
-local function craftForType(scanResults, craftingType)
+function TC_Autocraft:craftForType(scanResults, craftingType, charId)
   local craftCounter = 0
+  if not self.lastCrafted[charId] then
+    self.lastCrafted[charId] = {}
+  end
+  if not self.lastCrafted[charId][craftingType] then
+    self.lastCrafted[charId][craftingType] = {}
+  end
   for rIndex, entry in pairs(scanResults[craftingType]) do
     if not self.lastCrafted[charId][craftingType][rIndex] then
       self.lastCrafted[charId][craftingType][rIndex] = {}
     end
-    for tIndex, obj in pairs(entry[rIndex]) do
-      if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          self:QueueItems(charId, rIndex, tIndex)
+    if type(entry) == "table" then
+      for tIndex, obj in pairs(entry[rIndex]) do
+        if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
+          if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+            self:QueueItems(charId, rIndex, tIndex)
+            craftCounter = craftCounter + 1
+          end
+        end
+      end
+    else
+      if not self.lastCrafted[charId][craftingType][rIndex][entry] then
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
+          self:QueueItems(charId, rIndex, entry)
           craftCounter = craftCounter + 1
         end
       end
     end
   end
-  if craftCounter == 0 then
-    SCENE_MANAGER:ShowBaseScene()
-    local skillName = ZO_GetCraftingSkillName(craftingType)
-    d(self.parent.Lang.CRAFT_FAILED..skillName)
-  end
+  return craftCounter
 end
 
-function TC_Autocraft:CraftFromInput(scanResults)
+function TC_Autocraft:CraftFromInput(scanResults, sender)
   for iDex, entry in ipairs(scanResults) do
     local craftingType = CRAFT_TOKEN_REVERSE[entry[1]]
-    local iterLen = #entry - 1
-    for i = 2, iterLen do
-      local convertedObj = { [craftingType] = { [entry[i][1]] = entry[i][2] } }
-      craftForType(convertedObj, craftingType)
+    local iterLen = #entry[2] - 1
+    for i = 1, iterLen do
+      local convertedObj = { [craftingType] = { [entry[2][i]] = entry[2][i + 1] } }
+      self:craftForType(convertedObj, craftingType, sender)
     end
   end
 end
@@ -110,7 +121,12 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
     self.lastCrafted[charId][craftingType] = {}
   end
   self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
-    craftForType(scanResults, craftingType)
+    local craftCounter = self:craftForType(scanResults, craftingType, charId)
+    if craftCounter == 0 then
+      SCENE_MANAGER:ShowBaseScene()
+      local skillName = ZO_GetCraftingSkillName(craftingType)
+      d(self.parent.Lang.CRAFT_FAILED..skillName)
+    end
   end, self.lastCrafted)
 end
 

@@ -440,7 +440,7 @@ function TC:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   if key and not TC.AV.traitTable[key] then
     TC.AV.traitTable[key] = 0
   end
-  if key then
+  if key and TC.AV.traitTable[key] and charBitId then
     if TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
       TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
     end
@@ -586,7 +586,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
   if not self.rIndices[charId][craftingType] then
     for r = 1, researchLineLimit do
       if lastCrafted == nil or (lastCrafted ~= nil and not lastCrafted[charId][craftingType][r]) then
-        for t = 1, traitLimit do
+        for t = traitLimit, 1, -1 do
           key = self:GetTraitKey(craftingType, r, t)
           trait = self.AV.traitTable[key] or 0
           if self.charBitMissing(trait, mask) and not research[key] then
@@ -654,25 +654,26 @@ function TC:ScanUnknownTraitsForRequesting()
   return sendObject
 end
 
-function TC.processRequestMail()
-  TC.mailInstance.Inbox:RegisterCallback("Requestee", "QueueItems", function(mailId)
-    if self:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
-      local scanResults = self:RetrieveActiveMailData(mailId)
+function TC:processRequestMail()
+  TC.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
+  TC.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(mailId)
+    if self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
+      local scanResults = self.mailInstance:RetrieveActiveMailData(mailId)
       if scanResults then
         local scope = self.formatter.Scope({ text = scanResults.body })
-        local decodedResults = TC.formatter:decodeByProtocolName("proto", scope)
-        if decodedResults then
-          TC.autocraft:CraftFromInput(decodedResults)
+        local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
+        if next(decodedResults) ~= nil then
+          self.autocraft:CraftFromInput(decodedResults, scanResults.senderDisplayName)
         end
       end
     end
   end)
-  TC.mailInstance.Inbox:RegisterEvents("Requestee", "QueueItems")
 end
 
 local function TC_Event_Player_Activated(event, isA)
 	--Only fire once after login!
 	EVENT_MANAGER:UnregisterForEvent("TC_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED)
+	EVENT_MANAGER:UnregisterForEvent(TC.Name.."mailbox", EVENT_MAIL_READABLE)
 	TC.currentlyLoggedInChar = {}
 	TC.BuildMenu()
 	if TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId] then
@@ -687,7 +688,7 @@ local function TC_Event_Player_Activated(event, isA)
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
         if LibDynamicMail and TC.AV.settings.receiveOption then
-          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , TC.processRequestMail)
+          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
         end
       elseif TC.autocraft then
         TC_Autocraft:Destroy()
