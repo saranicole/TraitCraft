@@ -47,6 +47,7 @@ TC.Lang = {
   STATS_FINISH            =         "Fin",
   SEND_CRAFT_REQUEST      =         "Ouvrez votre messagerie pour préparer une demande de fabrication d'objets de recherche.",
   REQUIRES_RELOAD         =         "Cela déclenchera un rechargement du jeu.",
+  REQUIRES_LIBRARY        =         "Nécessite l'installation d'une dépendance ",
   ENABLE_BUTTON           =         "Activer",
   CRAFTER_REQUESTEE       =         "Gamertag pour les demandes de recherche liées à l'artisanat.",
   SENT_MAIL               =         "Courrier envoyé à",

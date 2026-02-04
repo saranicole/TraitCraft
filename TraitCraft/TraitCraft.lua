@@ -36,7 +36,11 @@ TC.Default = {
         g = 0.624,
         b = 0.0
       }
-    }
+    },
+    libNamespace = {
+      LDM = {},
+      LTF = {}
+    },
 }
 
 TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
@@ -46,6 +50,8 @@ TC.traitIndexKey = nil
 TC.hookLock = false
 TC.rIndices = {}
 TC.rObjects = {}
+TC.mailInstance = nil
+TC.formatter = nil
 
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
@@ -111,7 +117,10 @@ function TC.charBitMissing(trait, mask)
   -- Indicates that character bit needs to be set or is missing (as in the case of not researched)
   -- trait is the integer bitmask
   -- mask is the power-of-two flag for the character (e.g., 1, 2, 4, 8, ...)
-  return (trait % (mask*2)) < mask
+  if trait and mask then
+    return (trait % (mask*2)) < mask
+  end
+  return true
 end
 
 function TC.ResolveTraitDiffs()
@@ -274,12 +283,36 @@ function TC:StatsReport()
   end
 end
 
+local function registerFormatter()
+  TC.formatter:RegisterCore()
+  TC.formatter:RegisterProtocol("proto")
+end
+
+local function registerTemplates()
+  TC.mailInstance:RegisterTemplate("Requestor", {
+    recipient = "{recipient}",
+    subject   = "TRAITCRAFT:RESEARCH:V1",
+    body      = "{proto}"
+  })
+
+end
+
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+
+  if LibTextFormat then
+    TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)
+    registerFormatter()
+  end
+
+  if LibDynamicMail then
+    TC.mailInstance = TC.mailInstance or LibDynamicMail:New(TC.AV.libNamespace.LDM, TC.formatter)
+    registerTemplates()
+  end
 
   TC.bitwiseChars = TC.GetCharacterBitwise()
 
@@ -602,6 +635,13 @@ local function TC_Event_Player_Activated(event, isA)
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
+        if LibDynamicMail and TC.AV.settings.requestOption then
+          TC.mailInstance.Inbox:RegisterCallback("Requestee", "QueueItems", function()
+            TC.autocraft:ScanUnknownTraitsForCrafting(currentlyLoggedInCharId)
+          end)
+          TC.mailInstance.Inbox:RegisterEvents("Requestee", "QueueItems")
+          TC.mailInstance.Inbox:WatchMailByTemplateSubject("Requestor", "equals")
+        end
       elseif TC.autocraft then
         TC_Autocraft:Destroy()
       end

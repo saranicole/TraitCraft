@@ -1,11 +1,15 @@
 local TC = TraitCraft
 
 local LAM = LibHarvensAddonSettings
+local LDM = LibDynamicMail
+local LTF = LibTextFormat
 
 if not LibHarvensAddonSettings then
     d("LibHarvensAddonSettings is required!")
     return
 end
+
+local protocol = nil
 
 local researcherLimit = 25
 if IsInGamepadPreferredMode() then
@@ -165,6 +169,25 @@ function TC.BuildMenu()
   })
 
   panel:AddSetting({
+      type = LibHarvensAddonSettings.ST_BUTTON,
+      label = TC.Lang.SEND_CRAFT_REQUEST,
+      buttonText = TC.Lang.AUTOFILL_REQUEST,
+      clickHandler = function(control)
+        local bodyValues = TC.requestor:ScanUnknownTraitsForRequesting(TC)
+        local sendObject = {
+          recipient = TC.AV.settings.crafterRequestee,
+          subject = "TRAITCRAFT:RESEARCH:V1",
+          body = bodyValues,
+          records = bodyValues
+        }
+        TC.mailInstance:PopulateCompose("Requestor", sendObject)
+      end,
+      disable = function()
+        return TC.requestor == nil or LDM == nil or LTF == nil
+      end
+  })
+
+  panel:AddSetting({
     type = LAM.ST_CHECKBOX,
     label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.RESEARCH_REQUESTS,
     getFunction = function() return TC.AV.settings.requestOption end,
@@ -187,11 +210,11 @@ function TC.BuildMenu()
     buttonText = TC.Lang.ACTIVE_APPLY,
     clickHandler  = function()
       panel:UpdateControls()
-      ReloadUI("ingame")
+--       ReloadUI("ingame")
     end,
-    tooltip = TC.Lang.REQUIRES_RELOAD,
+    tooltip = TC.Lang.REQUIRES_RELOAD.."; "..TC.Lang.REQUIRES_LIBRARY.."LibDynamicMail, LibTextFormat",
     disable = function()
-      return TC.AV.settings.crafterRequestee == "" or not TC.AV.settings.requestOption
+      return TC.AV.settings.crafterRequestee == "" or not TC.AV.settings.requestOption or LDM == nil or LTF == nil
     end
   })
 

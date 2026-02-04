@@ -47,6 +47,7 @@ TC.Lang = {
   STATS_FINISH            =         "End",
   SEND_CRAFT_REQUEST      =         "Open your mail to auto-prepare researchable item crafting request",
   REQUIRES_RELOAD         =         "Will trigger an in game reload",
+  REQUIRES_LIBRARY        =         "Requires installation of library ",
   ENABLE_BUTTON           =         "Enable",
   AUTOFILL_REQUEST        =         "Autofill crafting request",
   CRAFTER_REQUESTEE       =         "Gamertag of crafter for crafting research requests",
