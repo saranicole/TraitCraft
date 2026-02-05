@@ -676,7 +676,7 @@ function TC:processRequestMail()
           craftCounter = self.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
         end
         if craftCounter > 0 then
-          if TC.AV.settings.deleteMatchingOnRead then
+          if TC.SV.settings.deleteMatchingOnRead then
             DeleteMail(mailId)
           end
           d(self.Lang.MAIL_PROCESSED)
@@ -705,7 +705,7 @@ local function TC_Event_Player_Activated(event, isA)
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.AV.settings.receiveOption then
+        if LibDynamicMail and TC.SV.settings.receiveOption then
           EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
         end
       elseif TC.autocraft then

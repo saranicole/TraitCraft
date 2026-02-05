@@ -549,9 +549,6 @@ function TC.BuildMenu()
       getFunction = function() return TC.SV.settings.receiveOption end,
       setFunction = function(var)
         TC.SV.settings.receiveOption = var
-      end,
-      disable = function()
-        return TC.SV.settings.requestOption == false
       end
     })
 
@@ -561,9 +558,6 @@ function TC.BuildMenu()
       getFunction = function() return TC.AV.settings.deleteMatchingOnRead end,
       setFunction = function(var)
         TC.SV.settings.deleteMatchingOnRead = var
-      end,
-      disable = function()
-        return TC.SV.settings.requestOption == false
       end
     })
 
