@@ -506,6 +506,7 @@ function TC.BuildMenu()
             records = bodyValues
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
+          d(TC.Lang.SEND_CRAFT_REQUEST)
         end,
         disable = function()
           return TC.AV.settings.requestOption == false
