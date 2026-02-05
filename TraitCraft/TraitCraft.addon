@@ -10,8 +10,8 @@
 ## APIVersion: 101048 101049
 ## AddOnVersion: 1
 ## SavedVariables: TraitCraft_Vars
-## DependsOn: LibHarvensAddonSettings>=2.0.7
-## OptionalDependsOn: LibLazyCrafting>=4.026 LibDynamicMail LibTextFormat
+## DependsOn: LibHarvensAddonSettings>=20101
+## OptionalDependsOn: LibLazyCrafting>=4026 LibDynamicMail>=014 LibTextFormat>=009
 
 autocraft.xml
 AutoCrafting.lua
