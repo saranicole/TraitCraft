@@ -500,6 +500,16 @@ function TC.BuildMenu()
       label = TC.Lang.RESEARCH_REQUESTS,
     })
 
+    panel:AddSetting {
+      type = LAM.ST_CHECKBOX,
+      label = TC.Lang.CHARACTER_SETTING,
+      tooltip = TC.Lang.CHARACTER_TOOLTIP
+      getFunction = function() return TC.AV.settings.isCharacterSpecific end,
+      setFunction = function(var)
+        TC:SwitchSV(var)
+      end
+    }
+
     panel:AddSetting({
         type = LibHarvensAddonSettings.ST_BUTTON,
         label = TC.Lang.SEND_CRAFT_REQUEST,
@@ -508,36 +518,39 @@ function TC.BuildMenu()
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
           local sendObject = {
-            recipient = TC.AV.settings.crafterRequestee,
+            recipient = TC.SV.settings.crafterRequestee,
             subject = "TRAITCRAFT:RESEARCH:V1",
             body = bodyValues,
             records = bodyValues
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
           if IsConsoleUI() then
-            makeAnnouncement(TC.Lang.SEND_CRAFT_REQUEST, SOUNDS.MAIL_WINDOW_OPEN)
+            makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
           end
         end,
         disable = function()
-          return TC.AV.settings.requestOption == false
+          return TC.SV.settings.requestOption == false
         end
     })
 
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.RESEARCH_REQUESTS,
-      getFunction = function() return TC.AV.settings.requestOption end,
+      getFunction = function() return TC.SV.settings.requestOption end,
       setFunction = function(var)
-        TC.AV.settings.requestOption = var
+        TC.SV.settings.requestOption = var
+      end,
+      disable = function()
+        return TC.SV.settings.requestOption == false
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.FULFILL_REQUEST,
-      getFunction = function() return TC.AV.settings.receiveOption end,
+      getFunction = function() return TC.SV.settings.receiveOption end,
       setFunction = function(var)
-        TC.AV.settings.receiveOption = var
+        TC.SV.settings.receiveOption = var
       end
     })
 
@@ -546,18 +559,18 @@ function TC.BuildMenu()
       label = TC.Lang.DELETE_ON_PROCESS,
       getFunction = function() return TC.AV.settings.deleteMatchingOnRead end,
       setFunction = function(var)
-        TC.AV.settings.deleteMatchingOnRead = var
+        TC.SV.settings.deleteMatchingOnRead = var
       end,
       disable = function()
-        return TC.AV.settings.requestOption == false
+        return TC.SV.settings.requestOption == false
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_EDIT,
       label = TC.Lang.CRAFTER_REQUESTEE,
-      getFunction = function() return "" end,
-      setFunction = function(value) TC.AV.settings.crafterRequestee = value end,
+      getFunction = function() return TC.SV.settings.crafterRequestee or "" end,
+      setFunction = function(value) TC.SV.settings.crafterRequestee = value end,
       default = ""
     })
 
@@ -571,14 +584,14 @@ function TC.BuildMenu()
       end,
       tooltip = TC.Lang.REQUIRES_RELOAD.."; "..TC.Lang.REQUIRES_LIBRARY.."LibDynamicMail, LibTextFormat",
       disable = function()
-        return TC.AV.settings.crafterRequestee == "" or not TC.AV.settings.requestOption
+        return TC.SV.settings.crafterRequestee == "" or not TC.SV.settings.requestOption
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_LABEL,
       label = function()
-          return TC.AV.settings.crafterRequestee
+          return TC.SV.settings.crafterRequestee
       end,
       tooltip = TC.Lang.SEND_CRAFT_REQUEST
     })

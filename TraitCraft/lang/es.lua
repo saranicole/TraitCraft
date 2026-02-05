@@ -59,4 +59,6 @@ TC.Lang = {
   DELETE_ON_PROCESS       =         "Eliminar las solicitudes de fabricación que están en proceso",
   MAIL_PROCESSED          =         "Solicitud de fabricación procesada",
   REQUEST_NOT_PROCESSED   =         "La solicitud de fabricación ha fallado",
+  CHARACTER_SETTING       =         "Aplicar al personaje",
+  CHARACTER_TOOLTIP       =         "La configuración de las solicitudes de fabricación se aplicará únicamente a este personaje",
 }

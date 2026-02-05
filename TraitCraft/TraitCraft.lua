@@ -37,7 +37,8 @@ TC.Default = {
         r = 0.902,
         g = 0.624,
         b = 0.0
-      }
+      },
+      isCharacterSpecific = false,
     },
     libNamespace = {
       LDM = {},
@@ -82,7 +83,14 @@ if IsInGamepadPreferredMode() then
   SMITHING = ZO_GamepadSmithingResearch
 end
 
-
+function TC:SwitchSV(flag)
+  if flag then
+    self.SV = self.CV
+  else
+    self.SV = self.AV
+  end
+  TC.AV.settings.isCharacterSpecific = flag
+end
 
 function TC.GetCharacterBitwise()
   local characterList = {}
@@ -313,6 +321,8 @@ local function OnAddOnLoaded(eventCode, addonName)
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, nil, TC.Default)
+  TC:SwitchSV(false)
 
   if LibTextFormat then
     TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)

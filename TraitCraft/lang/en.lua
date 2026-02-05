@@ -60,4 +60,6 @@ TC.Lang = {
   DELETE_ON_PROCESS       =         "Delete craft requests on processing",
   MAIL_PROCESSED          =         "Craft request processed",
   REQUEST_NOT_PROCESSED   =         "Craft request failed",
+  CHARACTER_SETTING       =         "Apply to character",
+  CHARACTER_TOOLTIP       =         "Settings for crafting requests will apply to this character only",
 }
