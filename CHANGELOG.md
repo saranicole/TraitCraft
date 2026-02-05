@@ -2,6 +2,7 @@
 - Send is working, will see about inbox processing
 - Inbox processing possibly working
 - Add option for automated deletion of processed mail
+- Make console populating mail event based
 
 ## 2026.01.31
 - First stab at auto-requesting research items via mail
