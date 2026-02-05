@@ -663,7 +663,7 @@ function TC:processRequestMail()
         local scope = self.formatter.Scope({ text = scanResults.body })
         local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
         if next(decodedResults) ~= nil then
-          self.autocraft:CraftFromInput(decodedResults, scanResults.senderDisplayName)
+          self.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
         end
       end
     end
