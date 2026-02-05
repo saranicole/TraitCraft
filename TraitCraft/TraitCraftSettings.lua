@@ -539,9 +539,7 @@ function TC.BuildMenu()
       getFunction = function() return TC.SV.settings.requestOption end,
       setFunction = function(var)
         TC.SV.settings.requestOption = var
-      end,
-      disable = function()
-        return TC.SV.settings.requestOption == false
+        panel:UpdateControls()
       end
     })
 
@@ -551,6 +549,9 @@ function TC.BuildMenu()
       getFunction = function() return TC.SV.settings.receiveOption end,
       setFunction = function(var)
         TC.SV.settings.receiveOption = var
+      end,
+      disable = function()
+        return TC.SV.settings.requestOption == false
       end
     })
 
