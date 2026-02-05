@@ -90,20 +90,21 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
 end
 
 function TC_Autocraft:CraftFromInput(scanResults, sender)
-  EVENT_MANAGER:UnregisterForEvent(self.parent.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
+
   local craftCounter = 0
   local craftingType = GetCraftingInteractionType()
-  for iDex, entry in ipairs(scanResults) do
+  for iDex, entry in pairs(scanResults) do
     if craftingType == CRAFT_TOKEN_REVERSE[entry[1]] then
       local iterLen = #entry[2] - 1
       for i = 1, iterLen do
         local convertedObj = { [craftingType] = { [entry[2][i]] = entry[2][i + 1] } }
         craftCounter = self:craftForType(convertedObj, craftingType, sender)
       end
+      scanResults[iDex] = nil
     end
   end
-  if craftCounter > 0 then return true end
-  return false
+  if craftCounter > 0 then return true, scanResults end
+  return false, scanResults
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
