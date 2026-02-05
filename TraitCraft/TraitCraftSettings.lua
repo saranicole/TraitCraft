@@ -146,13 +146,6 @@ function TC.SetCrafterDefaults(characters)
   end
 end
 
-local function makeAnnouncement(text, sound)
-  local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
-			params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
-			params:SetText(text)
-			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
-end
-
 local function checkLLCAbsent()
   return LibLazyCrafting == nil
 end
@@ -525,7 +518,7 @@ function TC.BuildMenu()
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
           if IsConsoleUI() then
-            makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+            TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
           end
         end,
         disable = function()
