@@ -14,7 +14,9 @@ PC and Console:
 * Autocraft next equipment needed for desired alts' research, with priority given to shorter research times
 * Slash command "/tcstats" will give you a quick overview of research on actively researching characters
 
-Console only: Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
+Console only: 
+* Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
+* TraitCraft provides a button in the settings to mail a crafting request to a friendly crafter automatically that will allow them to autocraft your needed researchable items (assuming they also have TraitCraft installed with Autocrafting turned on)
 
 [img]https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1 [/img]
 
