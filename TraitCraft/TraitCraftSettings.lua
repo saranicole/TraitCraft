@@ -531,6 +531,18 @@ function TC.BuildMenu()
     })
 
     panel:AddSetting({
+      type = LAM.ST_CHECKBOX,
+      label = TC.Lang.DELETE_ON_PROCESS,
+      getFunction = function() return TC.AV.settings.deleteMatchingOnRead end,
+      setFunction = function(var)
+        TC.AV.settings.deleteMatchingOnRead = var
+      end,
+      disable = function()
+        return TC.AV.settings.requestOption == false
+      end
+    })
+
+    panel:AddSetting({
       type = LAM.ST_EDIT,
       label = TC.Lang.CRAFTER_REQUESTEE,
       getFunction = function() return "" end,

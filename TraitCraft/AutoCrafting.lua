@@ -102,14 +102,17 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
 end
 
 function TC_Autocraft:CraftFromInput(scanResults, sender)
+  local craftCounter = 0
   for iDex, entry in ipairs(scanResults) do
     local craftingType = CRAFT_TOKEN_REVERSE[entry[1]]
     local iterLen = #entry[2] - 1
     for i = 1, iterLen do
       local convertedObj = { [craftingType] = { [entry[2][i]] = entry[2][i + 1] } }
-      self:craftForType(convertedObj, craftingType, sender)
+      craftCounter = self:craftForType(convertedObj, craftingType, sender)
     end
   end
+  if craftCounter > 0 then return true end
+  return false
 end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)

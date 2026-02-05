@@ -56,4 +56,7 @@ TC.Lang = {
   WITH_CRAFTING_REQUEST   =         "with crafting request of the following items:",
   RESEARCH_REQUESTS       =         "Researchable item requests by mail",
   CRAFTER_SETTINGS        =         "Crafter Account Settings",
+  DELETE_ON_PROCESS       =         "Delete craft requests on processing",
+  MAIL_PROCESSED          =         "Craft request processed",
+  REQUEST_NOT_PROCESSED   =         "Craft request failed",
 }

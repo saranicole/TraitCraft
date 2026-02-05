@@ -17,6 +17,7 @@ TC.Default = {
       crafterRequestee = "",
       requestOption = false,
       receiveOption = false,
+      deleteMatchingOnRead = false,
       autoCraftOption = false,
       autoCraftNirnhoned = false,
       showKnown = false,
@@ -658,12 +659,21 @@ function TC:processRequestMail()
   TC.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
   TC.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(mailId)
     if self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
+      local craftCounter = 0
       local scanResults = self.mailInstance:RetrieveActiveMailData(mailId)
       if scanResults then
         local scope = self.formatter.Scope({ text = scanResults.body })
         local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
         if next(decodedResults) ~= nil then
-          self.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+          craftCounter = self.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+        end
+        if craftCounter > 0 then
+          if TC.AV.settings.deleteMatchingOnRead then
+            DeleteMail(mailId)
+          end
+          d(self.Lang.MAIL_PROCESSED)
+        else
+          d(self.Lang.REQUEST_NOT_PROCESSED)
         end
       end
     end

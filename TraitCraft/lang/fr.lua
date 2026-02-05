@@ -55,4 +55,7 @@ TC.Lang = {
   WITH_CRAFTING_REQUEST   =         "avec une demande de fabrication des articles suivants :",
   RESEARCH_REQUESTS       =         "Solicitudes de artículos para investigación por correo.",
   CRAFTER_SETTINGS        =         "Paramètres du compte Crafter",
+  DELETE_ON_PROCESS       =         "Supprimer les demandes de fabrication en cours de traitement",
+  MAIL_PROCESSED          =         "Demande de fabrication traitée",
+  REQUEST_NOT_PROCESSED   =         "La demande de fabrication a échoué",
 }
