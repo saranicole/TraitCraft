@@ -684,8 +684,8 @@ function TC:processRequestMail()
                 d(self.Lang.REQUEST_NOT_PROCESSED)
               end
             end
-          end
-        end)
+          end)
+        end
       end
     end
   end)
