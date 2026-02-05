@@ -45,8 +45,8 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 	return foundTraitType or ITEM_TRAIT_TYPE_NONE
 end
 
-function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex)
-  local craftingType = GetCraftingInteractionType()
+function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex, craftingType)
+  local craftingType = craftingType or GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
@@ -73,13 +73,13 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
     if type(entry) == "table" then
       for tIndex, obj in pairs(entry[rIndex]) do
         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          self:QueueItems(charId, rIndex, tIndex)
+          self:QueueItems(charId, rIndex, tIndex, craftingType)
           craftCounter = craftCounter + 1
         end
       end
     else
       if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
-        self:QueueItems(charId, rIndex, entry)
+        self:QueueItems(charId, rIndex, entry, craftingType)
         craftCounter = craftCounter + 1
       end
     end
