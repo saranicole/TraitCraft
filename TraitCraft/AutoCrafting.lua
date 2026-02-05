@@ -46,11 +46,19 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 end
 
 function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex, craftingType)
+  if GetDisplayName() == "@Saranicole1980" then
+    d("craftingType")
+    d(craftingType)
+  end
   local craftingType = craftingType or GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
   local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
+  if GetDisplayName() == "@Saranicole1980" then
+    d("queue succeeded")
+    d(request)
+  end
   if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
     self.interactionTable:craftItem(craftingType)
   end
