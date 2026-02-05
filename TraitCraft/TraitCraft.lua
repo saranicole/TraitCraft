@@ -686,15 +686,18 @@ function TC:processRequestMail()
       TC.Name .. "FromMail",
       EVENT_CRAFTING_STATION_INTERACT,
       function()
-        local craftCounter = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+        local craftCounter, newResults = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
 
-        if craftCounter then
-          if TC.SV.settings.deleteMatchingOnRead then
-            DeleteMail(mailId)
+        if next(newResults) == nil then
+          EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
+          if craftCounter then
+            if TC.SV.settings.deleteMatchingOnRead then
+              DeleteMail(mailId)
+            end
+            d(self.Lang.MAIL_PROCESSED)
+          else
+            d(self.Lang.REQUEST_NOT_PROCESSED)
           end
-          d(self.Lang.MAIL_PROCESSED)
-        else
-          d(self.Lang.REQUEST_NOT_PROCESSED)
         end
       end
     )
