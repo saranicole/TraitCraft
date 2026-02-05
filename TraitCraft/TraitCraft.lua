@@ -312,7 +312,11 @@ local function registerTemplates()
     subject   = "TRAITCRAFT:RESEARCH:V1",
     body      = "{proto}"
   })
-
+  TC.mailInstance:RegisterTemplate("Requested", {
+    recipient = "",
+    subject   = "",
+    body      = ""
+  })
 end
 
 --When Loaded
@@ -663,6 +667,13 @@ function TC:ScanUnknownTraitsForRequesting()
   return sendObject
 end
 
+function TC.makeAnnouncement(text, sound)
+  local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+			params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
+			params:SetText(text)
+			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+end
+
 function TC:processRequestMail()
   self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
 
@@ -675,6 +686,12 @@ function TC:processRequestMail()
     if not scanResults then
       return
     end
+    if TC.SV.settings.deleteMatchingOnRead then
+      zo_callLater(function()
+        DeleteMail(mailId, true)
+      end, 500)
+    end
+    d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
     local scope = self.formatter.Scope({ text = scanResults.body })
     local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
@@ -691,10 +708,16 @@ function TC:processRequestMail()
         if next(newResults) == nil then
           EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
           if craftCounter then
-            if TC.SV.settings.deleteMatchingOnRead then
-              DeleteMail(mailId)
+            local sendObject = {
+              recipient = scanResults.senderDisplayName,
+              subject = TC.Lang.REQUESTED_ITEMS,
+              body = ""
+            }
+            TC.mailInstance:PopulateCompose("Requested", sendObject)
+            if IsConsoleUI() then
+              TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
+              TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
             end
-            d(self.Lang.MAIL_PROCESSED)
           else
             d(self.Lang.REQUEST_NOT_PROCESSED)
           end

@@ -62,4 +62,6 @@ TC.Lang = {
   REQUEST_NOT_PROCESSED   =         "Craft request failed",
   CHARACTER_SETTING       =         "Apply to character",
   CHARACTER_TOOLTIP       =         "Settings for crafting requests will apply to this character only",
+  REQUESTED_ITEMS         =         "Requested research items",
+  REQUESTOR_USERNAME      =         "Requestor gamertag: ",
 }

@@ -61,4 +61,6 @@ TC.Lang = {
   REQUEST_NOT_PROCESSED   =         "La demande de fabrication a échoué",
   CHARACTER_SETTING       =         "Appliquer au personnage",
   CHARACTER_TOOLTIP       =         "Les paramètres relatifs aux demandes de fabrication s'appliqueront uniquement à ce personnage",
+  REQUESTED_ITEMS         =         "Articles de recherche demandés",
+  REQUESTOR_USERNAME      =         "Gamertag du demandeur: ",
 }
