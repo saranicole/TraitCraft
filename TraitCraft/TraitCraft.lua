@@ -687,7 +687,8 @@ function TC:processRequestMail()
       return
     end
     if TC.SV.settings.deleteMatchingOnRead then
-      DeleteMail(mailId)
+      RequestReadMail(mailId)
+      DeleteMail(mailId, true)
     end
     d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
