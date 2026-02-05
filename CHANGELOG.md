@@ -1,3 +1,6 @@
+## 2026.02.05
+- Make announcement instead of using debug
+
 ## 2026.02.04
 - Send is working, will see about inbox processing
 - Inbox processing possibly working

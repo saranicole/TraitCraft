@@ -146,6 +146,13 @@ function TC.SetCrafterDefaults(characters)
   end
 end
 
+local function makeAnnouncement(text, sound)
+  local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+			params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
+			params:SetText(text)
+			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+end
+
 local function checkLLCAbsent()
   return LibLazyCrafting == nil
 end
@@ -497,6 +504,7 @@ function TC.BuildMenu()
         type = LibHarvensAddonSettings.ST_BUTTON,
         label = TC.Lang.SEND_CRAFT_REQUEST,
         buttonText = TC.Lang.AUTOFILL_REQUEST,
+        tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
           local sendObject = {
@@ -507,7 +515,7 @@ function TC.BuildMenu()
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
           if IsConsoleUI() then
-            d(TC.Lang.SEND_CRAFT_REQUEST)
+            makeAnnouncement(TC.Lang.SEND_CRAFT_REQUEST, SOUNDS.MAIL_WINDOW_OPEN)
           end
         end,
         disable = function()
