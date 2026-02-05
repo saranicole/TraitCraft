@@ -664,30 +664,41 @@ function TC:ScanUnknownTraitsForRequesting()
 end
 
 function TC:processRequestMail()
-  TC.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
-  TC.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(mailId)
-    if self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
-      local craftCounter = 0
-      local scanResults = self.mailInstance:RetrieveActiveMailData(mailId)
-      if scanResults then
-        local scope = self.formatter.Scope({ text = scanResults.body })
-        local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
-        if next(decodedResults) ~= nil then
-          EVENT_MANAGER:RegisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT, function()
-            craftCounter = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
-            if craftCounter > 0 then
-              if TC.SV.settings.deleteMatchingOnRead then
-                DeleteMail(mailId)
-              end
-              d(self.Lang.MAIL_PROCESSED)
-              else
-                d(self.Lang.REQUEST_NOT_PROCESSED)
-              end
-            end
-          end)
+  self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
+
+  self.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(mailId)
+    if not self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
+      return
+    end
+
+    local scanResults = self.mailInstance:RetrieveActiveMailData(mailId)
+    if not scanResults then
+      return
+    end
+
+    local scope = self.formatter.Scope({ text = scanResults.body })
+    local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
+    if not next(decodedResults) then
+      return
+    end
+
+    EVENT_MANAGER:RegisterForEvent(
+      TC.Name .. "FromMail",
+      EVENT_CRAFTING_STATION_INTERACT,
+      function()
+        local craftCounter =
+          TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+
+        if craftCounter > 0 then
+          if TC.SV.settings.deleteMatchingOnRead then
+            DeleteMail(mailId)
+          end
+          d(self.Lang.MAIL_PROCESSED)
+        else
+          d(self.Lang.REQUEST_NOT_PROCESSED)
         end
       end
-    end
+    )
   end)
 end
 
