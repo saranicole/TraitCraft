@@ -673,16 +673,19 @@ function TC:processRequestMail()
         local scope = self.formatter.Scope({ text = scanResults.body })
         local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
         if next(decodedResults) ~= nil then
-          craftCounter = self.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
-        end
-        if craftCounter > 0 then
-          if TC.SV.settings.deleteMatchingOnRead then
-            DeleteMail(mailId)
+          EVENT_MANAGER:RegisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT, function()
+            craftCounter = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+            if craftCounter > 0 then
+              if TC.SV.settings.deleteMatchingOnRead then
+                DeleteMail(mailId)
+              end
+              d(self.Lang.MAIL_PROCESSED)
+              else
+                d(self.Lang.REQUEST_NOT_PROCESSED)
+              end
+            end
           end
-          d(self.Lang.MAIL_PROCESSED)
-        else
-          d(self.Lang.REQUEST_NOT_PROCESSED)
-        end
+        end)
       end
     end
   end)

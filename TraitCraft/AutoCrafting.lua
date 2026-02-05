@@ -96,6 +96,7 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
 end
 
 function TC_Autocraft:CraftFromInput(scanResults, sender)
+  EVENT_MANAGER:UnregisterForEvent(self.parent.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
   local craftCounter = 0
   for iDex, entry in ipairs(scanResults) do
     local craftingType = CRAFT_TOKEN_REVERSE[entry[1]]
