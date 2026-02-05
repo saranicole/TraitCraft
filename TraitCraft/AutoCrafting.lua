@@ -53,7 +53,6 @@ function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex)
   local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
   if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
     self.interactionTable:craftItem(craftingType)
-    self.lastCrafted[charId][craftingType][researchIndex][traitIndex] = true
   end
 end
 
@@ -70,31 +69,18 @@ end
 
 function TC_Autocraft:craftForType(scanResults, craftingType, charId)
   local craftCounter = 0
-  if not self.lastCrafted[charId] then
-    self.lastCrafted[charId] = {}
-  end
-  if not self.lastCrafted[charId][craftingType] then
-    self.lastCrafted[charId][craftingType] = {}
-  end
   for rIndex, entry in pairs(scanResults[craftingType]) do
-    if not self.lastCrafted[charId][craftingType][rIndex] then
-      self.lastCrafted[charId][craftingType][rIndex] = {}
-    end
     if type(entry) == "table" then
       for tIndex, obj in pairs(entry[rIndex]) do
-        if not self.lastCrafted[charId][craftingType][rIndex][tIndex] then
-          if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-            self:QueueItems(charId, rIndex, tIndex)
-            craftCounter = craftCounter + 1
-          end
+        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
+          self:QueueItems(charId, rIndex, tIndex)
+          craftCounter = craftCounter + 1
         end
       end
     else
-      if not self.lastCrafted[charId][craftingType][rIndex][entry] then
-        if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
-          self:QueueItems(charId, rIndex, entry)
-          craftCounter = craftCounter + 1
-        end
+      if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
+        self:QueueItems(charId, rIndex, entry)
+        craftCounter = craftCounter + 1
       end
     end
   end
@@ -117,12 +103,6 @@ end
 
 function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local craftingType = GetCraftingInteractionType()
-  if not self.lastCrafted[charId] then
-    self.lastCrafted[charId] = {}
-  end
-  if not self.lastCrafted[charId][craftingType] then
-    self.lastCrafted[charId][craftingType] = {}
-  end
   self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
     local craftCounter = self:craftForType(scanResults, craftingType, charId)
     if craftCounter == 0 then
@@ -130,7 +110,7 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
       local skillName = ZO_GetCraftingSkillName(craftingType)
       d(self.parent.Lang.CRAFT_FAILED..skillName)
     end
-  end, self.lastCrafted)
+  end)
 end
 
 local function getGamepadCraftKeyIcon()
@@ -266,7 +246,6 @@ function TC_Autocraft:Initialize(parent)
   if not LLC then
     return
   end
-  self.lastCrafted = {}
   if not LLC:GetRequestingAddon(parent.Name) then
     local styles = self.parent:GetCommonStyles()
     self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)

@@ -563,7 +563,7 @@ function TC.sortKeysByValue(tbl)
   return keys
 end
 
-function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, lastCrafted)
+function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local tempResearchTable = {
     rCounter = {},
@@ -596,20 +596,18 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback, las
   end
   if not self.rIndices[charId][craftingType] then
     for r = 1, researchLineLimit do
-      if lastCrafted == nil or (lastCrafted ~= nil and not lastCrafted[charId][craftingType][r]) then
-        for t = traitLimit, 1, -1 do
-          key = self:GetTraitKey(craftingType, r, t)
-          trait = self.AV.traitTable[key] or 0
-          if self.charBitMissing(trait, mask) and not research[key] then
-            if not tempResearchTable.rCounter[r] then
-              tempResearchTable.rCounter[r] = 0
-            end
-            tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-            if not tempResearchTable.rObjects[r] then
-              tempResearchTable.rObjects[r] = {}
-            end
-            table.insert(tempResearchTable.rObjects[r], t)
+      for t = traitLimit, 1, -1 do
+        key = self:GetTraitKey(craftingType, r, t)
+        trait = self.AV.traitTable[key] or 0
+        if self.charBitMissing(trait, mask) and not research[key] then
+          if not tempResearchTable.rCounter[r] then
+            tempResearchTable.rCounter[r] = 0
           end
+          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+          if not tempResearchTable.rObjects[r] then
+            tempResearchTable.rObjects[r] = {}
+          end
+          table.insert(tempResearchTable.rObjects[r], t)
         end
       end
     end
