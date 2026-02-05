@@ -46,19 +46,11 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 end
 
 function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex, craftingType)
-  if GetDisplayName() == "@Saranicole1980" then
-    d("craftingType")
-    d(craftingType)
-  end
   local craftingType = craftingType or GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
   local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
-  if GetDisplayName() == "@Saranicole1980" then
-    d("queue succeeded")
-    d(request)
-  end
   if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
     self.interactionTable:craftItem(craftingType)
   end
@@ -96,6 +88,7 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
 end
 
 function TC_Autocraft:CraftFromInput(scanResults, sender)
+  EVENT_MANAGER:UnregisterForEvent(self.parent.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
   local craftCounter = 0
   for iDex, entry in ipairs(scanResults) do
     local craftingType = CRAFT_TOKEN_REVERSE[entry[1]]
