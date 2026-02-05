@@ -503,7 +503,7 @@ function TC.BuildMenu()
     panel:AddSetting {
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.CHARACTER_SETTING,
-      tooltip = TC.Lang.CHARACTER_TOOLTIP
+      tooltip = TC.Lang.CHARACTER_TOOLTIP,
       getFunction = function() return TC.AV.settings.isCharacterSpecific end,
       setFunction = function(var)
         TC:SwitchSV(var)
