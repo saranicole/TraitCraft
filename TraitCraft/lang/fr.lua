@@ -59,4 +59,6 @@ TC.Lang = {
   DELETE_ON_PROCESS       =         "Supprimer les demandes de fabrication en cours de traitement",
   MAIL_PROCESSED          =         "Demande de fabrication traitée",
   REQUEST_NOT_PROCESSED   =         "La demande de fabrication a échoué",
+  CHARACTER_SETTING       =         "Appliquer au personnage",
+  CHARACTER_TOOLTIP       =         "Les paramètres relatifs aux demandes de fabrication s'appliqueront uniquement à ce personnage",
 }

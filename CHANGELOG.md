@@ -1,5 +1,6 @@
 ## 2026.02.05
 - Make announcement instead of using debug
+- Fix saved vars - character specific settings
 
 ## 2026.02.04
 - Send is working, will see about inbox processing
