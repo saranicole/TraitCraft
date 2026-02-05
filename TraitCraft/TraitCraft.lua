@@ -686,10 +686,9 @@ function TC:processRequestMail()
       TC.Name .. "FromMail",
       EVENT_CRAFTING_STATION_INTERACT,
       function()
-        local craftCounter =
-          TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+        local craftCounter = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
 
-        if craftCounter > 0 then
+        if craftCounter then
           if TC.SV.settings.deleteMatchingOnRead then
             DeleteMail(mailId)
           end
