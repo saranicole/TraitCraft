@@ -45,22 +45,16 @@ local function findTraitType(craftingSkillType, researchLineIndex, traitIndex)
 	return foundTraitType or ITEM_TRAIT_TYPE_NONE
 end
 
-function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex, craftingType)
-  if GetDisplayName() == "@Saranicole1980" then
-    d("craftingType")
-    d(craftingType)
-  end
-  local craftingType = craftingType or GetCraftingInteractionType()
+function TC_Autocraft:QueueItems(charId, researchIndex, traitIndex)
+  local craftingType = GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
   traitType = traitType + 1
-  local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
-  if GetDisplayName() == "@Saranicole1980" then
-    d("queue succeeded")
-    d(request)
-  end
-  if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
-    self.interactionTable:craftItem(craftingType)
+  if patternIndex then
+    local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
+    if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+      self.interactionTable:craftItem(craftingType)
+    end
   end
 end
 
@@ -81,13 +75,13 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
     if type(entry) == "table" then
       for tIndex, obj in pairs(entry[rIndex]) do
         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          self:QueueItems(charId, rIndex, tIndex, craftingType)
+          self:QueueItems(charId, rIndex, tIndex)
           craftCounter = craftCounter + 1
         end
       end
     else
       if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
-        self:QueueItems(charId, rIndex, entry, craftingType)
+        self:QueueItems(charId, rIndex, entry)
         craftCounter = craftCounter + 1
       end
     end
