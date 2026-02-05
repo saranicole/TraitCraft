@@ -11,7 +11,7 @@
 ## AddOnVersion: 1
 ## SavedVariables: TraitCraft_Vars
 ## DependsOn: LibHarvensAddonSettings>=2.0.7
-## OptionalDependsOn: LibLazyCrafting>=4.026 LibDynamicMail>=0.0.6 LibTextFormat>=0.0.6
+## OptionalDependsOn: LibLazyCrafting>=4.026 LibDynamicMail LibTextFormat
 
 autocraft.xml
 AutoCrafting.lua
