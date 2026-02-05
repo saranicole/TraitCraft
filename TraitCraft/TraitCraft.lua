@@ -313,9 +313,9 @@ local function registerTemplates()
     body      = "{proto}"
   })
   TC.mailInstance:RegisterTemplate("Requested", {
-    recipient = "",
-    subject   = "",
-    body      = ""
+    recipient = "{recipient}",
+    subject   = "{subject}",
+    body      = "{body}"
   })
 end
 
@@ -687,9 +687,7 @@ function TC:processRequestMail()
       return
     end
     if TC.SV.settings.deleteMatchingOnRead then
-      zo_callLater(function()
-        DeleteMail(mailId, true)
-      end, 500)
+      DeleteMail(mailId)
     end
     d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
