@@ -34,6 +34,9 @@ jobs:
         run: |
           addon_name="${{ env.REPO_NAME }}"
           version="${{ steps.semver.outputs.nextStrict }}"
+          formatted_version=$( echo "${version//./}" )
+
+          echo "ADDON_FORMATTED_VERSION=$formatted_version" >> $GITHUB_ENV
 
           echo "ADDON_NAME=$addon_name" >> $GITHUB_ENV
           echo "ADDON_VERSION=$version" >> $GITHUB_ENV
@@ -41,7 +44,7 @@ jobs:
           echo "ZIP_FULL_NAME=${addon_name}-${version}.zip" >> $GITHUB_ENV
       - name: Create addon file
         run: |
-          cat ${{ github.workspace }}/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}.addon.template | envsubst > ${{ github.workspace }}/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}.addon
+          cat ${{ github.workspace }}/${{ env.REPO_NAME }}.addon.template | envsubst > ${{ github.workspace }}/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}.addon
           cat ${{ github.workspace }}/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}.addon
       - name: Create ZIP archive
         run: |
