@@ -100,11 +100,9 @@ function TC_Autocraft:CraftFromInput(scanResults, sender)
   local craftingType = GetCraftingInteractionType()
   for iDex, entry in pairs(scanResults) do
     if craftingType == CRAFT_TOKEN_REVERSE[entry[1]] then
-      local iterLen = #entry[2] - 1
-      for i = 1, iterLen do
-        local convertedObj = { [craftingType] = { [entry[2][i]] = entry[2][i + 1] } }
-        craftCounter = self:craftForType(convertedObj, craftingType, sender)
-      end
+      local itemObj = #entry[2]
+      local convertedObj = { [craftingType] = { [itemObj["researchIndex"]] = [itemObj["traitIndex"]] } }
+      craftCounter = self:craftForType(convertedObj, craftingType, sender)
       scanResults[iDex] = nil
     end
   end

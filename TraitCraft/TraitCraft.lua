@@ -319,19 +319,22 @@ end
 
 local function registerFormatter()
   TC.formatter:RegisterCore()
-  TC.formatter:RegisterProtocol("proto", {delimiters = { group = ":", record = ";", item = "," }})
+  TC.formatter:RegisterFilter("recipient", function(ctx, text)
+    local recipient = ctx.name or TC.SV.settings.crafterRequestee
+    return text..recipient
+  end)
 end
 
 local function registerTemplates()
   TC.mailInstance:RegisterTemplate("Requestor", {
     recipient = "{recipient}",
     subject   = "TRAITCRAFT:RESEARCH:V1",
-    body      = "{proto}"
+    body      = "{todotpath}"
   })
   TC.mailInstance:RegisterTemplate("Requested", {
     recipient = "{recipient}",
     subject   = "{subject}",
-    body      = "{body}"
+    body      = "{fromdotpath}"
   })
 end
 
@@ -595,6 +598,8 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
     return
   end
   local scanResults = { maxSimultResearch = char["maxSimultResearch"][craftingType] }
+  local serializeContain = {}
+  local serializeRecord = {}
   local mask = self.bitwiseChars[charId]
   if not char then
     d(self.Lang.LOG_INTO_CHAR)
@@ -645,13 +650,17 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
     if not scanResults[craftingType][rIndex] then
       scanResults[craftingType][rIndex] = {}
     end
+    serializeRecord["researchIndex"] = rIndex
     for j = 1, #self.rObjects[charId][rIndex] do
       local tIndex = self.rObjects[charId][rIndex][j]
+      serializeRecord["traitIndex"] = tIndex
       scanResults[craftingType][rIndex] = tIndex
       traitCounter = traitCounter + 1
     end
+    serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
+   table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
     if traitCounter >= char["maxSimultResearch"][craftingType] then
-      scanCallback(scanResults)
+      scanCallback(scanResults, serializeContain)
       return
     end
   end
@@ -660,25 +669,13 @@ end
 function TC:ScanUnknownTraitsForRequesting()
   local charId = GetCurrentCharacterId()
   local craftTypes = self:GetCraftTypes()
-  if not self.lastRequested[charId] then
-    self.lastRequested[charId] = {}
-  end
   local itemDescriptions = "|r\r\n  "
   local sendObject = {}
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
-    if not self.lastRequested[charId][craftingType] then
-      self.lastRequested[charId][craftingType] = {}
-    end
-    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
-      local record = {}
-      for rIndex, tIndex in pairs(scanResults[craftingType]) do
-        if self.lastRequested[charId][craftingType][rIndex] == nil or not self.lastRequested[charId][craftingType][rIndex][tIndex] then
-          record = { rIndex, tIndex }
-        end
-      end
-      sendObject[#sendObject + 1] = { CRAFT_TOKEN[craftingType], record }
-    end, self.lastRequested)
+    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults, serializedObj)
+      table.insert(sendObject, serializedObj)
+    end)
   end
   return sendObject
 end
@@ -707,8 +704,8 @@ function TC:processRequestMail()
     end
     d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
-    local scope = self.formatter.Scope({ text = scanResults.body })
-    local decodedResults = self.formatter:decodeByProtocolName("proto", scope)
+    local scope = self.formatter.Scope({ fromdotpath = scanResults.body })
+    local decodedResults = self.formatter:format("{fromdotpath}", scope)
     if not next(decodedResults) then
       return
     end
