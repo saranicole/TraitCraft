@@ -321,7 +321,11 @@ local function registerFormatter()
   TC.formatter:RegisterCore()
   TC.formatter:RegisterFilter("recipient", function(ctx, text)
     local recipient = ctx.name or TC.SV.settings.crafterRequestee
-    return text..recipient
+    if recipient and text then
+      return text..recipient
+    else
+      return ""
+    end
   end)
 end
 
