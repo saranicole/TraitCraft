@@ -323,19 +323,18 @@ local function registerFormatter()
     local recipient = ctx.name or TC.SV.settings.crafterRequestee
     return text..recipient
   end)
---   TC.formatter:RegisterProtocol("proto", {delimiters = { group = ":", record = ";", item = "," }})
 end
 
 local function registerTemplates()
   TC.mailInstance:RegisterTemplate("Requestor", {
     recipient = "{recipient}",
     subject   = "TRAITCRAFT:RESEARCH:V1",
-    body      = "{body|todotpath}"
+    body      = "{todotpath}"
   })
   TC.mailInstance:RegisterTemplate("Requested", {
     recipient = "{recipient}",
     subject   = "{subject}",
-    body      = "{body|fromdotpath}"
+    body      = "{fromdotpath}"
   })
 end
 

@@ -511,11 +511,9 @@ function TC.BuildMenu()
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
           local sendObject = {
-            --name = TC.SV.settings.crafterRequestee,
-            name = "Sara",
+            name = TC.SV.settings.crafterRequestee,
             subject = "TRAITCRAFT:RESEARCH:V1",
-            body = bodyValues,
-            recordSep = ";"
+            body = bodyValues
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
           if IsConsoleUI() then
