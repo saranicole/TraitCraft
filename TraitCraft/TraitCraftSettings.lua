@@ -497,7 +497,7 @@ function TC.BuildMenu()
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.CHARACTER_SETTING,
       tooltip = TC.Lang.CHARACTER_TOOLTIP,
-      getFunction = function() return TC.AV.settings.isCharacterSpecific end,
+      getFunction = function() return TC.SV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId] or TC.AV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId] end,
       setFunction = function(var)
         TC:SwitchSV(var)
       end
@@ -548,7 +548,7 @@ function TC.BuildMenu()
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.DELETE_ON_PROCESS,
-      getFunction = function() return TC.AV.settings.deleteMatchingOnRead end,
+      getFunction = function() return TC.SV.settings.deleteMatchingOnRead end,
       setFunction = function(var)
         TC.SV.settings.deleteMatchingOnRead = var
       end
@@ -572,7 +572,7 @@ function TC.BuildMenu()
       end,
       tooltip = TC.Lang.REQUIRES_RELOAD.."; "..TC.Lang.REQUIRES_LIBRARY.."LibDynamicMail, LibTextFormat",
       disable = function()
-        return TC.SV.settings.crafterRequestee == "" or not TC.SV.settings.requestOption
+        return not TC.SV.settings.requestOption
       end
     })
 

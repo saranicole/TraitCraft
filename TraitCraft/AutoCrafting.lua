@@ -86,6 +86,11 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
       end
     end
   end
+  if craftCounter == 0 then
+    SCENE_MANAGER:ShowBaseScene()
+    local skillName = ZO_GetCraftingSkillName(craftingType)
+    d(self.parent.Lang.CRAFT_FAILED..skillName)
+  end
   return craftCounter
 end
 
@@ -111,11 +116,6 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
   local craftingType = GetCraftingInteractionType()
   self.parent:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults)
     local craftCounter = self:craftForType(scanResults, craftingType, charId)
-    if craftCounter == 0 then
-      SCENE_MANAGER:ShowBaseScene()
-      local skillName = ZO_GetCraftingSkillName(craftingType)
-      d(self.parent.Lang.CRAFT_FAILED..skillName)
-    end
   end)
 end
 

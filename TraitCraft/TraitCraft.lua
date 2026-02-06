@@ -6,6 +6,8 @@ local TC = TraitCraft
 TC.Name = "TraitCraft"
 TC.Author = "@Saranicole1980"
 
+TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
+
 TC.Default = {
     allCrafterIds = {},
     allCrafters = {},
@@ -38,7 +40,9 @@ TC.Default = {
         g = 0.624,
         b = 0.0
       },
-      isCharacterSpecific = false,
+      isCharacterSpecific = {
+        [TC.currentlyLoggedInCharId] = false
+      },
     },
     libNamespace = {
       LDM = {},
@@ -46,7 +50,6 @@ TC.Default = {
     },
 }
 
-TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
 TC.traitIndexKey = nil
@@ -65,6 +68,19 @@ local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+function TC.HasJewelryCrafting()
+    local skillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(JEWELRY_CRAFTING)
+    return skillLineData:IsAvailable()
+end
+
+function TC.GetCraftTypes()
+  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  if not TC.HasJewelryCrafting() then
+    craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK }
+  end
+  return craftTypes
+end
 
 local CRAFT_TOKEN = {
   [CRAFTING_TYPE_BLACKSMITHING]       = "BS",
@@ -89,7 +105,7 @@ function TC:SwitchSV(flag)
   else
     self.SV = self.AV
   end
-  TC.AV.settings.isCharacterSpecific = flag
+  TC.AV.settings.isCharacterSpecific[self.currentlyLoggedInCharId] = flag
 end
 
 function TC.GetCharacterBitwise()
@@ -272,8 +288,8 @@ function TC:StatsReport()
     if char.research then
       summaryStr = ""
       for key, done in pairs(char.research) do
-        local craftingSkillType, researchLineIndex, traitIndex = TraitCraft:GetTraitFromKey(key)
-        local keyStr = TraitCraft:GetTraitStringFromKey(key)
+        local craftingSkillType, researchLineIndex, traitIndex = TC:GetTraitFromKey(key)
+        local keyStr = TC:GetTraitStringFromKey(key)
         if not summary[id][craftingSkillType] then
           summary[id][craftingSkillType] = {}
         end
@@ -324,9 +340,9 @@ local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
-  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
-  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, nil, TC.Default)
-  TC:SwitchSV(false)
+  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, GetWorldName(), TC.Default)
+  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, GetWorldName(), TC.Default)
+  TC:SwitchSV(TC.AV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId])
 
   if LibTextFormat then
     TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)
@@ -349,7 +365,7 @@ local function OnAddOnLoaded(eventCode, addonName)
     end
   end
   SLASH_COMMANDS["/tcstats"] = function(args)
-    TraitCraft:StatsReport()
+    TC:StatsReport()
   end
 end
 
@@ -422,8 +438,8 @@ end
 function TC:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
   local char = TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]
   if char then
-    local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
-    local whenDone = TraitCraft:GetResearchTimeForTrait(craftingType, researchLineIndex, traitIndex)
+    local key = TC:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    local whenDone = TC:GetResearchTimeForTrait(craftingType, researchLineIndex, traitIndex)
     if not char.research then
       char.research = {}
     end
@@ -446,12 +462,12 @@ function TC:SetTraitKnownOnCharIdWithKey(id, key)
   if key and TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
     TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
   end
-  TraitCraft:StopTraitResearchingWithKey(id, key)
+  TC:StopTraitResearchingWithKey(id, key)
 end
 
 function TC:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
-  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  local key = TC:GetTraitKey(craftingType, researchLineIndex, traitIndex)
   if key and not TC.AV.traitTable[key] then
     TC.AV.traitTable[key] = 0
   end
@@ -459,30 +475,30 @@ function TC:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
     if TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
       TC.AV.traitTable[key] = TC.AV.traitTable[key] + charBitId
     end
-    TraitCraft:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
+    TC:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
   end
 end
 
 function TC:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   local charBitId = TC.bitwiseChars[currentlyLoggedInCharId]
-  local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+  local key = TC:GetTraitKey(craftingType, researchLineIndex, traitIndex)
   if key then
     if TC.AV.traitTable[key] and TC.AV.traitTable[key] > 0 then
       if key and not TC.charBitMissing(TC.AV.traitTable[key], charBitId) then
         TC.AV.traitTable[key] = TC.AV.traitTable[key] - charBitId
       end
     end
-    TraitCraft:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
+    TC:StopTraitResearchingWithKey(currentlyLoggedInCharId, key)
   end
 end
 
 local function checkTrait(craftingType, researchLineIndex, traitIndex)
-  if TraitCraft:IsResearchingTrait(craftingType, researchLineIndex, traitIndex) then
-    TraitCraft:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
-  elseif TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
-    TraitCraft:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
+  if TC:IsResearchingTrait(craftingType, researchLineIndex, traitIndex) then
+    TC:SetTraitResearching(craftingType, researchLineIndex, traitIndex)
+  elseif TC:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex) then
+    TC:SetTraitKnown(craftingType, researchLineIndex, traitIndex)
   else
-    TraitCraft:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
+    TC:SetTraitUnknown(craftingType, researchLineIndex, traitIndex)
   end
 end
 
@@ -495,11 +511,11 @@ local function SetResearchHooks()
   EVENT_MANAGER:RegisterForEvent("TC_ResearchCanceled", EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, TC.SetTraitUnknown)
 end
 
-function TC:ScanKnownTraits()
+function TC.ScanKnownTraits()
   local start = GetFrameTimeMilliseconds()
-  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  local craftTypes = TC.GetCraftTypes()
   local traitLimit = 9
-  while true do
+  while TC.craftingTypeIndex <= #craftTypes do
     checkTrait(craftTypes[TC.craftingTypeIndex], TC.researchLineIndex, TC.traitIndex)
     TC.traitIndex = TC.traitIndex + 1
     if TC.traitIndex > traitLimit then
@@ -521,7 +537,7 @@ function TC:ScanKnownTraits()
   end
 end
 
-function TraitCraft:ScanForResearchExpired()
+function TC:ScanForResearchExpired()
   if not IsUnitInCombat("player") and not IsUnitDead("player") then
     local now = GetTimeStamp()
     for id, char in pairs(TC.AV.activelyResearchingCharacters) do
@@ -529,8 +545,8 @@ function TraitCraft:ScanForResearchExpired()
         for key, done in pairs(char.research) do
           local timeRemaining = GetDiffBetweenTimeStamps(done, now)
           if timeRemaining <= 0 then
-            TraitCraft:SetTraitKnownOnCharIdWithKey(id, key)
-            local traitKey = TraitCraft:GetTraitStringFromKey(key)
+            TC:SetTraitKnownOnCharIdWithKey(id, key)
+            local traitKey = TC:GetTraitStringFromKey(key)
             d(TraitCraft.Lang.RESEARCH_EXPIRED..char.name.." - "..traitKey)
           end
         end
@@ -539,8 +555,8 @@ function TraitCraft:ScanForResearchExpired()
   end
 end
 
-function TraitCraft:ScanMaxNumResearch()
-  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+function TC:ScanMaxNumResearch()
+  local craftTypes = self:GetCraftTypes()
   if not TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"] then
     TC.AV.activelyResearchingCharacters[currentlyLoggedInCharId]["maxSimultResearch"] = {}
   end
@@ -643,7 +659,7 @@ end
 
 function TC:ScanUnknownTraitsForRequesting()
   local charId = GetCurrentCharacterId()
-  local craftTypes = { BLACKSMITH, CLOTHIER, WOODWORK, JEWELRY_CRAFTING }
+  local craftTypes = self:GetCraftTypes()
   if not self.lastRequested[charId] then
     self.lastRequested[charId] = {}
   end
@@ -677,7 +693,7 @@ end
 function TC:processRequestMail()
   self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
 
-  self.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(mailId)
+  self.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(event, mailId)
     if not self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
       return
     end
@@ -686,8 +702,8 @@ function TC:processRequestMail()
     if not scanResults then
       return
     end
-    if TC.SV.settings.deleteMatchingOnRead then
-      DeleteMail(mailId)
+    if self.SV.settings.deleteMatchingOnRead then
+      self.mailInstance:SafeDeleteMail(mailId, true)
     end
     d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
@@ -847,12 +863,12 @@ end
 
 function TC.AddAltNeedIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, prefix)
   local controlName
-  local knows = TraitCraft:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex)
+  local knows = TC:DoesCharacterKnowTrait(craftingType, researchLineIndex, traitIndex)
   if not knows then
     controlName = prefix.."Unresearched"..currentlyLoggedInCharId.."C"..craftingType.."R"..researchLineIndex.."T"..traitIndex
     TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex, firstOrientation, secondOrientation, sideFloat, controlName)
   else
-    local key = TraitCraft:GetTraitKey(craftingType, researchLineIndex, traitIndex)
+    local key = TC:GetTraitKey(craftingType, researchLineIndex, traitIndex)
     if control.altNeedIcon and next(control.altNeedIcon) then
       for id, value in pairs(control.altNeedIcon) do
         for key, iconval in pairs(value) do
