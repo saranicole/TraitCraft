@@ -318,14 +318,9 @@ function TC:StatsReport()
 end
 
 local function registerFormatter()
-  TC.formatter:RegisterCore()
+  TC.formatter:RegisterCore("v1")
   TC.formatter:RegisterFilter("recipient", function(ctx, text)
-    local recipient = ctx.name or TC.SV.settings.crafterRequestee
-    if recipient and text then
-      return text..recipient
-    else
-      return ""
-    end
+    return ctx.scope:Get("name") or TC.SV.settings.crafterRequestee
   end)
 end
 

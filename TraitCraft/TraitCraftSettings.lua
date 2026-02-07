@@ -513,7 +513,7 @@ function TC.BuildMenu()
           local sendObject = {
             name = TC.SV.settings.crafterRequestee,
             subject = "TRAITCRAFT:RESEARCH:V1",
-            body = bodyValues,
+            todotpath = bodyValues,
             recordSep = ";"
           }
           TC.mailInstance:PopulateCompose("Requestor", sendObject)
