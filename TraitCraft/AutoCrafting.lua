@@ -2,6 +2,13 @@ TC_Autocraft = ZO_Object:Subclass()
 
 local LLC = LibLazyCrafting
 
+local CRAFT_TOKEN = {
+  [CRAFTING_TYPE_BLACKSMITHING]       = "BS",
+  [CRAFTING_TYPE_CLOTHIER]            = "CL",
+  [CRAFTING_TYPE_WOODWORKING]         = "WW",
+  [CRAFTING_TYPE_JEWELRYCRAFTING]     = "JW"
+}
+
 local CRAFT_TOKEN_REVERSE = {
   ["BS"]         = CRAFTING_TYPE_BLACKSMITHING,
   ["CL"]         = CRAFTING_TYPE_CLOTHIER,
@@ -65,7 +72,7 @@ local function getKeys(tbl)
   return keys
 end
 
-function TC_Autocraft:craftForType(scanResults, craftingType, charId)
+function TC_Autocraft:craftForType(scanResults, craftingType)
   local craftCounter = 0
   local request
   for rIndex, entry in pairs(scanResults[craftingType]) do
@@ -97,15 +104,17 @@ function TC_Autocraft:craftForType(scanResults, craftingType, charId)
   return craftCounter
 end
 
-function TC_Autocraft:CraftFromInput(scanResults, sender)
+function TC_Autocraft:CraftFromInput(scanResults)
 
   local craftCounter = 0
   local craftingType = GetCraftingInteractionType()
-  for iDex, entry in pairs(scanResults) do
-    if craftingType == CRAFT_TOKEN_REVERSE[entry[1]] then
-      local itemObj = #entry[2]
+  for iDex, entry in ipairs(scanResults) do
+    local nextKey, itemTable = next(entry)
+    local thisCraftType = CRAFT_TOKEN_REVERSE[nextKey]
+    if craftingType == thisCraftType then
+      local _, itemObj = next(itemTable)
       local convertedObj = { [craftingType] = { [itemObj["researchIndex"]] = itemObj["traitIndex"] } }
-      craftCounter = self:craftForType(convertedObj, craftingType, sender)
+      craftCounter = self:craftForType(convertedObj, craftingType)
       scanResults[iDex] = nil
     end
   end

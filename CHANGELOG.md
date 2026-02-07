@@ -1,3 +1,7 @@
+## 2026.02.07
+- Fix mail processing
+- Restored autocraft multiple research line functionality
+
 ## 2026.02.05
 - Make announcement instead of using debug
 - Fix saved vars - character specific settings
