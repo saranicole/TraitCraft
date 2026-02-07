@@ -618,7 +618,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   if not self.rObjects[charId] then
     self.rObjects[charId] = {}
   end
-  if not self.rIndices[charId][craftingType] then
+--   if not self.rIndices[charId][craftingType] then
     for r = 1, researchLineLimit do
       for t = traitLimit, 1, -1 do
         key = self:GetTraitKey(craftingType, r, t)
@@ -662,7 +662,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
         return
       end
     end
-  end
+--   end
 end
 
 function TC:ScanUnknownTraitsForRequesting()
@@ -687,54 +687,62 @@ function TC.makeAnnouncement(text, sound)
 end
 
 function TC:processRequestMail()
+  self.mailInstance:RegisterInboxEvents("Requestee", "FetchItems")
   self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
 
+  self.mailInstance:RegisterInboxCallback("Requestee", "FetchItems", function()
+    self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForTemplateSubject("Requestor")
+  end)
   self.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(event, mailId)
-    if not self.mailInstance:CheckMailForTemplateSubject(mailId, "Requestor", "equals") then
+    if not self.mailInstance.mailIds then
       return
     end
 
-    local scanResults = self.mailInstance:RetrieveActiveMailData(mailId)
-    if not scanResults then
-      return
-    end
-    if self.SV.settings.deleteMatchingOnRead then
-      self.mailInstance:SafeDeleteMail(mailId, true)
-    end
-    d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
+    if self.isValueInTable(self.mailInstance.mailIds, mailId) then
+      local scanResults = self.mailInstance:RetrieveMailData(mailId)
+      if not scanResults then
+        return
+      end
+      scanResults.body = self.mailInstance:RetrieveActiveMailBody()
 
-    local scope = self.formatter.Scope({ fromdotpath = scanResults.body })
-    local decodedResults = self.formatter:format("{fromdotpath}", scope)
-    if not next(decodedResults) then
-      return
-    end
+      if self.SV.settings.deleteMatchingOnRead then
+        self.mailInstance:SafeDeleteMail(mailId, true)
+      end
+      d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
-    EVENT_MANAGER:RegisterForEvent(
-      TC.Name .. "FromMail",
-      EVENT_CRAFTING_STATION_INTERACT,
-      function()
-        local craftCounter, newResults = TC.autocraft:CraftFromInput(decodedResults, scanResults.senderCharacterName)
+      local scope = self.formatter.Scope({ fromdotpath = scanResults.body, recordSep = ";" })
+      local decodedResults = self.formatter:format("{fromdotpath}", scope)
+      if not next(decodedResults) then
+        return
+      end
 
-        if next(newResults) == nil then
-          EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
-          if craftCounter then
-            local sendObject = {
-              recipient = scanResults.senderDisplayName,
-              subject = TC.Lang.REQUESTED_ITEMS,
-              body = ""
-            }
-            TC.mailInstance:PopulateCompose("Requested", sendObject)
-            if IsConsoleUI() then
-              TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
-              TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+      EVENT_MANAGER:RegisterForEvent(
+        TC.Name .. "FromMail",
+        EVENT_CRAFTING_STATION_INTERACT,
+        function()
+          local craftCounter, newResults = TC.autocraft:CraftFromInput(decodedResults)
+          if next(newResults) == nil then
+            EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
+            if craftCounter then
+              local sendObject = {
+                recipient = scanResults.senderDisplayName,
+                subject = TC.Lang.REQUESTED_ITEMS,
+                body = ""
+              }
+              TC.mailInstance:PopulateCompose("Requested", sendObject)
+              if IsConsoleUI() then
+                TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
+                TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+              end
+            else
+              d(self.Lang.REQUEST_NOT_PROCESSED)
             end
-          else
-            d(self.Lang.REQUEST_NOT_PROCESSED)
           end
         end
-      end
-    )
-  end)
+      )
+      self.mailInstance:UnregisterInboxReadEvents("QueueItems")
+    end
+  end, true)
 end
 
 local function TC_Event_Player_Activated(event, isA)
