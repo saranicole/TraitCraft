@@ -342,8 +342,8 @@ local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
-  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, GetWorldName(), TC.Default)
-  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, GetWorldName(), TC.Default)
+  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, nil, TC.Default)
   TC:SwitchSV(TC.AV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId])
 
   if LibTextFormat then
@@ -637,30 +637,30 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
     end
     self.rIndices[charId][craftingType] = TC.sortKeysByValue(tempResearchTable.rCounter)
     self.rObjects[charId] = tempResearchTable.rObjects
-  end
 
-    --Sort by minimum research duration
-  local traitCounter = 0
-  for i = 1, #self.rIndices[charId][craftingType] do
-    local rIndex = self.rIndices[charId][craftingType][i]
-    if not scanResults[craftingType] then
-      scanResults[craftingType] = {}
-    end
-    if not scanResults[craftingType][rIndex] then
-      scanResults[craftingType][rIndex] = {}
-    end
-    serializeRecord["researchIndex"] = rIndex
-    for j = 1, #self.rObjects[charId][rIndex] do
-      local tIndex = self.rObjects[charId][rIndex][j]
-      serializeRecord["traitIndex"] = tIndex
-      scanResults[craftingType][rIndex] = tIndex
-      traitCounter = traitCounter + 1
-    end
-    serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
-   table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
-    if traitCounter >= char["maxSimultResearch"][craftingType] then
-      scanCallback(scanResults, serializeContain)
-      return
+        --Sort by minimum research duration
+    local traitCounter = 0
+    for i = 1, #self.rIndices[charId][craftingType] do
+      local rIndex = self.rIndices[charId][craftingType][i]
+      if not scanResults[craftingType] then
+        scanResults[craftingType] = {}
+      end
+      if not scanResults[craftingType][rIndex] then
+        scanResults[craftingType][rIndex] = {}
+      end
+      serializeRecord["researchIndex"] = rIndex
+      for j = 1, #self.rObjects[charId][rIndex] do
+        local tIndex = self.rObjects[charId][rIndex][j]
+        serializeRecord["traitIndex"] = tIndex
+        scanResults[craftingType][rIndex] = tIndex
+        traitCounter = traitCounter + 1
+      end
+      serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
+     table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
+      if traitCounter >= char["maxSimultResearch"][craftingType] then
+        scanCallback(scanResults, serializeContain)
+        return
+      end
     end
   end
 end
