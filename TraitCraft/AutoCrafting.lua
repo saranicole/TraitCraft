@@ -108,7 +108,7 @@ function TC_Autocraft:CraftFromInput(scanResults)
 
   local craftCounter = 0
   local craftingType = GetCraftingInteractionType()
-  for iDex, entry in ipairs(scanResults) do
+  for iDex, entry in pairs(scanResults) do
     local nextKey, itemTable = next(entry)
     local thisCraftType = CRAFT_TOKEN_REVERSE[nextKey]
     if craftingType == thisCraftType then
