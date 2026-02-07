@@ -49,13 +49,9 @@ function TC_Autocraft:QueueItems(researchIndex, traitIndex)
   local craftingType = GetCraftingInteractionType()
   local patternIndex = self:GetPatternIndexFromResearchLine(craftingType, researchIndex)
   local traitType = findTraitType(craftingType, researchIndex, traitIndex)
+  local request
   traitType = traitType + 1
-  if patternIndex then
-    local request = self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
-    if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
-      self.interactionTable:craftItem(craftingType)
-    end
-  end
+  return self.interactionTable:CraftSmithingItemByLevel(patternIndex, false, 1, LLC_FREE_STYLE_CHOICE, traitType, false, craftingType, 0, 0, false)
 end
 
 local function getKeys(tbl)
@@ -71,17 +67,24 @@ end
 
 function TC_Autocraft:craftForType(scanResults, craftingType, charId)
   local craftCounter = 0
+  local request
   for rIndex, entry in pairs(scanResults[craftingType]) do
     if type(entry) == "table" then
       for tIndex, obj in pairs(entry[rIndex]) do
         if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, tIndex) then
-          self:QueueItems(rIndex, tIndex)
+          request = self:QueueItems(rIndex, tIndex)
+          if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+            self.interactionTable:craftItem(craftingType)
+          end
           craftCounter = craftCounter + 1
         end
       end
     else
       if self.parent:DoesCharacterKnowTrait(craftingType, rIndex, entry) then
-        self:QueueItems(rIndex, entry)
+        request = self:QueueItems(rIndex, entry)
+        if LLC.craftInteractionTables[craftingType]:isItemCraftable(craftingType, request) then
+          self.interactionTable:craftItem(craftingType)
+        end
         craftCounter = craftCounter + 1
       end
     end
@@ -174,7 +177,7 @@ function TC_Autocraft:ScanUnknownTraitsForCrafting(charId)
         end
       end
     end
-    self.rIndices[charId][craftingType] = sortKeysByValue(tempResearchTable.rCounter)
+    self.rIndices[charId][craftingType] = self.parent.sortKeysByValue(tempResearchTable.rCounter)
     self.rObjects[charId] = tempResearchTable.rObjects
   end
 
