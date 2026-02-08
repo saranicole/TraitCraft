@@ -112,7 +112,7 @@ function TC_Autocraft:CraftFromInput(scanResults)
     local nextKey, itemTable = next(entry)
     local thisCraftType = CRAFT_TOKEN_REVERSE[nextKey]
     if craftingType == thisCraftType then
-      for _, itemObj in itemTable do
+      for _, itemObj in pairs(itemTable) do
         local convertedObj = { [craftingType] = { [itemObj["researchIndex"]] = itemObj["traitIndex"] } }
         craftCounter = self:craftForType(convertedObj, craftingType)
       end
