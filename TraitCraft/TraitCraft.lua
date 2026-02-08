@@ -6,8 +6,6 @@ local TC = TraitCraft
 TC.Name = "TraitCraft"
 TC.Author = "@Saranicole1980"
 
-TC.currentlyLoggedInCharId = TC.currentlyLoggedInCharId or GetCurrentCharacterId()
-
 TC.Default = {
     allCrafterIds = {},
     allCrafters = {},
@@ -19,7 +17,6 @@ TC.Default = {
       crafterRequestee = "",
       requestOption = false,
       receiveOption = false,
-      deleteMatchingOnRead = false,
       autoCraftOption = false,
       autoCraftNirnhoned = false,
       showKnown = false,
@@ -40,9 +37,7 @@ TC.Default = {
         g = 0.624,
         b = 0.0
       },
-      isCharacterSpecific = {
-        [TC.currentlyLoggedInCharId] = false
-      },
+      CharacterSpecific = {},
     },
     libNamespace = {
       LDM = {},
@@ -50,6 +45,9 @@ TC.Default = {
     },
 }
 
+local currentlyLoggedInCharId = GetCurrentCharacterId()
+
+TC.currentlyLoggedInCharId = currentlyLoggedInCharId
 TC.currentlyLoggedInChar = TC.currentlyLoggedInChar or {}
 TC.bitwiseChars = TC.bitwiseChars or {}
 TC.traitIndexKey = nil
@@ -60,14 +58,9 @@ TC.mailInstance = nil
 TC.formatter = nil
 TC.lastRequested = {}
 
-local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
-local rootScene = "keyboardRootScene"
-
-if IsInGamepadPreferredMode() or IsConsoleUI() then
-  local rootScene = "gamepadRootScene"
-end
+local rootScene = "hud"
 
 local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
@@ -102,15 +95,6 @@ local SMITHING = ZO_SmithingResearch
 
 if IsInGamepadPreferredMode() then
   SMITHING = ZO_GamepadSmithingResearch
-end
-
-function TC:SwitchSV(flag)
-  if flag then
-    self.SV = self.CV
-  else
-    self.SV = self.AV
-  end
-  TC.AV.settings.isCharacterSpecific[self.currentlyLoggedInCharId] = flag
 end
 
 function TC.GetCharacterBitwise()
@@ -325,7 +309,7 @@ end
 local function registerFormatter()
   TC.formatter:RegisterCore("v1")
   TC.formatter:RegisterFilter("recipient", function(ctx, text)
-    return ctx.scope:Get("name") or TC.SV.settings.crafterRequestee
+    return ctx.scope:Get("name") or TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
   end)
 end
 
@@ -348,8 +332,9 @@ local function OnAddOnLoaded(eventCode, addonName)
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
-  TC.CV = ZO_SavedVars:NewCharacterIdSettings("TraitCraft_Vars", 1, nil, TC.Default)
-  TC:SwitchSV(TC.AV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId])
+
+  -- workaround for character specific saved vars
+  TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId] = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId] or {}
 
   if LibTextFormat then
     TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)
@@ -706,9 +691,7 @@ function TC:processRequestMail()
       end
       scanResults.body = self.mailInstance:RetrieveActiveMailBody()
 
-      if self.SV.settings.deleteMatchingOnRead then
-        self.mailInstance:SafeDeleteMail(mailId, true)
-      end
+      self.mailInstance:SafeDeleteMail(mailId, true)
       d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
 
       local scope = self.formatter.Scope({ fromdotpath = scanResults.body, recordSep = ";" })
@@ -768,7 +751,7 @@ local function TC_Event_Player_Activated(event, isA)
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.SV.settings.receiveOption then
+        if LibDynamicMail and TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption then
           EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
         end
       elseif TC.autocraft then

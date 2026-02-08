@@ -9,6 +9,8 @@ end
 
 local protocol = nil
 
+local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
+
 local researcherLimit = 25
 if IsInGamepadPreferredMode() then
   researcherLimit = 5
@@ -161,7 +163,7 @@ function TC.BuildMenu()
     allowRefresh = false    -- Enable automatic control updates
   })
 
-  if TC.SV.settings.requestOption then
+  if TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption then
     panel:AddSetting({
       type = LAM.ST_SECTION,
       label = TC.Lang.RESEARCH_REQUESTS,
@@ -176,7 +178,7 @@ function TC.BuildMenu()
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
           local sendObject = {
-            name = TC.SV.settings.crafterRequestee,
+            name = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee,
             subject = "TRAITCRAFT:RESEARCH:V1",
             todotpath = bodyValues,
             recordSep = ";"
@@ -521,16 +523,6 @@ function TC.BuildMenu()
       label = TC.Lang.RESEARCH_REQUESTS,
     })
 
-    panel:AddSetting {
-      type = LAM.ST_CHECKBOX,
-      label = TC.Lang.CHARACTER_SETTING,
-      tooltip = TC.Lang.CHARACTER_TOOLTIP,
-      getFunction = function() return TC.SV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId] or TC.AV.settings.isCharacterSpecific[TC.currentlyLoggedInCharId] end,
-      setFunction = function(var)
-        TC:SwitchSV(var)
-      end
-    }
-
     panel:AddSetting({
         type = LibHarvensAddonSettings.ST_BUTTON,
         label = TC.Lang.SEND_CRAFT_REQUEST,
@@ -539,7 +531,7 @@ function TC.BuildMenu()
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
           local sendObject = {
-            name = TC.SV.settings.crafterRequestee,
+            name = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee,
             subject = "TRAITCRAFT:RESEARCH:V1",
             todotpath = bodyValues,
             recordSep = ";"
@@ -550,16 +542,16 @@ function TC.BuildMenu()
           end
         end,
         disable = function()
-          return TC.SV.settings.requestOption == false
+          return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption == false
         end
     })
 
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.RESEARCH_REQUESTS,
-      getFunction = function() return TC.SV.settings.requestOption end,
+      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption or false end,
       setFunction = function(var)
-        TC.SV.settings.requestOption = var
+        TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption = var
         panel:UpdateControls()
       end
     })
@@ -567,26 +559,17 @@ function TC.BuildMenu()
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.FULFILL_REQUEST,
-      getFunction = function() return TC.SV.settings.receiveOption end,
+      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption or false end,
       setFunction = function(var)
-        TC.SV.settings.receiveOption = var
-      end
-    })
-
-    panel:AddSetting({
-      type = LAM.ST_CHECKBOX,
-      label = TC.Lang.DELETE_ON_PROCESS,
-      getFunction = function() return TC.SV.settings.deleteMatchingOnRead end,
-      setFunction = function(var)
-        TC.SV.settings.deleteMatchingOnRead = var
+        TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption = var
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_EDIT,
       label = TC.Lang.CRAFTER_REQUESTEE,
-      getFunction = function() return TC.SV.settings.crafterRequestee or "" end,
-      setFunction = function(value) TC.SV.settings.crafterRequestee = value end,
+      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee or "" end,
+      setFunction = function(value) TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee = value end,
       default = ""
     })
 
@@ -600,14 +583,14 @@ function TC.BuildMenu()
       end,
       tooltip = TC.Lang.REQUIRES_RELOAD.."; "..TC.Lang.REQUIRES_LIBRARY.."LibDynamicMail, LibTextFormat",
       disable = function()
-        return not TC.SV.settings.requestOption
+        return not TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_LABEL,
       label = function()
-          return TC.SV.settings.crafterRequestee
+          return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee or ""
       end,
       tooltip = TC.Lang.SEND_CRAFT_REQUEST
     })
