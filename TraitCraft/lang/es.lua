@@ -55,6 +55,7 @@ TC.Lang = {
   SENT_MAIL               =         "Correo enviado a",
   WITH_CRAFTING_REQUEST   =         "con la solicitud de fabricación de los siguientes artículos:",
   RESEARCH_REQUESTS       =         "Solicitudes de artículos para investigación por correo.",
+  RESEARCH_BELOW_TOOLTIP  =         "Configure las solicitudes de investigación en la parte inferior de la configuración",
   CRAFTER_SETTINGS        =         "Configuración de la cuenta de Crafter",
   DELETE_ON_PROCESS       =         "Eliminar las solicitudes de fabricación que están en proceso",
   MAIL_PROCESSED          =         "Solicitud de fabricación procesada",

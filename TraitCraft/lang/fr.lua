@@ -55,6 +55,7 @@ TC.Lang = {
   SENT_MAIL               =         "Courrier envoyé à",
   WITH_CRAFTING_REQUEST   =         "avec une demande de fabrication des articles suivants :",
   RESEARCH_REQUESTS       =         "Solicitudes de artículos para investigación por correo.",
+  RESEARCH_BELOW_TOOLTIP  =         "Configurez les demandes de recherche d'engins spatiaux en bas des paramètres.",
   CRAFTER_SETTINGS        =         "Paramètres du compte Crafter",
   DELETE_ON_PROCESS       =         "Supprimer les demandes de fabrication en cours de traitement",
   MAIL_PROCESSED          =         "Demande de fabrication traitée",

@@ -161,6 +161,34 @@ function TC.BuildMenu()
     allowRefresh = false    -- Enable automatic control updates
   })
 
+  if TC.SV.settings.requestOption then
+    panel:AddSetting({
+      type = LAM.ST_SECTION,
+      label = TC.Lang.RESEARCH_REQUESTS,
+      tooltip = TC.Lang.RESEARCH_BELOW_TOOLTIP
+    })
+
+    panel:AddSetting({
+        type = LibHarvensAddonSettings.ST_BUTTON,
+        label = TC.Lang.SEND_CRAFT_REQUEST,
+        buttonText = TC.Lang.AUTOFILL_REQUEST,
+        tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
+        clickHandler = function(control)
+          local bodyValues = TC:ScanUnknownTraitsForRequesting()
+          local sendObject = {
+            name = TC.SV.settings.crafterRequestee,
+            subject = "TRAITCRAFT:RESEARCH:V1",
+            todotpath = bodyValues,
+            recordSep = ";"
+          }
+          TC.mailInstance:PopulateCompose("Requestor", sendObject)
+          if IsConsoleUI() then
+            TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+          end
+        end
+    })
+  end
+
   panel:AddSetting({
     type = LAM.ST_SECTION,
     label = TC.Lang.CRAFTER_SETTINGS,
