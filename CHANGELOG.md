@@ -1,3 +1,8 @@
+## 2026.02.08
+- Fix autocraft of multiple research lines
+- Add shortcut button at top of settings
+- Fix post-autocraft announcement
+
 ## 2026.02.07
 - Fix mail processing
 - Restored autocraft multiple research line functionality

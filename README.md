@@ -13,10 +13,11 @@ PC and Console:
 * Show any combination of researched, unresearched, and researching traits in the crafting research and creations tabs via icons specific to researching characters (which you specify).
 * Autocraft next equipment needed for desired alts' research, with priority given to shorter research times
 * Slash command "/tcstats" will give you a quick overview of research on actively researching characters
+* TraitCraft provides a button in the settings to mail a crafting request to a friendly crafter automatically that will allow them to autocraft your needed researchable items (assuming they also have TraitCraft installed with Autocrafting turned on) 
 
 Console only: 
 * Shows researching statuses of actively researching characters on inventory/bank/guild bank/decon tooltips.
-* TraitCraft provides a button in the settings to mail a crafting request to a friendly crafter automatically that will allow them to autocraft your needed researchable items (assuming they also have TraitCraft installed with Autocrafting turned on) 
+* 
 
 [img]https://github.com/user-attachments/assets/5fe33590-cdb0-4c8e-9774-f14feb4768b1 [/img]
 
@@ -25,6 +26,8 @@ Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u
 [size=+2]Requirements[/size]
 
 Requires LibHarvensAddonSettings
+
+Optional dependencies:  LibDynamicMail, LibTextFormat (enables the autocraft from mail message feature)
 
 [size=+2]Optional Requirements (needed for Autocrafting)[/size]
 

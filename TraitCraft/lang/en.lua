@@ -56,6 +56,7 @@ TC.Lang = {
   SENT_MAIL               =         "Sending mail to",
   WITH_CRAFTING_REQUEST   =         "with crafting request of the following items:",
   RESEARCH_REQUESTS       =         "Researchable item requests by mail",
+  RESEARCH_BELOW_TOOLTIP  =         "Configure research craft requests at bottom of settings",
   CRAFTER_SETTINGS        =         "Crafter Account Settings",
   DELETE_ON_PROCESS       =         "Delete craft requests on processing",
   MAIL_PROCESSED          =         "Craft request processed",

@@ -63,6 +63,11 @@ TC.lastRequested = {}
 local currentlyLoggedInCharId = TC.currentlyLoggedInCharId
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
+local rootScene = "keyboardRootScene"
+
+if IsInGamepadPreferredMode() or IsConsoleUI() then
+  local rootScene = "gamepadRootScene"
+end
 
 local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
@@ -725,11 +730,16 @@ function TC:processRequestMail()
                 subject = TC.Lang.REQUESTED_ITEMS,
                 body = ""
               }
-              TC.mailInstance:PopulateCompose("Requested", sendObject)
-              if IsConsoleUI() then
-                TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
-                TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
-              end
+              SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
+                local sceneName = scene:GetName()
+                if sceneName == rootScene and newState == SCENE_SHOWING then
+                  TC.mailInstance:PopulateCompose("Requested", sendObject)
+                  if IsConsoleUI() then
+                    TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
+                    TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+                  end
+                end
+              end)
             else
               d(self.Lang.REQUEST_NOT_PROCESSED)
             end
