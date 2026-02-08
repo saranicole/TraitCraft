@@ -681,7 +681,7 @@ function TC.showCompose(scene, newState)
   }
 
   local sceneName = scene:GetName()
-  if sceneName == rootScene and newState == SCENE_SHOWN then
+  if sceneName == rootScene and newState == SCENE_SHOWING then
     SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
     TC.mailInstance:PopulateCompose("Requested", sendObject)
     if IsConsoleUI() then
