@@ -333,7 +333,7 @@ local function registerTemplates()
   TC.mailInstance:RegisterTemplate("Requested", {
     recipient = "{recipient}",
     subject   = "{subject}",
-    body      = "{fromdotpath}"
+    body      = ""
   })
 end
 
