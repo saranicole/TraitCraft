@@ -58,6 +58,8 @@ TC.mailInstance = nil
 TC.formatter = nil
 TC.lastRequested = {}
 TC.scanResults = {}
+TC.mailSubject = "TRAITCRAFT:RESEARCH:V1"
+TC.notifyLock = false
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -314,19 +316,6 @@ local function registerFormatter()
   end)
 end
 
-local function registerTemplates()
-  TC.mailInstance:RegisterTemplate("Requestor", {
-    recipient = "{recipient}",
-    subject   = "TRAITCRAFT:RESEARCH:V1",
-    body      = "{todotpath}"
-  })
-  TC.mailInstance:RegisterTemplate("Requested", {
-    recipient = "{recipient}",
-    subject   = "{subject}",
-    body      = ""
-  })
-end
-
 --When Loaded
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
@@ -344,7 +333,6 @@ local function OnAddOnLoaded(eventCode, addonName)
 
   if LibDynamicMail then
     TC.mailInstance = TC.mailInstance or LibDynamicMail:New(TC.AV.libNamespace.LDM, TC.formatter)
-    registerTemplates()
   end
 
   TC.bitwiseChars = TC.GetCharacterBitwise()
@@ -674,16 +662,13 @@ function TC.makeAnnouncement(text, sound)
 end
 
 function TC.showCompose(scene, newState)
-  local sendObject = {
-    recipient = TC.scanResults.senderDisplayName,
-    subject = TC.Lang.REQUESTED_ITEMS,
-    body = ""
-  }
-
   local sceneName = scene:GetName()
   if sceneName == rootScene and newState == SCENE_SHOWING then
     SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
-    TC.mailInstance:PopulateCompose("Requested", sendObject)
+
+    local scope = self.formatter.Scope({ todotpath = bodyValues })
+    local encodedResearch = self.formatter:format("{todotpath}", scope)
+    TC.mailInstance:ComposeMail(TC.scanResults.senderDisplayName, TC.mailSubject, "")
     if IsConsoleUI() then
       TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
       TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
@@ -692,14 +677,21 @@ function TC.showCompose(scene, newState)
   end
 end
 
-function TC:processRequestMail()
-  self.mailInstance:RegisterInboxEvents("Requestee", "FetchItems")
-  self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
+local function notifyOnce(notification)
+  if not TC.notifyLock then
+    d(notification)
+  end
+  TC.notifyLock = true
+end
 
-  self.mailInstance:RegisterInboxCallback("Requestee", "FetchItems", function()
-    self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForTemplateSubject("Requestor")
+function TC:processRequestMail()
+  self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
+  self.mailInstance:RegisterInboxEvents(self.Name.."QueueItems")
+
+  self.mailInstance:RegisterInboxCallback(self.Name.."FetchItems", function()
+    self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
   end)
-  self.mailInstance:RegisterInboxCallback("Requestee", "QueueItems", function(event, mailId)
+  self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
     if not self.mailInstance.mailIds then
       return
     end
@@ -712,9 +704,9 @@ function TC:processRequestMail()
       TC.scanResults.body = self.mailInstance:RetrieveActiveMailBody()
 
       self.mailInstance:SafeDeleteMail(mailId, true)
-      d(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
+      notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
 
-      local scope = self.formatter.Scope({ fromdotpath = TC.scanResults.body, recordSep = ";" })
+      local scope = self.formatter.Scope({ fromdotpath = TC.scanResults.body })
       local decodedResults = self.formatter:format("{fromdotpath}", scope)
       if not next(decodedResults) then
         return
@@ -734,6 +726,7 @@ function TC:processRequestMail()
               d(self.Lang.REQUEST_NOT_PROCESSED)
             end
           end
+          TC.notifyLock = false
         end
       )
       self.mailInstance:UnregisterInboxReadEvents("QueueItems")
