@@ -728,13 +728,9 @@ function TC:processRequestMail()
           if next(newResults) == nil then
             EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
             if craftCounter then
-              local sendObject = {
-                recipient = TC.scanResults.senderDisplayName,
-                subject = TC.Lang.REQUESTED_ITEMS,
-                body = ""
-              }
               SCENE_MANAGER:RegisterCallback("SceneStateChanged", TC.showCompose)
             else
+              TC.scanResults = {}
               d(self.Lang.REQUEST_NOT_PROCESSED)
             end
           end
