@@ -60,6 +60,7 @@ TC.Lang = {
   CRAFTER_SETTINGS        =         "Crafter Account Settings",
   DELETE_ON_PROCESS       =         "Delete craft requests on processing",
   MAIL_PROCESSED          =         "Craft request processed",
+  SEND_REQUESTED_ITEMS    =         "Open your mail view to send crafted items",
   REQUEST_NOT_PROCESSED   =         "Craft request failed",
   CHARACTER_SETTING       =         "Apply to character",
   CHARACTER_TOOLTIP       =         "Settings for crafting requests will apply to this character only",

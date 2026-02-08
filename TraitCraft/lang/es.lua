@@ -59,6 +59,7 @@ TC.Lang = {
   CRAFTER_SETTINGS        =         "Configuración de la cuenta de Crafter",
   DELETE_ON_PROCESS       =         "Eliminar las solicitudes de fabricación que están en proceso",
   MAIL_PROCESSED          =         "Solicitud de fabricación procesada",
+  SEND_REQUESTED_ITEMS    =         "Abre la vista de correo para enviar los objetos que has creado",
   REQUEST_NOT_PROCESSED   =         "La solicitud de fabricación ha fallado",
   CHARACTER_SETTING       =         "Aplicar al personaje",
   CHARACTER_TOOLTIP       =         "La configuración de las solicitudes de fabricación se aplicará únicamente a este personaje",
