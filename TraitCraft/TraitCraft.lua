@@ -585,6 +585,14 @@ function TC.sortKeysByValue(tbl)
   return keys
 end
 
+local function Slice(tbl, first, last)
+  local sliced = {}
+  for i = first or 1, last or #tbl do
+    sliced[#sliced + 1] = tbl[i]
+  end
+  return sliced
+end
+
 function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local tempResearchTable = {
@@ -596,7 +604,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
     d(self.Lang.LOG_INTO_CHAR)
     return
   end
-  local scanResults = { maxSimultResearch = char["maxSimultResearch"][craftingType] }
+  local maxSimultResearch = char["maxSimultResearch"][craftingType]
   local serializeContain = {}
   local serializeRecord = {}
   local mask = self.bitwiseChars[charId]
@@ -618,51 +626,39 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   if not self.rObjects[charId] then
     self.rObjects[charId] = {}
   end
---   if not self.rIndices[charId][craftingType] then
-    for r = 1, researchLineLimit do
-      for t = traitLimit, 1, -1 do
-        key = self:GetTraitKey(craftingType, r, t)
-        trait = self.AV.traitTable[key] or 0
-        if self.charBitMissing(trait, mask) and not research[key] then
-          if not tempResearchTable.rCounter[r] then
-            tempResearchTable.rCounter[r] = 0
-          end
-          tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
-          if not tempResearchTable.rObjects[r] then
-            tempResearchTable.rObjects[r] = {}
-          end
-          table.insert(tempResearchTable.rObjects[r], t)
-        end
-      end
-    end
-    self.rIndices[charId][craftingType] = TC.sortKeysByValue(tempResearchTable.rCounter)
-    self.rObjects[charId] = tempResearchTable.rObjects
 
-        --Sort by minimum research duration
-    local traitCounter = 0
-    for i = 1, #self.rIndices[charId][craftingType] do
-      local rIndex = self.rIndices[charId][craftingType][i]
-      if not scanResults[craftingType] then
-        scanResults[craftingType] = {}
-      end
-      if not scanResults[craftingType][rIndex] then
-        scanResults[craftingType][rIndex] = {}
-      end
-      serializeRecord["researchIndex"] = rIndex
-      for j = 1, #self.rObjects[charId][rIndex] do
-        local tIndex = self.rObjects[charId][rIndex][j]
-        serializeRecord["traitIndex"] = tIndex
-        scanResults[craftingType][rIndex] = tIndex
-        traitCounter = traitCounter + 1
-      end
-      serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
-     table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
-      if traitCounter >= char["maxSimultResearch"][craftingType] then
-        scanCallback(scanResults, serializeContain)
-        return
+  for r = 1, researchLineLimit do
+    for t = 1, traitLimit do
+      key = self:GetTraitKey(craftingType, r, t)
+      trait = self.AV.traitTable[key] or 0
+      if self.charBitMissing(trait, mask) and not research[key] then
+        if not tempResearchTable.rCounter[r] then
+          tempResearchTable.rCounter[r] = 0
+        end
+        tempResearchTable.rCounter[r] =  tempResearchTable.rCounter[r] + 1
+        if not tempResearchTable.rObjects[r] then
+          tempResearchTable.rObjects[r] = {}
+        end
+        table.insert(tempResearchTable.rObjects[r], t)
       end
     end
---   end
+  end
+  self.rIndices[charId][craftingType] = TC.sortKeysByValue(tempResearchTable.rCounter)
+  self.rObjects[charId] = tempResearchTable.rObjects
+
+  local researchIndices = Slice(self.rIndices[charId][craftingType], 1, maxSimultResearch)
+  local serializeContain = {}
+  for i = #researchIndices, 1, -1 do
+    local researchIndex = researchIndices[i]
+    local traitObjects = tempResearchTable.rObjects[researchIndex]
+    local traitIndices = Slice(select(1, traitObjects), 1, maxSimultResearch)
+    serializeRecord["researchIndex"] = researchIndex
+    serializeRecord["traitIndex"] = traitIndices[1]
+    serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
+    table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
+    serializeRecord = {}
+  end
+  scanCallback(serializeContain)
 end
 
 function TC:ScanUnknownTraitsForRequesting()
@@ -672,7 +668,7 @@ function TC:ScanUnknownTraitsForRequesting()
   local sendObject = {}
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
-    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(scanResults, serializedObj)
+    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(serializedObj)
       table.insert(sendObject, serializedObj)
     end)
   end

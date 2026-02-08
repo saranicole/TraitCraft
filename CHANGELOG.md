@@ -1,6 +1,7 @@
 ## 2026.02.07
 - Fix mail processing
 - Restored autocraft multiple research line functionality
+- Fix mail feature multiple research line support
 
 ## 2026.02.05
 - Make announcement instead of using debug
