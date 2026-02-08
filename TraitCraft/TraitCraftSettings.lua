@@ -177,16 +177,11 @@ function TC.BuildMenu()
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
-          local sendObject = {
-            name = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee,
-            subject = "TRAITCRAFT:RESEARCH:V1",
-            todotpath = bodyValues,
-            recordSep = ";"
-          }
-          TC.mailInstance:PopulateCompose("Requestor", sendObject)
-          if IsConsoleUI() then
-            TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
-          end
+          local to = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
+          local scope = TC.formatter.Scope({ todotpath = bodyValues })
+          local encodedResearch = TC.formatter:format("{todotpath}", scope)
+          TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
+          TC.makeAnnouncement(TC.Lang.REQUEST_SENT, SOUNDS.MAIL_WINDOW_OPEN)
         end
     })
   end
@@ -530,19 +525,11 @@ function TC.BuildMenu()
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
-          local sendObject = {
-            name = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee,
-            subject = "TRAITCRAFT:RESEARCH:V1",
-            todotpath = bodyValues,
-            recordSep = ";"
-          }
-          TC.mailInstance:PopulateCompose("Requestor", sendObject)
-          if IsConsoleUI() then
-            TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
-          end
-        end,
-        disable = function()
-          return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption == false
+          local to = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
+          local scope = TC.formatter.Scope({ todotpath = bodyValues })
+          local encodedResearch = TC.formatter:format("{todotpath}", scope)
+          TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
+          TC.makeAnnouncement(TC.Lang.REQUEST_SENT, SOUNDS.MAIL_WINDOW_OPEN)
         end
     })
 
