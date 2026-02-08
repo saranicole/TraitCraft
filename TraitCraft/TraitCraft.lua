@@ -57,6 +57,7 @@ TC.rObjects = {}
 TC.mailInstance = nil
 TC.formatter = nil
 TC.lastRequested = {}
+TC.scanResults = {}
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -672,6 +673,25 @@ function TC.makeAnnouncement(text, sound)
 			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
 end
 
+function TC.showCompose(scene, newState)
+  local sendObject = {
+    recipient = TC.scanResults.senderDisplayName,
+    subject = TC.Lang.REQUESTED_ITEMS,
+    body = ""
+  }
+
+  local sceneName = scene:GetName()
+  if sceneName == rootScene and newState == SCENE_SHOWN then
+    SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
+    TC.mailInstance:PopulateCompose("Requested", sendObject)
+    if IsConsoleUI() then
+      TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
+      TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
+    end
+    TC.scanResults = {}
+  end
+end
+
 function TC:processRequestMail()
   self.mailInstance:RegisterInboxEvents("Requestee", "FetchItems")
   self.mailInstance:RegisterInboxEvents("Requestee", "QueueItems")
@@ -685,16 +705,16 @@ function TC:processRequestMail()
     end
 
     if self.isValueInTable(self.mailInstance.mailIds, mailId) then
-      local scanResults = self.mailInstance:RetrieveMailData(mailId)
-      if not scanResults then
+      TC.scanResults = self.mailInstance:RetrieveMailData(mailId)
+      if not TC.scanResults then
         return
       end
-      scanResults.body = self.mailInstance:RetrieveActiveMailBody()
+      TC.scanResults.body = self.mailInstance:RetrieveActiveMailBody()
 
       self.mailInstance:SafeDeleteMail(mailId, true)
-      d(TC.Lang.REQUESTOR_USERNAME..scanResults.senderDisplayName)
+      d(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
 
-      local scope = self.formatter.Scope({ fromdotpath = scanResults.body, recordSep = ";" })
+      local scope = self.formatter.Scope({ fromdotpath = TC.scanResults.body, recordSep = ";" })
       local decodedResults = self.formatter:format("{fromdotpath}", scope)
       if not next(decodedResults) then
         return
@@ -708,22 +728,9 @@ function TC:processRequestMail()
           if next(newResults) == nil then
             EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
             if craftCounter then
-              local sendObject = {
-                recipient = scanResults.senderDisplayName,
-                subject = TC.Lang.REQUESTED_ITEMS,
-                body = ""
-              }
-              SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
-                local sceneName = scene:GetName()
-                if sceneName == rootScene and newState == SCENE_SHOWING then
-                  TC.mailInstance:PopulateCompose("Requested", sendObject)
-                  if IsConsoleUI() then
-                    TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
-                    TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
-                  end
-                end
-              end)
+              SCENE_MANAGER:RegisterCallback("SceneStateChanged", TC.showCompose)
             else
+              TC.scanResults = {}
               d(self.Lang.REQUEST_NOT_PROCESSED)
             end
           end
