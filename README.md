@@ -27,11 +27,11 @@ Screenshot courtesy of [MaliBuuGaming](https://www.esoui.com/forums/member.php?u
 
 Requires LibHarvensAddonSettings
 
-Optional dependencies:  LibDynamicMail, LibTextFormat (enables the autocraft from mail message feature)
-
-[size=+2]Optional Requirements (needed for Autocrafting)[/size]
+[size=+2]Optional Requirements[/size]
 
 LibLazyCrafting
+
+LibDynamicMail, LibTextFormat (together with LibLazyCrafting these enable the autocraft from mail message feature)
 
 [size=+2]How to Use[/size]
 1. Log into your main crafter ( the one with the most traits researched already )
