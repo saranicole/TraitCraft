@@ -37,7 +37,6 @@ TC.Default = {
         g = 0.624,
         b = 0.0
       },
-      CharacterSpecific = {},
     },
     libNamespace = {
       LDM = {},
@@ -312,7 +311,7 @@ end
 local function registerFormatter()
   TC.formatter:RegisterCore("v1")
   TC.formatter:RegisterFilter("recipient", function(ctx, text)
-    return ctx.scope:Get("name") or TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
+    return ctx.scope:Get("name") or TC.AV.settings.crafterRequestee
   end)
 end
 
@@ -322,9 +321,6 @@ local function OnAddOnLoaded(eventCode, addonName)
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
 
   TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
-
-  -- workaround for character specific saved vars
-  TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId] = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId] or {}
 
   if LibTextFormat then
     TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)
@@ -748,7 +744,7 @@ local function TC_Event_Player_Activated(event, isA)
     if next(TC.AV.allCrafterIds) then
       if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
         TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption then
+        if LibDynamicMail and TC.AV.settings.receiveOption then
           EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
         end
       elseif TC.autocraft then

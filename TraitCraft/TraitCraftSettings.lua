@@ -163,7 +163,7 @@ function TC.BuildMenu()
     allowRefresh = false    -- Enable automatic control updates
   })
 
-  if TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption then
+  if TC.AV.settings.requestOption then
     panel:AddSetting({
       type = LAM.ST_SECTION,
       label = TC.Lang.RESEARCH_REQUESTS,
@@ -177,7 +177,7 @@ function TC.BuildMenu()
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
-          local to = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
+          local to = TC.AV.settings.crafterRequestee
           local scope = TC.formatter.Scope({ todotpath = bodyValues })
           local encodedResearch = TC.formatter:format("{todotpath}", scope)
           TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
@@ -525,7 +525,7 @@ function TC.BuildMenu()
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
           local bodyValues = TC:ScanUnknownTraitsForRequesting()
-          local to = TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee
+          local to = TC.AV.settings.crafterRequestee
           local scope = TC.formatter.Scope({ todotpath = bodyValues })
           local encodedResearch = TC.formatter:format("{todotpath}", scope)
           TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
@@ -536,9 +536,9 @@ function TC.BuildMenu()
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.RESEARCH_REQUESTS,
-      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption or false end,
+      getFunction = function() return TC.AV.settings.requestOption or false end,
       setFunction = function(var)
-        TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption = var
+        TC.AV.settings.requestOption = var
         panel:UpdateControls()
       end
     })
@@ -546,17 +546,17 @@ function TC.BuildMenu()
     panel:AddSetting({
       type = LAM.ST_CHECKBOX,
       label = TC.Lang.ENABLE_BUTTON.." "..TC.Lang.FULFILL_REQUEST,
-      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption or false end,
+      getFunction = function() return TC.AV.settings.receiveOption or false end,
       setFunction = function(var)
-        TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].receiveOption = var
+        TC.AV.settings.receiveOption = var
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_EDIT,
       label = TC.Lang.CRAFTER_REQUESTEE,
-      getFunction = function() return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee or "" end,
-      setFunction = function(value) TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee = value end,
+      getFunction = function() return TC.AV.settings.crafterRequestee or "" end,
+      setFunction = function(value) TC.AV.settings.crafterRequestee = value end,
       default = ""
     })
 
@@ -570,14 +570,14 @@ function TC.BuildMenu()
       end,
       tooltip = TC.Lang.REQUIRES_RELOAD.."; "..TC.Lang.REQUIRES_LIBRARY.."LibDynamicMail, LibTextFormat",
       disable = function()
-        return not TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].requestOption
+        return not TC.AV.settings.requestOption
       end
     })
 
     panel:AddSetting({
       type = LAM.ST_LABEL,
       label = function()
-          return TC.AV.settings.CharacterSpecific[currentlyLoggedInCharId].crafterRequestee or ""
+          return TC.AV.settings.crafterRequestee or ""
       end,
       tooltip = TC.Lang.SEND_CRAFT_REQUEST
     })
