@@ -665,9 +665,6 @@ function TC.showCompose(scene, newState)
   local sceneName = scene:GetName()
   if sceneName == rootScene and newState == SCENE_SHOWING then
     SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
-
-    local scope = self.formatter.Scope({ todotpath = bodyValues })
-    local encodedResearch = self.formatter:format("{todotpath}", scope)
     TC.mailInstance:ComposeMail(TC.scanResults.senderDisplayName, TC.mailSubject, "")
     if IsConsoleUI() then
       TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
