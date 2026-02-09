@@ -1,4 +1,5 @@
 ## 2026.02.08
+- Just using account-wide saved vars already
 - Fix autocraft of multiple research lines
 - Add shortcut button at top of settings
 - Fix post-autocraft announcement - scene showing
