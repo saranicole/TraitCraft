@@ -568,6 +568,20 @@ local function Slice(tbl, first, last)
   return sliced
 end
 
+-- accepted with gratitude from Dolgubon
+local function getPatternFromResearchLine(station, researchLine)
+    if station == CRAFTING_TYPE_CLOTHIER and researchLine > 1 then
+        return researchLine + 1
+    end
+    if station == CRAFTING_TYPE_WOODWORKING then
+        local map = {
+            1,3,4,5,6,2
+        }
+        return map[researchLine]
+    end
+    return researchLine
+end
+
 function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local tempResearchTable = {
@@ -623,17 +637,29 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
 
   local researchIndices = Slice(self.rIndices[charId][craftingType], 1, maxSimultResearch)
   local serializeContain = {}
+  local csvContain = {}
   for i = #researchIndices, 1, -1 do
     local researchIndex = researchIndices[i]
     local traitObjects = tempResearchTable.rObjects[researchIndex]
-    local traitIndices = Slice(select(1, traitObjects), 1, maxSimultResearch)
+    local traitIndices = select(1, traitObjects)
     serializeRecord["researchIndex"] = researchIndex
     serializeRecord["traitIndex"] = traitIndices[1]
     serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
     table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
+    if self.autocraft.interactionTable then
+      local pattern = getPatternFromResearchLine(craftingType, researchIndex)
+      local trait = GetSmithingResearchLineTraitInfo(craftingType, researchIndex, traitIndices[1])
+      if trait then
+        trait = trait + 1
+      end
+      local itemLink = self.autocraft.interactionTable:getItemLinkFromParticulars(pattern, false, 1, LLC_FREE_STYLE_CHOICE, trait, craftingType, 0, 1)
+      if itemLink and itemLink ~= "" then
+        table.insert(csvContain, itemLink)
+      end
+    end
     serializeRecord = {}
   end
-  scanCallback(serializeContain)
+  scanCallback(serializeContain, csvContain)
 end
 
 function TC:ScanUnknownTraitsForRequesting()
@@ -641,13 +667,15 @@ function TC:ScanUnknownTraitsForRequesting()
   local craftTypes = self:GetCraftTypes()
   local itemDescriptions = "|r\r\n  "
   local sendObject = {}
+  local csvObject = {}
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
-    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(serializedObj)
+    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(serializedObj, csvValues)
       table.insert(sendObject, serializedObj)
+      table.insert(csvObject, csvValues)
     end)
   end
-  return sendObject
+  return sendObject, csvObject
 end
 
 function TC.makeAnnouncement(text, sound)
@@ -657,11 +685,11 @@ function TC.makeAnnouncement(text, sound)
 			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
 end
 
-function TC.showCompose(scene, newState)
+function TC.showCompose(scene, newState, scanResults)
   local sceneName = scene:GetName()
   if sceneName == rootScene and newState == SCENE_SHOWING then
     SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
-    TC.mailInstance:ComposeMail(TC.scanResults.senderDisplayName, TC.mailSubject, "")
+    TC.mailInstance:ComposeMail(scanResults.senderDisplayName, TC.Lang.REQUESTED_ITEMS, "")
     if IsConsoleUI() then
       TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
       TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
@@ -676,6 +704,24 @@ local function notifyOnce(notification)
   end
   TC.notifyLock = true
 end
+
+local function Split(search, delim)
+  local parts = {}
+  local start = 1
+
+  while true do
+      local i, j = search:find(delim, start, true) -- true = plain match
+      if not i then
+          table.insert(parts, search:sub(start))
+          break
+      end
+
+      table.insert(parts, search:sub(start, i - 1))
+      start = j + 1
+  end
+  return parts
+end
+
 
 function TC:processRequestMail()
   self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
@@ -694,7 +740,14 @@ function TC:processRequestMail()
       if not TC.scanResults then
         return
       end
-      TC.scanResults.body = self.mailInstance:RetrieveActiveMailBody()
+      local mailBody = self.mailInstance:RetrieveActiveMailBody()
+      local delim = string.rep("-", 30)
+      local bodysplit = Split(mailBody, delim)
+      if not bodysplit then
+        return
+      end
+
+      _, TC.scanResults.body = next(bodysplit)
 
       self.mailInstance:SafeDeleteMail(mailId, true)
       notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
@@ -713,7 +766,9 @@ function TC:processRequestMail()
           if next(newResults) == nil then
             EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
             if craftCounter then
-              SCENE_MANAGER:RegisterCallback("SceneStateChanged", TC.showCompose)
+              SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
+                TC.showCompose(scene, newState, TC.scanResults)
+              end)
             else
               TC.scanResults = {}
               d(self.Lang.REQUEST_NOT_PROCESSED)

@@ -53,6 +53,8 @@ I give credit to Baertram and the other developers ingeniousclown, katkat42, and
 
 Special thanks to [MaliBuuGaming](https://www.esoui.com/forums/member.php?u=83968) for the original ESO UI post that got me thinking about this problem in ESO, and for alpha testing some very unstable releases. 
 
+I am grateful to [Dolgubon](https://www.esoui.com/forums/member.php?action=getinfo&userid=23366) as well who supported the development of the automatic mail feature, and of course for his [LibLazyCrafting](https://www.esoui.com/downloads/info1594-LibLazyCrafting.html) library and other coding inspirations!
+
 [size=+2]Development Status[/size]
 
 Development Status: Stable
