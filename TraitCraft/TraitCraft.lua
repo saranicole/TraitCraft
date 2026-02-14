@@ -57,7 +57,7 @@ TC.mailInstance = nil
 TC.formatter = nil
 TC.lastRequested = {}
 TC.scanResults = {}
-TC.mailSubject = "TRAITCRAFT:RESEARCH:V1"
+TC.mailSubject = "TRAITCRAFT:RESEARCH:V2"
 TC.notifyLock = false
 TC.hookTooltipLock = false
 
