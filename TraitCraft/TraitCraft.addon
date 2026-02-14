@@ -15,7 +15,6 @@
 
 autocraft.xml
 AutoCrafting.lua
-Console/Inventory.lua
 TraitCraft.lua
 TraitCraftSettings.lua
 Crafting.lua

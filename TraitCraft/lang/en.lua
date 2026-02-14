@@ -51,7 +51,7 @@ TC.Lang = {
   REQUIRES_RELOAD         =         "Will trigger an in game reload",
   REQUIRES_LIBRARY        =         "Requires installation of library ",
   ENABLE_BUTTON           =         "Enable",
-  FULFILL_REQUEST         =         "fulfilling crafting requests from others",
+  FULFILL_REQUEST         =         "automatic acceptance of crafting requests from incoming mail",
   AUTOFILL_REQUEST        =         "New crafting request",
   CRAFTER_REQUESTEE       =         "Gamertag of crafter for crafting research requests",
   SENT_MAIL               =         "Sending mail to",
@@ -67,4 +67,7 @@ TC.Lang = {
   CHARACTER_TOOLTIP       =         "Settings for crafting requests will apply to this character only",
   REQUESTED_ITEMS         =         "Requested research items",
   REQUESTOR_USERNAME      =         "Requestor gamertag: ",
+  TRAITCRAFT_ADVERTISE    =         "Cycle each item link and optionally add to automated crafting.",
+  ADD_TO_QUEUE            =         "Add to auto-crafting queue",
+  ITEM_ADDED_TO_AUTOCRAFT =         " added for auto-crafting",
 }

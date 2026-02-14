@@ -59,6 +59,7 @@ TC.lastRequested = {}
 TC.scanResults = {}
 TC.mailSubject = "TRAITCRAFT:RESEARCH:V1"
 TC.notifyLock = false
+TC.hookTooltipLock = false
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -68,6 +69,43 @@ local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+local mailView = "mailGamepad"
+
+TC.mailLinkKeybind =
+{
+    alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+    {
+        name = function()
+            return TC.Lang.ADD_TO_QUEUE
+        end,
+
+        keybind = "UI_SHORTCUT_QUATERNARY",
+
+        callback = function()
+            local link = TC.currentItemLink
+            if link and TC.autocraft.interactionTable then
+                TC.makeAnnouncement("|cfd7a1a"..link..TC.Lang.ITEM_ADDED_TO_AUTOCRAFT.."|r", SOUNDS.SMITHING_OPENED)
+                TC.autocraft.interactionTable:CraftSmithingItemFromLink(link)
+            end
+        end,
+
+        visible = function()
+            return TC.currentItemLink ~= nil and SCENE_MANAGER:IsShowing(mailView)
+        end,
+
+        enabled = function()
+            return true
+        end,
+    }
+}
+
+
+local function setupNoop()
+  return
+end
+
 
 function TC.HasJewelryCrafting()
     local skillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(JEWELRY_CRAFTING)
@@ -722,64 +760,70 @@ local function Split(search, delim)
   return parts
 end
 
+-- Waiting on LibLazyCrafting.importCraftableLinksRequestFromMail to accept a mailText argument
+function TC:importCraftableLinksShim(mailText)
+	for link in string.gmatch(mailText, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
+			self.autocraft.interactionTable:CraftSmithingItemFromLink(link)
+	end
+end
+
+local function mailHookCallback()
+  ZO_PostHook(ZO_GamepadLinks, "OnLinkShown", function(self, linkData)
+    if linkData.link and linkData.linkType == "item" then
+      TC.currentItemLink = linkData.link
+      KEYBIND_STRIP:AddKeybindButtonGroup(TC.mailLinkKeybind)
+    end
+  end)
+  ZO_PostHook(ZO_GamepadLinks, "OnLinkHidden", function(self, linkData)
+      TC.currentItemLink = nil
+      KEYBIND_STRIP:UpdateKeybindButtonGroup(TC.mailLinkKeybind)
+  end)
+end
+
+function TC.hookTooltips()
+  ZO_PostHook(MAIL_GAMEPAD:GetInbox(), "UpdateLinks", mailHookCallback)
+end
 
 function TC:processRequestMail()
-  self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
-  self.mailInstance:RegisterInboxEvents(self.Name.."QueueItems")
+  if IsInGamepadPreferredMode() or IsConsoleUI() then
+    self.hookTooltips()
+  end
+  if TC.AV.settings.receiveOption then
+    self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
+    self.mailInstance:RegisterInboxEvents(self.Name.."QueueItems")
 
-  self.mailInstance:RegisterInboxCallback(self.Name.."FetchItems", function()
-    self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
-  end)
-  self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
-    if not self.mailInstance.mailIds then
-      return
-    end
-
-    if self.isValueInTable(self.mailInstance.mailIds, mailId) then
-      TC.scanResults = self.mailInstance:RetrieveMailData(mailId)
-      if not TC.scanResults then
-        return
-      end
-      local mailBody = self.mailInstance:RetrieveActiveMailBody()
-      local delim = string.rep("-", 30)
-      local bodysplit = Split(mailBody, delim)
-      if not bodysplit then
+    self.mailInstance:RegisterInboxCallback(self.Name.."FetchItems", function()
+      self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
+    end)
+    self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
+      if not self.mailInstance.mailIds then
         return
       end
 
-      _, TC.scanResults.body = next(bodysplit)
-
-      self.mailInstance:SafeDeleteMail(mailId, true)
-      notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
-
-      local scope = self.formatter.Scope({ fromdotpath = TC.scanResults.body })
-      local decodedResults = self.formatter:format("{fromdotpath}", scope)
-      if not next(decodedResults) then
-        return
-      end
-
-      EVENT_MANAGER:RegisterForEvent(
-        TC.Name .. "FromMail",
-        EVENT_CRAFTING_STATION_INTERACT,
-        function()
-          local craftCounter, newResults = TC.autocraft:CraftFromInput(decodedResults)
-          if next(newResults) == nil then
-            EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
-            if craftCounter then
-              SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
-                TC.showCompose(scene, newState, TC.scanResults)
-              end)
-            else
-              TC.scanResults = {}
-              d(self.Lang.REQUEST_NOT_PROCESSED)
-            end
-          end
-          TC.notifyLock = false
+      if self.isValueInTable(self.mailInstance.mailIds, mailId) then
+        TC.scanResults = self.mailInstance:RetrieveMailData(mailId)
+        if not TC.scanResults then
+          return
         end
-      )
+        local mailBody = self.mailInstance:RetrieveActiveMailBody()
+        local delim = string.rep("-", 30)
+        local bodysplit = Split(mailBody, delim)
+        if not bodysplit then
+          return
+        end
+
+        self.scanResults.body = bodysplit[2]
+        if self.scanResults.body then
+          if not TC.notifyLock then
+            self:importCraftableLinksShim(self.scanResults.body)
+          end
+          self.mailInstance:SafeDeleteMail(mailId, true)
+          notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
+        end
+      end
       self.mailInstance:UnregisterInboxReadEvents("QueueItems")
-    end
-  end, true)
+    end, true)
+  end
 end
 
 local function TC_Event_Player_Activated(event, isA)
@@ -792,18 +836,17 @@ local function TC_Event_Player_Activated(event, isA)
     EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
     TC:ScanMaxNumResearch()
   end
-  if IsConsoleUI() then
-    TC.inventory = TC_Inventory:New(TC)
-  end
-  if LibLazyCrafting and TC.AV.settings.autoCraftOption then
-    if next(TC.AV.allCrafterIds) then
-      if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
-        TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.AV.settings.receiveOption then
-          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
+  if LibLazyCrafting then
+    if TC.AV.settings.autoCraftOption then
+      if next(TC.AV.allCrafterIds) then
+        if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
+          TC.autocraft = TC_Autocraft:New(TC)
+          if LibDynamicMail then
+            EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
+          end
+        elseif TC.autocraft then
+          TC_Autocraft:Destroy()
         end
-      elseif TC.autocraft then
-        TC_Autocraft:Destroy()
       end
     end
   end
@@ -836,10 +879,6 @@ function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex
     control.researchIcon.icon:SetHidden(false)
   end
   return icon
-end
-
-local function setupNoop()
-  return
 end
 
 function TC:GetCommonStyles()

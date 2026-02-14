@@ -51,7 +51,7 @@ TC.Lang = {
   REQUIRES_RELOAD         =         "Esto provocará una recarga dentro del juego.",
   REQUIRES_LIBRARY        =         "Requiere la instalación de una dependencia ",
   ENABLE_BUTTON           =         "Permitir",
-  FULFILL_REQUEST         =         "cumpliendo con las solicitudes de creación de objetos de otros",
+  FULFILL_REQUEST         =         "cumpliendo automáticamente con las solicitudes de creación de objetos de otros",
   CRAFTER_REQUESTEE       =         "Gamertag del artesano para las solicitudes de investigación de fabricación.",
   SENT_MAIL               =         "Correo enviado a",
   WITH_CRAFTING_REQUEST   =         "con la solicitud de fabricación de los siguientes artículos:",
@@ -66,4 +66,7 @@ TC.Lang = {
   CHARACTER_TOOLTIP       =         "La configuración de las solicitudes de fabricación se aplicará únicamente a este personaje",
   REQUESTED_ITEMS         =         "Artículos de investigación solicitados",
   REQUESTOR_USERNAME      =         "Gamertag del solicitante: ",
+  TRAITCRAFT_ADVERTISE    =         "Cicla cada enlace de elemento y, opcionalmente, agrégalo a la elaboración automatizada.",
+  ADD_TO_QUEUE            =         "Añadir a la cola de creación automática",
+  ITEM_ADDED_TO_AUTOCRAFT =         " añadido para elaboración automática",
 }
