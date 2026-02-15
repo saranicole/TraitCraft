@@ -1,6 +1,7 @@
 --Name Space
 TraitCraft = {}
 local TC = TraitCraft
+local LLC = LibLazyCrafting
 
 --Basic Info
 TC.Name = "TraitCraft"
@@ -60,6 +61,12 @@ TC.scanResults = {}
 TC.mailSubject = "TRAITCRAFT:RESEARCH:V2"
 TC.notifyLock = false
 TC.hookTooltipLock = false
+TC.notifySmithingLock = {
+  [CRAFTING_TYPE_BLACKSMITHING] = false,
+  [CRAFTING_TYPE_CLOTHIER] = false,
+  [CRAFTING_TYPE_WOODWORKING] = false,
+  [CRAFTING_TYPE_JEWELRYCRAFTING] = false
+}
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -684,7 +691,7 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
     serializeRecord["traitIndex"] = traitIndices[1]
     serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
     table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
-    if self.autocraft.interactionTable then
+    if self.autocraft and self.autocraft.interactionTable then
       local pattern = getPatternFromResearchLine(craftingType, researchIndex)
       local trait = GetSmithingResearchLineTraitInfo(craftingType, researchIndex, traitIndices[1])
       if trait then
@@ -718,7 +725,6 @@ end
 
 function TC.makeAnnouncement(text, sound)
   local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
-			params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
 			params:SetText(text)
 			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
 end
@@ -760,13 +766,6 @@ local function Split(search, delim)
   return parts
 end
 
--- Waiting on LibLazyCrafting.importCraftableLinksRequestFromMail to accept a mailText argument
-function TC:importCraftableLinksShim(mailText)
-	for link in string.gmatch(mailText, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
-			self.autocraft.interactionTable:CraftSmithingItemFromLink(link)
-	end
-end
-
 local function mailHookCallback()
   ZO_PostHook(ZO_GamepadLinks, "OnLinkShown", function(self, linkData)
     if linkData.link and linkData.linkType == "item" then
@@ -796,7 +795,7 @@ function TC:processRequestMail()
       self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
     end)
     self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
-      if not self.mailInstance.mailIds then
+      if not next(self.mailInstance.mailIds) then
         return
       end
 
@@ -813,9 +812,10 @@ function TC:processRequestMail()
         end
 
         self.scanResults.body = bodysplit[2]
+
         if self.scanResults.body then
           if not TC.notifyLock then
-            self:importCraftableLinksShim(self.scanResults.body)
+            LLC.importCraftableLinksFromString(self.scanResults.body)
           end
           self.mailInstance:SafeDeleteMail(mailId, true)
           notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
@@ -836,11 +836,18 @@ local function TC_Event_Player_Activated(event, isA)
     EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
     TC:ScanMaxNumResearch()
   end
-  if LibLazyCrafting then
+  if LLC then
     if TC.AV.settings.autoCraftOption then
+      TC.autocraft = TC_Autocraft:New(TC)
+      LLC:AddListeningAddon(TC.Name, function(event)
+        local craftingType = GetCraftingInteractionType()
+        if event ~= LLC_CRAFT_SUCCESS and craftingType and not TC.notifySmithingLock[craftingType] then
+          ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04[TraitCraft]|r "..event)
+          TC.notifySmithingLock[craftingType] = true
+        end
+      end)
       if next(TC.AV.allCrafterIds) then
         if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
-          TC.autocraft = TC_Autocraft:New(TC)
           if LibDynamicMail then
             EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
           end
