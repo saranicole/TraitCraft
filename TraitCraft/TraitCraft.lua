@@ -92,7 +92,7 @@ TC.mailLinkKeybind =
 
         callback = function()
             local link = TC.currentItemLink
-            if link and TC.autocraft.interactionTable then
+            if link and TC.autocraft and TC.autocraft.interactionTable then
                 TC.makeAnnouncement("|cfd7a1a"..link..TC.Lang.ITEM_ADDED_TO_AUTOCRAFT.."|r", SOUNDS.SMITHING_OPENED)
                 TC.autocraft.interactionTable:CraftSmithingItemFromLink(link)
             end
