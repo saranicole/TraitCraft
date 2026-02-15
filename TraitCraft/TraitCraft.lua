@@ -839,7 +839,7 @@ local function TC_Event_Player_Activated(event, isA)
   if LLC then
     if TC.AV.settings.autoCraftOption then
       TC.autocraft = TC_Autocraft:New(TC)
-      LLC:AddListeningAddon(TC.Name, function(event)
+      LLC:AddListeningAddon(TC.Name.."listener", function(event)
         local craftingType = GetCraftingInteractionType()
         if event ~= LLC_CRAFT_SUCCESS and craftingType and not TC.notifySmithingLock[craftingType] then
           ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04[TraitCraft]|r "..event)
