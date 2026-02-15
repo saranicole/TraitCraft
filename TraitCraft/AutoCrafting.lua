@@ -391,5 +391,7 @@ function TC_Autocraft:Destroy()
   else
     self:RemoveKeyboardUI()
   end
-  self.parent.autocraft = nil
+  if self.parent and self.parent.autocraft then
+    self.parent.autocraft = nil
+  end
 end
