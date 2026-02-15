@@ -1,6 +1,7 @@
 --Name Space
 TraitCraft = {}
 local TC = TraitCraft
+local LLC = LibLazyCrafting
 
 --Basic Info
 TC.Name = "TraitCraft"
@@ -57,8 +58,15 @@ TC.mailInstance = nil
 TC.formatter = nil
 TC.lastRequested = {}
 TC.scanResults = {}
-TC.mailSubject = "TRAITCRAFT:RESEARCH:V1"
+TC.mailSubject = "TRAITCRAFT:RESEARCH:V2"
 TC.notifyLock = false
+TC.hookTooltipLock = false
+TC.notifySmithingLock = {
+  [CRAFTING_TYPE_BLACKSMITHING] = false,
+  [CRAFTING_TYPE_CLOTHIER] = false,
+  [CRAFTING_TYPE_WOODWORKING] = false,
+  [CRAFTING_TYPE_JEWELRYCRAFTING] = false
+}
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -68,6 +76,43 @@ local BLACKSMITH 		= CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER 			= CRAFTING_TYPE_CLOTHIER
 local WOODWORK 			= CRAFTING_TYPE_WOODWORKING
 local JEWELRY_CRAFTING 	= CRAFTING_TYPE_JEWELRYCRAFTING
+
+local mailView = "mailGamepad"
+
+TC.mailLinkKeybind =
+{
+    alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+    {
+        name = function()
+            return TC.Lang.ADD_TO_QUEUE
+        end,
+
+        keybind = "UI_SHORTCUT_QUATERNARY",
+
+        callback = function()
+            local link = TC.currentItemLink
+            if link and TC.autocraft.interactionTable then
+                TC.makeAnnouncement("|cfd7a1a"..link..TC.Lang.ITEM_ADDED_TO_AUTOCRAFT.."|r", SOUNDS.SMITHING_OPENED)
+                TC.autocraft.interactionTable:CraftSmithingItemFromLink(link)
+            end
+        end,
+
+        visible = function()
+            return TC.currentItemLink ~= nil and SCENE_MANAGER:IsShowing(mailView)
+        end,
+
+        enabled = function()
+            return true
+        end,
+    }
+}
+
+
+local function setupNoop()
+  return
+end
+
 
 function TC.HasJewelryCrafting()
     local skillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(JEWELRY_CRAFTING)
@@ -568,6 +613,20 @@ local function Slice(tbl, first, last)
   return sliced
 end
 
+-- accepted with gratitude from Dolgubon
+local function getPatternFromResearchLine(station, researchLine)
+    if station == CRAFTING_TYPE_CLOTHIER and researchLine > 1 then
+        return researchLine + 1
+    end
+    if station == CRAFTING_TYPE_WOODWORKING then
+        local map = {
+            1,3,4,5,6,2
+        }
+        return map[researchLine]
+    end
+    return researchLine
+end
+
 function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
   local nirnCraftTypes = { CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_WOODWORKING }
   local tempResearchTable = {
@@ -623,17 +682,29 @@ function TC:ScanUnknownTraitsForCrafting(charId, craftingType, scanCallback)
 
   local researchIndices = Slice(self.rIndices[charId][craftingType], 1, maxSimultResearch)
   local serializeContain = {}
+  local csvContain = {}
   for i = #researchIndices, 1, -1 do
     local researchIndex = researchIndices[i]
     local traitObjects = tempResearchTable.rObjects[researchIndex]
-    local traitIndices = Slice(select(1, traitObjects), 1, maxSimultResearch)
+    local traitIndices = select(1, traitObjects)
     serializeRecord["researchIndex"] = researchIndex
     serializeRecord["traitIndex"] = traitIndices[1]
     serializeContain[CRAFT_TOKEN[craftingType]] = serializeContain[CRAFT_TOKEN[craftingType]] or {}
     table.insert(serializeContain[CRAFT_TOKEN[craftingType]], serializeRecord)
+    if self.autocraft and self.autocraft.interactionTable then
+      local pattern = getPatternFromResearchLine(craftingType, researchIndex)
+      local trait = GetSmithingResearchLineTraitInfo(craftingType, researchIndex, traitIndices[1])
+      if trait then
+        trait = trait + 1
+      end
+      local itemLink = self.autocraft.interactionTable:getItemLinkFromParticulars(pattern, false, 1, LLC_FREE_STYLE_CHOICE, trait, craftingType, 0, 1)
+      if itemLink and itemLink ~= "" then
+        table.insert(csvContain, itemLink)
+      end
+    end
     serializeRecord = {}
   end
-  scanCallback(serializeContain)
+  scanCallback(serializeContain, csvContain)
 end
 
 function TC:ScanUnknownTraitsForRequesting()
@@ -641,27 +712,28 @@ function TC:ScanUnknownTraitsForRequesting()
   local craftTypes = self:GetCraftTypes()
   local itemDescriptions = "|r\r\n  "
   local sendObject = {}
+  local csvObject = {}
   for i = 1, #craftTypes do
     local craftingType = craftTypes[i]
-    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(serializedObj)
+    self:ScanUnknownTraitsForCrafting(charId, craftingType, function(serializedObj, csvValues)
       table.insert(sendObject, serializedObj)
+      table.insert(csvObject, csvValues)
     end)
   end
-  return sendObject
+  return sendObject, csvObject
 end
 
 function TC.makeAnnouncement(text, sound)
   local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
-			params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
 			params:SetText(text)
 			CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
 end
 
-function TC.showCompose(scene, newState)
+function TC.showCompose(scene, newState, scanResults)
   local sceneName = scene:GetName()
   if sceneName == rootScene and newState == SCENE_SHOWING then
     SCENE_MANAGER:UnregisterCallback("SceneStateChanged", TC.showCompose)
-    TC.mailInstance:ComposeMail(TC.scanResults.senderDisplayName, TC.mailSubject, "")
+    TC.mailInstance:ComposeMail(scanResults.senderDisplayName, TC.Lang.REQUESTED_ITEMS, "")
     if IsConsoleUI() then
       TC.makeAnnouncement(TC.Lang.MAIL_PROCESSED, SOUNDS.MAIL_WINDOW_OPEN)
       TC.makeAnnouncement(TC.Lang.CRAFT_REQUEST_TOOLTIP, SOUNDS.MAIL_WINDOW_OPEN)
@@ -677,54 +749,81 @@ local function notifyOnce(notification)
   TC.notifyLock = true
 end
 
-function TC:processRequestMail()
-  self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
-  self.mailInstance:RegisterInboxEvents(self.Name.."QueueItems")
+local function Split(search, delim)
+  local parts = {}
+  local start = 1
 
-  self.mailInstance:RegisterInboxCallback(self.Name.."FetchItems", function()
-    self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
+  while true do
+      local i, j = search:find(delim, start, true) -- true = plain match
+      if not i then
+          table.insert(parts, search:sub(start))
+          break
+      end
+
+      table.insert(parts, search:sub(start, i - 1))
+      start = j + 1
+  end
+  return parts
+end
+
+local function mailHookCallback()
+  ZO_PostHook(ZO_GamepadLinks, "OnLinkShown", function(self, linkData)
+    if linkData.link and linkData.linkType == "item" then
+      TC.currentItemLink = linkData.link
+      KEYBIND_STRIP:AddKeybindButtonGroup(TC.mailLinkKeybind)
+    end
   end)
-  self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
-    if not self.mailInstance.mailIds then
-      return
-    end
+  ZO_PostHook(ZO_GamepadLinks, "OnLinkHidden", function(self, linkData)
+      TC.currentItemLink = nil
+      KEYBIND_STRIP:UpdateKeybindButtonGroup(TC.mailLinkKeybind)
+  end)
+end
 
-    if self.isValueInTable(self.mailInstance.mailIds, mailId) then
-      TC.scanResults = self.mailInstance:RetrieveMailData(mailId)
-      if not TC.scanResults then
+function TC.hookTooltips()
+  ZO_PostHook(MAIL_GAMEPAD:GetInbox(), "UpdateLinks", mailHookCallback)
+end
+
+function TC:processRequestMail()
+  if IsInGamepadPreferredMode() or IsConsoleUI() then
+    self.hookTooltips()
+  end
+  if TC.AV.settings.receiveOption then
+    self.mailInstance:RegisterInboxEvents(self.Name.."FetchItems")
+    self.mailInstance:RegisterInboxEvents(self.Name.."QueueItems")
+
+    self.mailInstance:RegisterInboxCallback(self.Name.."FetchItems", function()
+      self.mailInstance.mailIds = self.mailInstance:FetchMailIdsForSubject(self.mailSubject)
+    end)
+    self.mailInstance:RegisterInboxCallback(self.Name.."QueueItems", function(event, mailId)
+      if not next(self.mailInstance.mailIds) then
         return
       end
-      TC.scanResults.body = self.mailInstance:RetrieveActiveMailBody()
 
-      self.mailInstance:SafeDeleteMail(mailId, true)
-      notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
-
-      local scope = self.formatter.Scope({ fromdotpath = TC.scanResults.body })
-      local decodedResults = self.formatter:format("{fromdotpath}", scope)
-      if not next(decodedResults) then
-        return
-      end
-
-      EVENT_MANAGER:RegisterForEvent(
-        TC.Name .. "FromMail",
-        EVENT_CRAFTING_STATION_INTERACT,
-        function()
-          local craftCounter, newResults = TC.autocraft:CraftFromInput(decodedResults)
-          if next(newResults) == nil then
-            EVENT_MANAGER:UnregisterForEvent(TC.Name.."FromMail", EVENT_CRAFTING_STATION_INTERACT)
-            if craftCounter then
-              SCENE_MANAGER:RegisterCallback("SceneStateChanged", TC.showCompose)
-            else
-              TC.scanResults = {}
-              d(self.Lang.REQUEST_NOT_PROCESSED)
-            end
-          end
-          TC.notifyLock = false
+      if self.isValueInTable(self.mailInstance.mailIds, mailId) then
+        TC.scanResults = self.mailInstance:RetrieveMailData(mailId)
+        if not TC.scanResults then
+          return
         end
-      )
+        local mailBody = self.mailInstance:RetrieveActiveMailBody()
+        local delim = string.rep("-", 30)
+        local bodysplit = Split(mailBody, delim)
+        if not bodysplit then
+          return
+        end
+
+        self.scanResults.body = bodysplit[2]
+
+        if self.scanResults.body then
+          if not TC.notifyLock then
+            LLC.importCraftableLinksFromString(self.scanResults.body)
+          end
+          self.mailInstance:SafeDeleteMail(mailId, true)
+          notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
+        end
+      end
       self.mailInstance:UnregisterInboxReadEvents("QueueItems")
-    end
-  end, true)
+    end, true)
+  end
 end
 
 local function TC_Event_Player_Activated(event, isA)
@@ -737,18 +836,24 @@ local function TC_Event_Player_Activated(event, isA)
     EVENT_MANAGER:RegisterForUpdate("TC_ScanKnownTraits", 0, TC.ScanKnownTraits)
     TC:ScanMaxNumResearch()
   end
-  if IsConsoleUI() then
-    TC.inventory = TC_Inventory:New(TC)
-  end
-  if LibLazyCrafting and TC.AV.settings.autoCraftOption then
-    if next(TC.AV.allCrafterIds) then
-      if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
-        TC.autocraft = TC_Autocraft:New(TC)
-        if LibDynamicMail and TC.AV.settings.receiveOption then
-          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
+  if LLC then
+    if TC.AV.settings.autoCraftOption then
+      TC.autocraft = TC_Autocraft:New(TC)
+      LLC:AddListeningAddon(TC.Name.."listener", function(event)
+        local craftingType = GetCraftingInteractionType()
+        if event ~= LLC_CRAFT_SUCCESS and craftingType and not TC.notifySmithingLock[craftingType] then
+          ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04[TraitCraft]|r "..event)
+          TC.notifySmithingLock[craftingType] = true
         end
-      elseif TC.autocraft then
-        TC_Autocraft:Destroy()
+      end)
+      if next(TC.AV.allCrafterIds) then
+        if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
+          if LibDynamicMail then
+            EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
+          end
+        elseif TC.autocraft then
+          TC_Autocraft:Destroy()
+        end
       end
     end
   end
@@ -781,10 +886,6 @@ function TC.addResearchIcon(control, craftingType, researchLineIndex, traitIndex
     control.researchIcon.icon:SetHidden(false)
   end
   return icon
-end
-
-local function setupNoop()
-  return
 end
 
 function TC:GetCommonStyles()

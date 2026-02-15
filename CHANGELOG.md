@@ -1,3 +1,6 @@
+## 2026.02.14
+- Use LLC provided mail parsing and queuing functions
+
 ## 2026.02.08
 - Just using account-wide saved vars already
 - Fix autocraft of multiple research lines

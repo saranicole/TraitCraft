@@ -176,10 +176,10 @@ function TC.BuildMenu()
         buttonText = TC.Lang.AUTOFILL_REQUEST,
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
-          local bodyValues = TC:ScanUnknownTraitsForRequesting()
+          local bodyValues, csvValues = TC:ScanUnknownTraitsForRequesting()
           local to = TC.AV.settings.crafterRequestee
-          local scope = TC.formatter.Scope({ todotpath = bodyValues })
-          local encodedResearch = TC.formatter:format("{todotpath}", scope)
+          local scope = TC.formatter.Scope({ advert = TC.Lang.TRAITCRAFT_ADVERTISE, todotpath = bodyValues, tocsv = csvValues, rep = string.rep("-", 30) })
+          local encodedResearch = TC.formatter:format("{advert}\r\n{rep}{tocsv}", scope)
           TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
           TC.makeAnnouncement(TC.Lang.REQUEST_SENT, SOUNDS.MAIL_WINDOW_OPEN)
         end
@@ -524,10 +524,10 @@ function TC.BuildMenu()
         buttonText = TC.Lang.AUTOFILL_REQUEST,
         tooltip = TC.Lang.CRAFT_REQUEST_TOOLTIP,
         clickHandler = function(control)
-          local bodyValues = TC:ScanUnknownTraitsForRequesting()
+          local bodyValues, csvValues = TC:ScanUnknownTraitsForRequesting()
           local to = TC.AV.settings.crafterRequestee
-          local scope = TC.formatter.Scope({ todotpath = bodyValues })
-          local encodedResearch = TC.formatter:format("{todotpath}", scope)
+          local scope = TC.formatter.Scope({ advert = TC.Lang.TRAITCRAFT_ADVERTISE, todotpath = bodyValues, tocsv = csvValues, rep = string.rep("-", 30) })
+          local encodedResearch = TC.formatter:format("{advert}\r\n{rep}{tocsv}", scope)
           TC.mailInstance:ComposeMail(to, TC.mailSubject, encodedResearch, true)
           TC.makeAnnouncement(TC.Lang.REQUEST_SENT, SOUNDS.MAIL_WINDOW_OPEN)
         end
