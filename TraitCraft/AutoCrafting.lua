@@ -363,7 +363,7 @@ function TC_Autocraft:Initialize(parent)
   if not LLC:GetRequestingAddon(parent.Name) then
     local styles = self.parent:GetCommonStyles()
     self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
-      local finalVerdict = false
+      local finalVerdict = true
       local reasons
       local requests = parent.currentSmithingRequest
       local remainingRequests = {
