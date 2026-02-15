@@ -363,8 +363,33 @@ function TC_Autocraft:Initialize(parent)
   if not LLC:GetRequestingAddon(parent.Name) then
     local styles = self.parent:GetCommonStyles()
     self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
-      if not LLC_NO_FURTHER_CRAFT_POSSIBLE then
-        d(event)
+      local finalVerdict = false
+      local reasons
+      local requests = parent.currentSmithingRequest
+      local remainingRequests = {
+          [CRAFTING_TYPE_BLACKSMITHING] = {},
+          [CRAFTING_TYPE_CLOTHIER] = {},
+          [CRAFTING_TYPE_WOODWORKING] = {},
+          [CRAFTING_TYPE_JEWELRYCRAFTING] = {}
+      }
+      local unindexedRequests = {}
+      if requests and next(requests) then
+        for i, req in ipairs(requests) do
+          if req.station == craftingType then
+            reasons = LLC.craftInteractionTables[craftingType].getNonCraftableReasons(req)
+          else
+            table.insert(unindexedRequests, req)
+          end
+          table.insert(remainingRequests[req.station], req)
+          if reasons and not reasons.finalVerdict then
+            finalVerdict = false
+          end
+        end
+      end
+      parent.currentSmithingRequest = unindexedRequests
+      if next(remainingRequests[craftingType]) and not parent.notifySmithingLock[craftingType] and not finalVerdict then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04["..parent.Name.."]|r "..parent.Lang.REQUEST_NOT_PROCESSED)
+        parent.notifySmithingLock[craftingType] = true
       end
       return
     end, parent.Author, styles)
