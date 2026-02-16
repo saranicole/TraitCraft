@@ -777,6 +777,18 @@ function TC.hookTooltips()
   ZO_PostHook(MAIL_GAMEPAD:GetInbox(), "UpdateLinks", mailHookCallback)
 end
 
+local function importCraftableLinks(table, body)
+  local addedRequests
+  addedRequests = table:importCraftableLinksFromString(self.scanResults.body)
+  if not addedRequests then
+    addedRequests = {}
+    for link in string.gmatch(body, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
+      table.insert(addedRequests, table:CraftSmithingItemFromLink(link))
+    end
+  end
+  return addedRequests
+end
+
 function TC:processRequestMail()
   if IsInGamepadPreferredMode() or IsConsoleUI() then
     self.hookTooltips()
@@ -809,7 +821,7 @@ function TC:processRequestMail()
 
         if self.scanResults.body then
           if not TC.notifyLock and self.autocraft and self.autocraft.interactionTable then
-            self.autocraft.interactionTable:importCraftableLinksFromString(self.scanResults.body)
+            importCraftableLinks(self.autocraft.interactionTable, self.scanResults.body)
           end
           self.mailInstance:SafeDeleteMail(mailId, true)
           notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
