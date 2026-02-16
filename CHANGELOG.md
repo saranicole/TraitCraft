@@ -1,5 +1,6 @@
-## 2026.02.15
-- Process auto-crafting failure correctly
+## 2026.02.16
+- Bug fixes for crafting request handling
+- Migrate Saved vars to namespaces
 
 ## 2026.02.14
 - Use LLC provided mail parsing and queuing functions
