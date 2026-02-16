@@ -61,13 +61,6 @@ TC.scanResults = {}
 TC.mailSubject = "TRAITCRAFT:RESEARCH:V2"
 TC.notifyLock = false
 TC.hookTooltipLock = false
-TC.notifySmithingLock = {
-  [CRAFTING_TYPE_BLACKSMITHING] = false,
-  [CRAFTING_TYPE_CLOTHIER] = false,
-  [CRAFTING_TYPE_WOODWORKING] = false,
-  [CRAFTING_TYPE_JEWELRYCRAFTING] = false
-}
-TC.currentSmithingRequest = {}
 
 local currentlyLoggedInChar = {}
 local researchLineIndex = nil
@@ -95,7 +88,7 @@ TC.mailLinkKeybind =
             local link = TC.currentItemLink
             if link and TC.autocraft and TC.autocraft.interactionTable then
                 TC.makeAnnouncement("|cfd7a1a"..link..TC.Lang.ITEM_ADDED_TO_AUTOCRAFT.."|r", SOUNDS.SMITHING_OPENED)
-                table.insert(TC.currentSmithingRequest, TC.autocraft.interactionTable:CraftSmithingItemFromLink(link))
+                TC.autocraft.interactionTable:CraftSmithingItemFromLink(link)
             end
         end,
 
@@ -816,7 +809,7 @@ function TC:processRequestMail()
 
         if self.scanResults.body then
           if not TC.notifyLock and self.autocraft and self.autocraft.interactionTable then
-            self.currentSmithingRequest = self.autocraft.interactionTable:importCraftableLinksFromString(self.scanResults.body)
+            self.autocraft.interactionTable:importCraftableLinksFromString(self.scanResults.body)
           end
           self.mailInstance:SafeDeleteMail(mailId, true)
           notifyOnce(TC.Lang.REQUESTOR_USERNAME..TC.scanResults.senderDisplayName)
@@ -840,13 +833,6 @@ local function TC_Event_Player_Activated(event, isA)
   if LLC then
     if TC.AV.settings.autoCraftOption then
       TC.autocraft = TC_Autocraft:New(TC)
---       LLC:AddListeningAddon(TC.Name.."listener", function(event)
---         local craftingType = GetCraftingInteractionType()
---         if event ~= LLC_CRAFT_SUCCESS and craftingType and not TC.notifySmithingLock[craftingType] then
---           ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04[TraitCraft]|r "..event)
---           TC.notifySmithingLock[craftingType] = true
---         end
---       end)
       if next(TC.AV.allCrafterIds) then
         if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
           if LibDynamicMail then

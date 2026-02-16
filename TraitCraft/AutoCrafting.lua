@@ -365,14 +365,13 @@ function TC_Autocraft:Initialize(parent)
     self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
       local finalVerdict = true
       local reasons
-      local requests = parent.currentSmithingRequest
+      local requests = LLC.craftingQueue[parent.name]
       local remainingRequests = {
           [CRAFTING_TYPE_BLACKSMITHING] = {},
           [CRAFTING_TYPE_CLOTHIER] = {},
           [CRAFTING_TYPE_WOODWORKING] = {},
           [CRAFTING_TYPE_JEWELRYCRAFTING] = {}
       }
-      local unindexedRequests = {}
       if requests and next(requests) then
         for i, req in ipairs(requests) do
           if req.station == craftingType then
@@ -386,12 +385,9 @@ function TC_Autocraft:Initialize(parent)
           end
         end
       end
-      parent.currentSmithingRequest = unindexedRequests
-      if next(remainingRequests[craftingType]) and not parent.notifySmithingLock[craftingType] and not finalVerdict then
+      if next(remainingRequests[craftingType]) and not finalVerdict then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04["..parent.Name.."]|r "..parent.Lang.REQUEST_NOT_PROCESSED)
-        parent.notifySmithingLock[craftingType] = true
       end
-      return
     end, parent.Author, styles)
   end
   if not IsInGamepadPreferredMode() then
