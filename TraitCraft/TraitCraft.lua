@@ -779,7 +779,9 @@ end
 
 local function importCraftableLinks(table, body)
   local addedRequests
-  addedRequests = table:importCraftableLinksFromString(body)
+  if table and type(table["importCraftableLinksFromString"]) == "function" then
+    addedRequests = table:importCraftableLinksFromString(body)
+  end
   if not addedRequests and body then
     addedRequests = {}
     for link in string.gmatch(body, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
