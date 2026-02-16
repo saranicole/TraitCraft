@@ -1,3 +1,6 @@
+## 2026.02.15
+- Process auto-crafting failure correctly
+
 ## 2026.02.14
 - Use LLC provided mail parsing and queuing functions
 
