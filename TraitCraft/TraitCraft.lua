@@ -787,15 +787,15 @@ function TC.hookTooltips()
   ZO_PostHook(MAIL_GAMEPAD:GetInbox(), "UpdateLinks", mailHookCallback)
 end
 
-local function importCraftableLinks(table, body)
+local function importCraftableLinks(interactionTable, body)
   local addedRequests
-  if table and type(table["importCraftableLinksFromString"]) == "function" then
-    addedRequests = table:importCraftableLinksFromString(body)
+  if interactionTable and type(interactionTable["importCraftableLinksFromString"]) == "function" then
+    addedRequests = interactionTable:importCraftableLinksFromString(body)
   end
   if not addedRequests and body then
     addedRequests = {}
     for link in string.gmatch(body, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
-      table.insert(addedRequests, table:CraftSmithingItemFromLink(link))
+      table.insert(addedRequests, interactionTable:CraftSmithingItemFromLink(link))
     end
   end
   return addedRequests
