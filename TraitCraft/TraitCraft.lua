@@ -358,8 +358,18 @@ end
 local function OnAddOnLoaded(eventCode, addonName)
   if addonName ~= TC.Name then return end
 	EVENT_MANAGER:UnregisterForEvent(TC.Name, EVENT_ADD_ON_LOADED)
+  local ns = GetDisplayName()..GetWorldName()
+  local oldVars = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+  local newVars = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, ns, TC.Default)
 
-  TC.AV = ZO_SavedVars:NewAccountWide("TraitCraft_Vars", 1, nil, TC.Default)
+  if not newVars._migrated and next(oldVars) ~= nil then
+      -- Deep copy old data into new
+      ZO_DeepTableCopy(oldVars, newVars)
+
+      newVars._migrated = true
+  end
+
+  TC.AV = newVars
 
   if LibTextFormat then
     TC.formatter = TC.formatter or LibTextFormat:New(TC.AV.libNamespace.LTF)
