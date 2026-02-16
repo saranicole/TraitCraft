@@ -779,7 +779,7 @@ end
 
 local function importCraftableLinks(table, body)
   local addedRequests
-  addedRequests = table:importCraftableLinksFromString(self.scanResults.body)
+  addedRequests = table:importCraftableLinksFromString(body)
   if not addedRequests and body then
     addedRequests = {}
     for link in string.gmatch(body, "(|H%d:item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+|h|h)") do
