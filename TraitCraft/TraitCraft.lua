@@ -844,15 +844,19 @@ local function TC_Event_Player_Activated(event, isA)
   end
   if LLC then
     if TC.AV.settings.autoCraftOption then
+      local isCrafter = false
       if next(TC.AV.allCrafterIds) then
         if TC.isValueInTable(TC.AV.allCrafterIds, currentlyLoggedInCharId) then
-          TC.autocraft = TC_Autocraft:New(TC)
-          if LibDynamicMail then
-            EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
-          end
-        elseif TC.autocraft then
-          TC_Autocraft:Destroy()
+          isCrafter = true
         end
+      end
+      TC.autocraft = TC_Autocraft:New(TC, isCrafter)
+      if isCrafter then
+        if LibDynamicMail then
+          EVENT_MANAGER:RegisterForEvent(TC.Name.."mailbox", EVENT_MAIL_OPEN_MAILBOX , function(mailId) TC:processRequestMail(mailId) end )
+        end
+      elseif TC.autocraft then
+        TC_Autocraft:Destroy()
       end
     end
   end

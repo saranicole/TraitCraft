@@ -352,7 +352,24 @@ function TC_Autocraft:CreateKeyboardUI()
   end
 end
 
-function TC_Autocraft:Initialize(parent)
+function TC_Autocraft:CreateUI()
+  if not IsInGamepadPreferredMode() then
+    EVENT_MANAGER:RegisterForEvent(self.parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
+      self:CreateKeyboardUI()
+    end)
+  else
+    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
+      local sceneName = scene:GetName()
+      if sceneName == "gamepad_smithing_root" and newState == SCENE_SHOWING then
+        self:CreateGamepadUI()
+      elseif self.showing then
+        self:RemoveGamepadUI()
+      end
+    end)
+  end
+end
+
+function TC_Autocraft:Initialize(parent, isCrafter)
   self.parent = parent
   if not LLC then
     return
@@ -402,19 +419,8 @@ function TC_Autocraft:Initialize(parent)
       end
     end, parent.Author, styles)
   end
-  if not IsInGamepadPreferredMode() then
-    EVENT_MANAGER:RegisterForEvent(parent.Name, EVENT_CRAFTING_STATION_INTERACT, function()
-      self:CreateKeyboardUI()
-    end)
-  else
-    SCENE_MANAGER:RegisterCallback("SceneStateChanged", function(scene, newState)
-      local sceneName = scene:GetName()
-      if sceneName == "gamepad_smithing_root" and newState == SCENE_SHOWING then
-        self:CreateGamepadUI()
-      elseif self.showing then
-        self:RemoveGamepadUI()
-      end
-    end)
+  if isCrafter then
+    self:CreateUI()
   end
 end
 
