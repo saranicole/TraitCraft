@@ -360,32 +360,44 @@ function TC_Autocraft:Initialize(parent)
   self.lastCrafted = {}
   self.rIndices = {}
   self.rObjects = {}
+  local origSelf = self
   if not LLC:GetRequestingAddon(parent.Name) then
     local styles = self.parent:GetCommonStyles()
     self.interactionTable = LLC:AddRequestingAddon(parent.Name, false, function (event, craftingType, requestTable)
       local finalVerdict = true
       local reasons
-      local requests = LLC.craftingQueue[parent.name]
+      local requests = origSelf.interactionTable:getAddonCraftingQueue(station)
       local remainingRequests = {
           [CRAFTING_TYPE_BLACKSMITHING] = {},
           [CRAFTING_TYPE_CLOTHIER] = {},
           [CRAFTING_TYPE_WOODWORKING] = {},
           [CRAFTING_TYPE_JEWELRYCRAFTING] = {}
       }
+      local canCraft = {
+          [CRAFTING_TYPE_BLACKSMITHING] = true,
+          [CRAFTING_TYPE_CLOTHIER] = true,
+          [CRAFTING_TYPE_WOODWORKING] = true,
+          [CRAFTING_TYPE_JEWELRYCRAFTING] = true
+      }
       if requests and next(requests) then
-        for i, req in ipairs(requests) do
-          if req.station == craftingType then
-            reasons = LLC.craftInteractionTables[craftingType].getNonCraftableReasons(req)
-          else
-            table.insert(unindexedRequests, req)
-          end
-          table.insert(remainingRequests[req.station], req)
-          if reasons and not reasons.finalVerdict then
-            finalVerdict = false
+        for i, request in pairs(requests) do
+          iDex, req = next(request)
+          if req then
+            if req.station == craftingType then
+              reasons = LLC.craftInteractionTables[craftingType].getNonCraftableReasons(req)
+              if reasons and next(reasons) then
+                canCraft[craftingType] = reasons.finalVerdict
+                if not reasons.finalVerdict then
+                  requests[i][iDex] = nil
+                end
+              end
+            else
+              table.insert(remainingRequests[req.station], req)
+            end
           end
         end
       end
-      if next(remainingRequests[craftingType]) and not finalVerdict then
+      if not canCraft[craftingType] then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "|cc42a04["..parent.Name.."]|r "..parent.Lang.REQUEST_NOT_PROCESSED)
       end
     end, parent.Author, styles)
