@@ -1,3 +1,6 @@
+## 2026.04.13
+- Update for u50
+
 ## 2026.02.16
 - Bug fixes for crafting request handling
 - Migrate Saved vars to namespaces
