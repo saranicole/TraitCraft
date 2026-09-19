@@ -7,7 +7,7 @@
 ## Title: TraitCraft
 ## Author: @thisbeaurielle
 ## Version: ${ADDON_VERSION}
-## APIVersion: 101049 101050
+## APIVersion: 101050 101051
 ## AddOnVersion: ${ADDON_FORMATTED_VERSION}
 ## SavedVariables: TraitCraft_Vars
 ## DependsOn: LibHarvensAddonSettings>=20101
